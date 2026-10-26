@@ -5,7 +5,7 @@ Each important decision gets one short file: context, decision, consequences. A 
 | # | Decision | Status |
 | --- | --- | --- |
 | [0001](0001-local-only-data.md) | Local-only data | Accepted |
-| 0002 | Tech stack ([#11](https://github.com/asyncfinkd/lumo/issues/11)) | Proposed |
+| [0002](0002-tech-stack.md) | Tech stack | Accepted |
 | [0003](0003-money-as-minor-units.md) | Money as integer minor units | Accepted |
 
 ## Template
