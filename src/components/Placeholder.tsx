@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { color, space, text } from '@/theme';
 
-// Temporary screen body until each feature is built. Copy moves to i18n (#35).
+// Temporary screen body until each feature is built.
 export function Placeholder({ title, note }: { title: string; note?: string }) {
   return (
     <SafeAreaView style={styles.root}>

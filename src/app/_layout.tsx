@@ -10,6 +10,7 @@ import {
 } from '@expo-google-fonts/nunito';
 import { Placeholder } from '@/components/Placeholder';
 import { useDatabase } from '@/db/useDatabase';
+import i18n from '@/i18n';
 import { color } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -31,7 +32,7 @@ export default function RootLayout() {
 
   if (!fontsDone || !dbDone) return null;
   if (database.error) {
-    return <Placeholder title="Something went wrong" note={database.error.message} />;
+    return <Placeholder title={i18n.t('errors.generic')} note={database.error.message} />;
   }
 
   return (

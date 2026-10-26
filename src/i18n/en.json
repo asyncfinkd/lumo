@@ -1,0 +1,190 @@
+{
+  "common": {
+    "continue": "Continue",
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "skipForNow": "Skip for now",
+    "maybeLater": "Maybe later",
+    "comingSoon": "Coming soon."
+  },
+  "tabs": {
+    "home": "Home",
+    "insights": "Insights",
+    "budgets": "Budgets",
+    "profile": "Profile",
+    "add": "Add transaction"
+  },
+  "errors": {
+    "generic": "Something went wrong"
+  },
+  "home": {
+    "greeting": {
+      "morning": "Good morning, {{name}} ☀️",
+      "afternoon": "Good afternoon, {{name}}",
+      "evening": "Good evening, {{name}} 🌙"
+    },
+    "doingGreat": "You're doing great this month.",
+    "leftToSpend": "Left to spend",
+    "ofAvailable": "of {{amount}}",
+    "spentPercent": "{{percent}}% spent",
+    "daysLeft_one": "{{count}} day left",
+    "daysLeft_other": "{{count}} days left",
+    "overspent": "{{amount}} over this month. That's okay, it happens.",
+    "totalBalance": "Total balance",
+    "addBalance": "Add your balance",
+    "cameIn": "Came in",
+    "wentOut": "Went out",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "seeAll": "See all",
+    "monthlyBill": "monthly bill",
+    "welcomeToast": "All set. You've got this 🌞"
+  },
+  "addTransaction": {
+    "newExpense": "New expense",
+    "newIncome": "New income",
+    "expense": "Expense",
+    "income": "Income",
+    "type": "Type",
+    "category": "Category",
+    "todayDate": "Today, {{date}}",
+    "addNote": "Add a note",
+    "addExpense": "Add expense",
+    "addIncome": "Add income",
+    "amountLabel": "Amount {{amount}}",
+    "deleteKey": "Delete",
+    "decimalKey": "Decimal point",
+    "message": {
+      "income": "Lovely! That goes straight to your balance 🌿",
+      "stillLeft": "Nice! Still {{amount}} left for {{category}} {{emoji}}",
+      "over": "{{amount}} over on {{category}} — that's okay 🤍",
+      "covered": "{{category}} already covered this month {{emoji}}"
+    }
+  },
+  "budgets": {
+    "title": "Budgets",
+    "leftAcross": "{{amount}} left across budgets",
+    "daysToGo_one": "{{count}} day to go",
+    "daysToGo_other": "{{count}} days to go",
+    "onTrack": "{{count}} of {{total}} on track 🌿",
+    "spentOf": "{{spent}} of {{limit}}",
+    "left": "left",
+    "newBudget": "New budget",
+    "editBudget": "{{category}}, {{left}} left of {{limit}}. Edit budget",
+    "note": {
+      "allPaid": "All paid this month ✓",
+      "low": "Running a little low · easy does it",
+      "plenty": "Plenty left · treat yourself 🍰",
+      "left_one": "{{amount}} left · {{count}} day to go",
+      "left_other": "{{amount}} left · {{count}} days to go"
+    }
+  },
+  "editBudget": {
+    "monthly": "Monthly budget",
+    "lower": "Lower by {{amount}}",
+    "raise": "Raise by {{amount}}",
+    "spentSoFar": "{{spent}} spent so far · {{left}} left",
+    "stretch": "You've already spent {{spent}}, so that's a stretch",
+    "nudge": "Nudge me when {{amount}} is left",
+    "save": "Save budget",
+    "quickAmounts": "Quick amounts"
+  },
+  "insights": {
+    "title": "Insights",
+    "subtitle": "Where your money went, gently.",
+    "period": "Period",
+    "week": "Week",
+    "month": "Month",
+    "spentThisWeek": "spent this week",
+    "spentThisMonth": "spent this month",
+    "byCategory": "By category",
+    "chart": "Donut chart: {{parts}}"
+  },
+  "onboarding": {
+    "step": "Step {{step}} of {{total}}",
+    "welcome": {
+      "title": "Money, but calmer.",
+      "body": "Let's set things up together. It takes 2 minutes.",
+      "start": "Let's start"
+    },
+    "name": {
+      "label": "Your name",
+      "title": "What should we call you?",
+      "hint": "Just your first name is perfect."
+    },
+    "currency": {
+      "label": "Currency",
+      "title": "Which currency do you use?",
+      "hint": "We picked lari for you. Change it anytime.",
+      "search": "Search currencies",
+      "empty": "Hmm, nothing by that name yet 🌱"
+    },
+    "income": {
+      "label": "Monthly income",
+      "title": "How much lands in your account each month?",
+      "hint": "Your take-home pay, after taxes.",
+      "payday": "Payday",
+      "paydayValue_ordinal_one": "{{count}}st",
+      "paydayValue_ordinal_two": "{{count}}nd",
+      "paydayValue_ordinal_few": "{{count}}rd",
+      "paydayValue_ordinal_other": "{{count}}th",
+      "addAnother": "+ Add another income"
+    },
+    "bills": {
+      "label": "Monthly bills",
+      "title": "What do you pay every month?",
+      "hint": "Tap what applies. You can change it later.",
+      "perMonth": "{{amount}} / month",
+      "tapToAdd": "Tap to add",
+      "addYourOwn": "Add your own"
+    },
+    "reveal": {
+      "title": "{{name}}, here's your month ✨",
+      "hint": "Based on what you told us. Tweak it anytime.",
+      "income": "Income",
+      "bills": "Bills",
+      "yoursToSpend": "Yours to spend",
+      "perDay": "That's about {{amount}} a day.",
+      "looksGood": "Looks good"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "name": "Name",
+    "currency": "Currency",
+    "income": "Income",
+    "bills": "Bills",
+    "deleteAll": "Delete all data",
+    "deleteAllConfirm": "This removes everything you've entered from this phone. It can't be undone."
+  },
+  "categories": {
+    "coffee": "Coffee",
+    "groceries": "Groceries",
+    "transport": "Getting around",
+    "treats": "Treats",
+    "bills": "Bills",
+    "home": "Home",
+    "salary": "Salary",
+    "freelance": "Freelance",
+    "gift": "Gift",
+    "refund": "Refund"
+  },
+  "currencies": {
+    "GEL": "Georgian lari",
+    "USD": "US dollar",
+    "EUR": "Euro",
+    "GBP": "British pound",
+    "TRY": "Turkish lira",
+    "AMD": "Armenian dram",
+    "AZN": "Azerbaijani manat",
+    "UAH": "Ukrainian hryvnia"
+  },
+  "placeholder": {
+    "home": "Left to spend comes here.",
+    "budgets": "Per-category budgets come here.",
+    "profile": "Settings come here.",
+    "onboarding": "Onboarding starts here.",
+    "addTransaction": "The add sheet comes here."
+  }
+}

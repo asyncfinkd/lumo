@@ -1,5 +1,7 @@
+import { useTranslation } from 'react-i18next';
 import { Placeholder } from '@/components/Placeholder';
 
 export default function ProfileScreen() {
-  return <Placeholder title="Profile" note="Settings come here." />;
+  const { t } = useTranslation();
+  return <Placeholder title={t('profile.title')} note={t('placeholder.profile')} />;
 }

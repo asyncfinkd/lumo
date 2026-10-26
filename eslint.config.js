@@ -10,4 +10,12 @@ module.exports = defineConfig([
   {
     ignores: ['dist/*', 'spikes/*', '.expo/*', 'src/db/migrations/*'],
   },
+  {
+    // All user-facing copy goes through i18n (#35): no raw text in JSX.
+    files: ['src/**/*.tsx'],
+    ignores: ['src/**/__tests__/**'],
+    rules: {
+      'react/jsx-no-literals': ['error', { noStrings: true, ignoreProps: true }],
+    },
+  },
 ]);
