@@ -10,6 +10,7 @@ import {
 } from '@expo-google-fonts/nunito';
 import { Placeholder } from '@/components/Placeholder';
 import { useDatabase } from '@/db/useDatabase';
+import { color } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -36,7 +37,7 @@ export default function RootLayout() {
   return (
     <>
       <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#FBF7F2' } }}>
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(onboarding)" />
         <Stack.Screen name="add-transaction" options={{ presentation: 'modal' }} />
