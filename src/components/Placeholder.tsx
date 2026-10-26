@@ -1,8 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { color, space, text } from '@/theme';
 
-// Temporary screen body until each feature is built. Colors and text move to
-// theme tokens (#31) and i18n (#35).
+// Temporary screen body until each feature is built. Copy moves to i18n (#35).
 export function Placeholder({ title, note }: { title: string; note?: string }) {
   return (
     <SafeAreaView style={styles.root}>
@@ -15,8 +15,8 @@ export function Placeholder({ title, note }: { title: string; note?: string }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#FBF7F2' },
-  body: { flex: 1, padding: 24, gap: 4 },
-  title: { fontSize: 28, lineHeight: 34, fontFamily: 'Nunito_800ExtraBold', color: '#2B2522' },
-  note: { fontSize: 14, lineHeight: 18, fontFamily: 'Nunito_600SemiBold', color: '#776C65' },
+  root: { flex: 1, backgroundColor: color.bg },
+  body: { flex: 1, padding: space.screen, gap: 4 },
+  title: { ...text.h1, color: color.ink },
+  note: { ...text.subtitle, color: color.muted },
 });
