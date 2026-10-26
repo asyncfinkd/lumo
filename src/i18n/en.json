@@ -116,7 +116,17 @@
     "spentThisWeek": "spent this week",
     "spentThisMonth": "spent this month",
     "byCategory": "By category",
-    "chart": "Donut chart: {{parts}}"
+    "chart": "Donut chart: {{parts}}",
+    "insight": {
+      "label": "Insight",
+      "led": "{{category}} led this week. {{flavor}}",
+      "less": "You spent {{percent}}% less on {{category}} than in {{month}}. Nice! {{emoji}}",
+      "flavor": {
+        "groceries": "A few little store runs add up 🧺"
+      }
+    },
+    "rowLabel": "{{category}}, {{amount}}, {{percent}}%",
+    "percent": "{{percent}}%"
   },
   "onboarding": {
     "step": "Step {{step}} of {{total}}",
