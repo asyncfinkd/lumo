@@ -20,6 +20,7 @@ import { db } from '@/db/client';
 import { addDays, type CalendarDate } from '@/domain/dates';
 import type { TransactionKind } from '@/domain/leftToSpend';
 import { type CurrencyCode, currencies, formatMoney, parseAmount } from '@/domain/money';
+import { CATEGORY_EMOJI } from '@/features/categoryEmoji';
 import { useActiveBills, useAllTransactions, useBudgets, useMoneyMonth } from '@/features/live';
 import { type AddMessage, addMessage, messageTone } from '@/features/transactions/addMessage';
 import {
@@ -32,16 +33,6 @@ import { addTransaction } from '@/features/transactions/repo';
 import { color, radius, size, text } from '@/theme';
 
 const CATEGORIES = { expense: EXPENSE_CATEGORIES, income: INCOME_CATEGORIES } as const;
-
-// The design's emoji at the end of each budget message.
-const EMOJI: Record<ExpenseCategoryId, string> = {
-  coffee: '☕',
-  groceries: '🧺',
-  transport: '🚲',
-  treats: '🍰',
-  bills: '💡',
-  home: '🏡',
-};
 
 // AddTransaction: type, amount, a line on how it lands, category, date, note.
 // Saves a `manual` transaction; Home and budgets update through live queries.
@@ -267,7 +258,7 @@ function MessagePill({ message, currency }: { message: AddMessage; currency: Cur
   const { t, i18n } = useTranslation();
   const money = (minor: number) => formatMoney(minor, currency);
   const word = (id: CategoryId) => t(`categories.${id}`).toLocaleLowerCase(i18n.language);
-  const emoji = (id: CategoryId) => EMOJI[id as ExpenseCategoryId] ?? '';
+  const emoji = (id: CategoryId) => CATEGORY_EMOJI[id as ExpenseCategoryId] ?? '';
 
   const line =
     message.type === 'income'
