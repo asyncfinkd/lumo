@@ -35,6 +35,11 @@ export function useBills() {
   return useLiveQuery(billsQuery(db)).data;
 }
 
+/** Bills that are on: what Left to spend reserves and the add sheet calls "covered". */
+export function useActiveBills() {
+  return useLiveQuery(billsQuery(db).where(eq(recurringBills.active, true))).data;
+}
+
 export function useIncomes() {
   return useLiveQuery(incomesQuery(db)).data;
 }
@@ -53,7 +58,7 @@ export function useMoneyMonth() {
   const today = useToday();
   const profile = useProfile();
   const incomes = useIncomes();
-  const bills = useLiveQuery(billsQuery(db).where(eq(recurringBills.active, true))).data;
+  const bills = useActiveBills();
   const transactions = useAllTransactions();
 
   const summary = useMemo(

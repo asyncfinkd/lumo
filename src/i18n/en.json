@@ -60,7 +60,11 @@
     "type": "Type",
     "category": "Category",
     "todayDate": "Today, {{date}}",
+    "yesterdayDate": "Yesterday, {{date}}",
+    "pickDay": "Pick a day",
+    "pickDayHint": "Pick another day",
     "addNote": "Add a note",
+    "note": "Note",
     "addExpense": "Add expense",
     "addIncome": "Add income",
     "amountLabel": "Amount {{amount}}",
@@ -70,7 +74,9 @@
       "income": "Lovely! That goes straight to your balance 🌿",
       "stillLeft": "Nice! Still {{amount}} left for {{category}} {{emoji}}",
       "over": "{{amount}} over on {{category}} — that's okay 🤍",
-      "covered": "{{category}} already covered this month {{emoji}}"
+      "covered": "{{category}} already covered this month {{emoji}}",
+      "stillLeftToSpend": "Nice! Still {{amount}} left to spend ✨",
+      "overMonth": "{{amount}} over this month — that's okay 🤍"
     }
   },
   "budgets": {
@@ -216,7 +222,6 @@
   "placeholder": {
     "budgets": "Per-category budgets come here.",
     "profile": "Settings come here.",
-    "onboarding": "Onboarding starts here.",
-    "addTransaction": "The add sheet comes here."
+    "onboarding": "Onboarding starts here."
   }
 }

@@ -44,6 +44,9 @@ export function Sheet({ onDismissed, accessibilityLabel, top, children }: Props)
 
   const y = useSharedValue(screen);
   const scrim = useSharedValue(0);
+  // A second tap or drag while it's already closing would call onDismissed
+  // (router.back) twice.
+  const closing = useSharedValue(false);
 
   useEffect(() => {
     if (!height) return;
@@ -60,6 +63,8 @@ export function Sheet({ onDismissed, accessibilityLabel, top, children }: Props)
 
   const dismiss = (ms: number) => {
     'worklet';
+    if (closing.get()) return;
+    closing.set(true);
     scrim.set(withTiming(0, { duration: ms }));
     y.set(
       withTiming(height || screen, { duration: ms, easing: Easing.in(Easing.quad) }, (done) => {
