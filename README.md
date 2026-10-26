@@ -1,4 +1,4 @@
-<p align="center"><img src="./assets/banner.png" alt="Lumo – Money, but calmer." width="100%"></p>
+<p align="center"><img src="./docs/images/banner.gif" alt="Lumo – Money, but calmer." width="100%"></p>
 
 <h1 align="center">Lumo</h1>
 <p align="center"><b>Money, but calmer.</b><br>A cozy budget tracker that shows what's left to spend, gently. No spreadsheets, no guilt.</p>
@@ -17,7 +17,20 @@ Most finance apps feel like a bank form or a busy dashboard. Lumo is the opposit
 
 It answers one question first: **how much can I still spend this month?** Everything else steps back. The tone is warm and human, the numbers are clear, and nothing is shouting at you in red.
 
+## Your money never leaves your phone
+
+<p align="center"><img src="./docs/images/privacy.png" alt="Your money never leaves your phone. No account, no servers, no cloud." width="100%"></p>
+
+No account. No servers. No cloud. Lumo keeps everything in one small SQLite file on your device, and nowhere else. It never asks for your email, a password or your bank login.
+
+- **Works offline.** Airplane mode? Still all here.
+- **No ads, no trackers.** Nothing watches how you spend.
+- **Export anytime.** CSV or PDF, saved where you choose.
+- **Erase it for real.** Delete everything. Nothing is left elsewhere.
+
 ## Features
+
+<p align="center"><img src="./docs/images/screens.png" alt="Home, Add expense, Budgets and Insights screens" width="100%"></p>
 
 - **Left to spend:** one clear number on the Home screen, with a soft progress bar and the days left in the month.
 - **Quick add:** a bottom sheet with a big amount, a number pad, Expense / Income switch and category chips. Fast to use with one thumb.
@@ -27,6 +40,29 @@ It answers one question first: **how much can I still spend this month?** Everyt
 - **2-minute setup:** onboarding asks one question per screen: name, currency, income, monthly bills and an optional savings goal. Then it reveals your month: _"Here's what's yours to spend."_
 - **Multiple currencies:** Georgian lari (₾) by default, plus US dollar, euro and more.
 - **Alternate app icons:** a light default icon, with dark and orange versions to choose from.
+
+## Set up in two minutes, without an account
+
+<p align="center"><img src="./docs/images/onboarding.png" alt="Two minutes. Zero accounts. Onboarding: name, currency, income, bills, your month." width="100%"></p>
+
+No email, no password. Just your first name, and Lumo sets up your month:
+
+1. **Say hi:** first name only.
+2. **Currency:** lari, dollar, euro and more.
+3. **Income:** what lands in your account, and your payday.
+4. **Bills:** rent, phone, gym. Tap what applies.
+5. **Your month:** what's yours to spend.
+
+## Your data, your rules
+
+<p align="center"><img src="./docs/images/your-data.png" alt="Categories, search, export and delete-all screens" width="100%"></p>
+
+Everything lives on your phone, so you are the only one in control of it.
+
+- **Make it yours:** add, rename and recolor categories.
+- **Find anything:** search every transaction.
+- **Take it with you:** export to CSV or PDF, made on the device.
+- **Erase it for real:** delete all your data, with no copies anywhere else.
 
 ## Design principles
 
@@ -100,6 +136,7 @@ How we work: [CONTRIBUTING.md](CONTRIBUTING.md). Decisions: [docs/adr](docs/adr)
 - [ ] Upcoming bills strip
 - [ ] Monthly recap story
 - [ ] Dark mode
+- [ ] Categories, search, export and delete-all
 - [ ] Georgian language (ქართული)
 
 ## Contributing
