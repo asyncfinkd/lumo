@@ -453,3 +453,16 @@ export function CheckIcon({ color }: { color: string }) {
     </Svg>
   );
 }
+
+/** Profile → Categories. */
+export function GridIcon({ color }: { color: string }) {
+  const s = rowLine(color);
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" accessible={false}>
+      <Rect {...s} fill={color} fillOpacity={0.22} x={4} y={4} width={7} height={7} rx={2.2} />
+      <Rect {...s} x={13} y={4} width={7} height={7} rx={2.2} />
+      <Rect {...s} x={4} y={13} width={7} height={7} rx={2.2} />
+      <Rect {...s} fill={color} fillOpacity={0.22} x={13} y={13} width={7} height={7} rx={2.2} />
+    </Svg>
+  );
+}

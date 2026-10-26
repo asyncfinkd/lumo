@@ -6,7 +6,7 @@ import { useMemo } from 'react';
 import { eq } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { db } from '@/db/client';
-import { recurringBills } from '@/db/schema';
+import { categories, recurringBills } from '@/db/schema';
 import type { CalendarDate } from '@/domain/dates';
 import { budgetsQuery } from './budgets/repo';
 import { summarizeMonth } from './money/summary';
@@ -25,6 +25,10 @@ export function useProfile() {
 export function useProfileStatus() {
   const { data, updatedAt } = useLiveQuery(profileQuery(db));
   return { loaded: updatedAt !== undefined, profile: data[0] };
+}
+
+export function useCategories() {
+  return useLiveQuery(db.select().from(categories).orderBy(categories.sortOrder)).data;
 }
 
 export function useBudgets() {
