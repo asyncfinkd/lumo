@@ -39,7 +39,7 @@ export function budgetRows({
   budgets: readonly { categoryId: string; limitMinor: number }[];
   transactions: readonly Tx[];
   /** Active bills only. */
-  bills: readonly { id: string; categoryId: string }[];
+  bills: readonly { id: string; categoryId: string | null }[];
   period: PayPeriod;
 }): BudgetRow[] {
   const paid = new Set(

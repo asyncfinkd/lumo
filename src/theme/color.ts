@@ -53,6 +53,8 @@ export const color = {
   placeholder: '#A0958D',
   progressTrack: 'rgba(43,37,34,0.07)',
   radioRing: '#DDD2C8',
+  /** An empty radio dot in a dialog (ProfileCategoryDelete). */
+  radioRingSoft: '#D9CEC5',
   selectedRow: 'rgba(255,240,199,0.75)',
   listCard: 'rgba(255,255,255,0.8)',
   /** Unselected bill tile. */

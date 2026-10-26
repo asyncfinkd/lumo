@@ -39,7 +39,7 @@ export function addMessage({
   amountMinor: number;
   budgets: readonly { categoryId: string; limitMinor: number }[];
   /** Active bills only. */
-  bills: readonly { categoryId: string }[];
+  bills: readonly { categoryId: string | null }[];
   transactions: readonly (MoneyTransaction & { categoryId: string | null })[];
   period: PayPeriod;
   left: LeftToSpend;
