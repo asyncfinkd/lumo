@@ -149,6 +149,14 @@ export function PlusIcon({ size = 26, color, width = 2.4 }: IconProps & { width?
   );
 }
 
+export function MinusIcon({ size = 22, color }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
+      <Path {...line(color, 2.4)} d="M6 12h12" />
+    </Svg>
+  );
+}
+
 export function CloseIcon({ size = 18, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
@@ -198,12 +206,28 @@ export function SparkleIcon({ color }: { color: string }) {
   );
 }
 
-export function CalendarIcon({ color }: { color: string }) {
-  const s = line(color, 1.9);
+export function CalendarIcon({ color, size = 18, width = 1.9 }: IconProps & { width?: number }) {
+  const s = line(color, width);
   return (
-    <Svg width={18} height={18} viewBox="0 0 24 24" accessible={false}>
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
       <Rect {...s} fill={color} fillOpacity={0.2} x={4} y={5.5} width={16} height={14.5} rx={4} />
       <Path {...s} d="M4 10h16M8.5 3.5v3M15.5 3.5v3" />
+    </Svg>
+  );
+}
+
+/** EditBudget's nudge row. */
+export function BellIcon({ color }: { color: string }) {
+  const s = line(color);
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" accessible={false}>
+      <Path
+        {...s}
+        fill={color}
+        fillOpacity={0.2}
+        d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"
+      />
+      <Path {...s} d="M10 20a2.2 2.2 0 0 0 4 0" />
     </Svg>
   );
 }

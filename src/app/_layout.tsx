@@ -71,6 +71,7 @@ function AppStack() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="add-transaction" options={sheetOptions} />
         <Stack.Screen name="balance" options={sheetOptions} />
+        <Stack.Screen name="edit-budget" options={sheetOptions} />
       </Stack.Protected>
       <Stack.Protected guard={!onboarded} redirectTo="/">
         <Stack.Screen name="(onboarding)" />

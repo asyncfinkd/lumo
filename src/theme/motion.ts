@@ -17,6 +17,8 @@ export const curve = {
   thumb: [0.34, 1.3, 0.64, 1],
   /** Insights bars */
   bar: [0.34, 1.25, 0.64, 1],
+  /** Switch knob */
+  switch: [0.34, 1.4, 0.64, 1],
   /** Bottom sheets sliding up */
   sheet: [0.32, 1.15, 0.5, 1],
 } as const satisfies Record<string, Curve>;
@@ -37,6 +39,8 @@ export const duration = {
   sheet: 700,
   scrim: 500,
   caretBlink: 1100,
+  switchKnob: 400,
+  switchTrack: 250,
   orbDrift: 30000,
   /** Onboarding step content sliding in from the right. */
   slide: 700,
