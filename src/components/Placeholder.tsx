@@ -15,7 +15,8 @@ export function Placeholder({ title, note }: { title: string; note?: string }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.bg },
+  // Transparent so the backdrop light shows through.
+  root: { flex: 1 },
   body: { flex: 1, padding: space.screen, gap: 4 },
   title: { ...text.h1, color: color.ink },
   note: { ...text.subtitle, color: color.muted },
