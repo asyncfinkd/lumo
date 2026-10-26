@@ -58,6 +58,15 @@ export const color = {
   /** Unselected bill tile. */
   tileOff: 'rgba(255,255,255,0.8)',
 
+  // Profile photo
+  toast: 'rgba(255,255,255,0.92)',
+  /** ProfilePhotoCrop's dark ground and its soft text. */
+  cropBg: '#1E1A18',
+  cropHint: 'rgba(255,248,241,0.72)',
+  cropTrack: 'rgba(255,255,255,0.22)',
+  /** Destructive tile and text (Remove photo, Delete). */
+  dangerSoft: '#FBE7DF',
+  danger: '#A4402B',
   // Switch
   switchOn: '#6BAF8D',
   switchOff: '#E2D8CF',
@@ -124,6 +133,18 @@ export const categoryColor: Record<CategoryId, CategoryColors> = {
   gift: { bg: '#FBDDE3', selected: '#F6C8D3', fg: '#B9566E', chart: '#EFA3B6' },
   refund: { bg: '#FFF0C7', selected: '#FFE39A', fg: '#A0761C', chart: '#F5C86A' },
 };
+
+/** ProfilePhotoSheet's colors for the initial when there's no photo. */
+export const avatarColor = {
+  butter: '#FFE7A6',
+  peach: '#FFD9C7',
+  blush: '#F8D3DD',
+  lilac: '#E2D9F4',
+  sky: '#D3E5F6',
+  sage: '#D3EADB',
+} as const;
+
+export type AvatarColor = keyof typeof avatarColor;
 
 /** Bill tiles in onboarding: soft tile, selected tile, icon color. */
 export const billColor: Record<BillKey, { bg: string; selected: string; fg: string }> = {

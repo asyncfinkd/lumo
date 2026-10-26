@@ -201,12 +201,51 @@
   },
   "profile": {
     "title": "Profile",
+    "since": "Using Lumo since {{month}}",
+    "changePhoto": "Change profile photo",
+    "yourMoney": "Your money",
+    "preferences": "Preferences",
     "name": "Name",
     "currency": "Currency",
-    "income": "Income",
-    "bills": "Bills",
+    "income": "Monthly income",
+    "incomeValue": "{{amount}} · {{day}}",
+    "bills": "Monthly bills",
+    "billsCount_one": "{{count}} bill",
+    "billsCount_other": "{{count}} bills",
+    "reminders": "Reminders",
+    "appIcon": "App icon",
+    "appIconLight": "Light",
+    "language": "Language",
+    "languageName": "English",
+    "export": "Export my data",
+    "exportFormat": "CSV",
+    "footer": "Lumo {{version}} · made with care",
     "deleteAll": "Delete all data",
-    "deleteAllConfirm": "This removes everything you've entered from this phone. It can't be undone."
+    "deleteAllConfirm": "This removes everything you've entered from this phone. It can't be undone.",
+    "photo": {
+      "title": "Profile photo",
+      "take": "Take a photo",
+      "choose": "Choose from library",
+      "remove": "Remove photo",
+      "keepInitial": "Or keep your initial",
+      "colors": {
+        "butter": "Butter",
+        "peach": "Peach",
+        "blush": "Blush",
+        "lilac": "Lilac",
+        "sky": "Sky",
+        "sage": "Sage"
+      },
+      "done": "Done",
+      "updated": "Looking good! Photo updated"
+    },
+    "crop": {
+      "title": "Move and scale",
+      "hint": "Drag to fit your face in the circle.",
+      "zoom": "Zoom",
+      "photo": "Your chosen photo",
+      "use": "Use photo"
+    }
   },
   "categories": {
     "coffee": "Coffee",
@@ -231,7 +270,6 @@
     "UAH": "Ukrainian hryvnia"
   },
   "placeholder": {
-    "profile": "Settings come here.",
     "onboarding": "Onboarding starts here."
   }
 }

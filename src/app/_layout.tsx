@@ -72,6 +72,14 @@ function AppStack() {
         <Stack.Screen name="add-transaction" options={sheetOptions} />
         <Stack.Screen name="balance" options={sheetOptions} />
         <Stack.Screen name="edit-budget" options={sheetOptions} />
+        <Stack.Screen name="profile-photo" options={sheetOptions} />
+        <Stack.Screen
+          name="profile-photo-crop"
+          options={{
+            presentation: 'fullScreenModal',
+            contentStyle: { backgroundColor: color.cropBg },
+          }}
+        />
       </Stack.Protected>
       <Stack.Protected guard={!onboarded} redirectTo="/">
         <Stack.Screen name="(onboarding)" />

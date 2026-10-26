@@ -34,6 +34,16 @@ export const profile = sqliteTable('profile', {
   /** Day of the month the pay period starts, 1–31 (#2). */
   payday: integer('payday').notNull(),
   onboardedAt: text('onboarded_at'),
+  /** Background of the initial when there's no photo (ProfilePhotoSheet). */
+  avatarColor: text('avatar_color', {
+    enum: ['butter', 'peach', 'blush', 'lilac', 'sky', 'sage'],
+  })
+    .notNull()
+    .default('butter'),
+  /** The cropped profile photo, a file in the app's document directory. */
+  photoUri: text('photo_uri'),
+  /** The Reminders switch in Profile. */
+  reminders: integer('reminders', { mode: 'boolean' }).notNull().default(true),
 });
 
 /** The fixed v1 set from the design: 6 expense and 4 income categories. */

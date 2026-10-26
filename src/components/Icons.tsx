@@ -335,3 +335,121 @@ export function ChevronDownIcon({ color }: { color: string }) {
     </Svg>
   );
 }
+
+// Profile (#53): row icons, 20pt, 1.9 stroke.
+const rowLine = (color: string) => line(color, 1.9);
+
+export function PersonIcon({ color }: { color: string }) {
+  const s = rowLine(color);
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" accessible={false}>
+      <Circle {...s} fill={color} fillOpacity={0.22} cx={12} cy={8.5} r={4} />
+      <Path {...s} d="M4.5 20c1.5-3.4 4.3-5 7.5-5s6 1.6 7.5 5" />
+    </Svg>
+  );
+}
+
+/** Bills that repeat; also the small badge on automatic rows. */
+export function RepeatIcon({ color, size = 20, width = 1.9 }: IconProps & { width?: number }) {
+  const s = line(color, width);
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
+      <Path {...s} d="m17 2.5 3 3-3 3" />
+      <Path {...s} d="M4 11.5v-1a5 5 0 0 1 5-5h11" />
+      <Path {...s} d="m7 21.5-3-3 3-3" />
+      <Path {...s} d="M20 12.5v1a5 5 0 0 1-5 5H4" />
+    </Svg>
+  );
+}
+
+export function GlobeIcon({ color }: { color: string }) {
+  const s = rowLine(color);
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" accessible={false}>
+      <Circle {...s} cx={12} cy={12} r={8.5} />
+      <Path
+        {...s}
+        fill={color}
+        fillOpacity={0.15}
+        d="M3.5 12h17M12 3.5c2.4 2.4 3.5 5.2 3.5 8.5s-1.1 6.1-3.5 8.5c-2.4-2.4-3.5-5.2-3.5-8.5S9.6 5.9 12 3.5z"
+      />
+    </Svg>
+  );
+}
+
+export function DownloadIcon({ color }: { color: string }) {
+  const s = rowLine(color);
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" accessible={false}>
+      <Path {...s} d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5" />
+      <Path
+        {...s}
+        fill={color}
+        fillOpacity={0.15}
+        d="M4.5 15.5v2a3 3 0 0 0 3 3h9a3 3 0 0 0 3-3v-2"
+      />
+    </Svg>
+  );
+}
+
+export function CameraIcon({
+  color,
+  size = 20,
+  width = 1.9,
+  fillOpacity = 0.22,
+}: IconProps & { width?: number; fillOpacity?: number }) {
+  const s = line(color, width);
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
+      <Path
+        {...s}
+        fill={color}
+        fillOpacity={fillOpacity}
+        d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.4-2h4.6l1.4 2h1.8A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"
+      />
+      <Circle {...s} cx={12} cy={12.5} r={3.2} />
+    </Svg>
+  );
+}
+
+export function ImageIcon({ color }: { color: string }) {
+  const s = rowLine(color);
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" accessible={false}>
+      <Rect {...s} fill={color} fillOpacity={0.22} x={3.5} y={4.5} width={17} height={15} rx={4} />
+      <Circle {...s} cx={9} cy={9.5} r={1.6} />
+      <Path {...s} d="m4 17 5-4.5 3.5 3 2.5-2 5 4" />
+    </Svg>
+  );
+}
+
+export function TrashIcon({ color, size = 20 }: IconProps) {
+  const s = rowLine(color);
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
+      <Path
+        {...s}
+        fill={color}
+        fillOpacity={0.18}
+        d="M6 7.5h12l-1 11.2a2 2 0 0 1-2 1.8H9a2 2 0 0 1-2-1.8z"
+      />
+      <Path {...s} d="M4.5 7.5h15M9.5 7.5V5.5a1.5 1.5 0 0 1 1.5-1.5h2a1.5 1.5 0 0 1 1.5 1.5v2" />
+    </Svg>
+  );
+}
+
+export function ChevronRightIcon({ color }: { color: string }) {
+  return (
+    <Svg width={16} height={16} viewBox="0 0 24 24" accessible={false}>
+      <Path {...line(color, 2.4)} d="m9.5 6 6 6-6 6" />
+    </Svg>
+  );
+}
+
+export function CheckIcon({ color }: { color: string }) {
+  return (
+    <Svg width={16} height={16} viewBox="0 0 24 24" accessible={false}>
+      <Path {...line(color, 3)} d="m5.5 12.5 4 4 9-9" />
+    </Svg>
+  );
+}

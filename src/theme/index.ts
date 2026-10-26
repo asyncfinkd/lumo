@@ -1,4 +1,12 @@
-export { billColor, categoryColor, color, currencyColor, gradient } from './color';
+export {
+  avatarColor,
+  type AvatarColor,
+  billColor,
+  categoryColor,
+  color,
+  currencyColor,
+  gradient,
+} from './color';
 export { fontFamily, tabularNums, text } from './font';
 export { curve, duration, pressScale } from './motion';
 export { shadow } from './shadow';
