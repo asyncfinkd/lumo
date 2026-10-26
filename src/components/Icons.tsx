@@ -231,3 +231,83 @@ export function BackspaceIcon({ color }: { color: string }) {
     </Svg>
   );
 }
+
+export type BillIconName =
+  | 'rent'
+  | 'utilities'
+  | 'internet'
+  | 'phone'
+  | 'gym'
+  | 'insurance'
+  | 'netflix'
+  | 'spotify'
+  | 'other';
+
+/** Bill tiles in onboarding (OBBills). */
+export function BillIcon({ name, color }: { name: BillIconName; color: string }) {
+  const s = line(color, 1.9);
+  const tint = { fill: color, fillOpacity: 0.22 };
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" accessible={false}>
+      {name === 'rent' && (
+        <Path
+          {...s}
+          {...tint}
+          d="M4 10.5 12 4l8 6.5V19a2 2 0 0 1-2 2h-3.5v-5h-5v5H6a2 2 0 0 1-2-2z"
+        />
+      )}
+      {name === 'utilities' && <Path {...s} {...tint} d="M13 3 5 13.5h6l-1 7.5 8-10.5h-6z" />}
+      {name === 'internet' && (
+        <>
+          <Path
+            {...s}
+            d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.5 16a5 5 0 0 1 7 0"
+          />
+          <Circle cx={12} cy={19} r={1.4} fill={color} />
+        </>
+      )}
+      {name === 'phone' && (
+        <>
+          <Rect {...s} {...tint} x={6.5} y={2.5} width={11} height={19} rx={3.5} />
+          <Path {...s} d="M10.5 18.5h3" />
+        </>
+      )}
+      {name === 'gym' && (
+        <>
+          <Rect {...s} {...tint} x={5} y={7} width={3.5} height={10} rx={1.75} />
+          <Rect {...s} {...tint} x={15.5} y={7} width={3.5} height={10} rx={1.75} />
+          <Path {...s} d="M8.5 12h7M2.5 10v4M21.5 10v4" />
+        </>
+      )}
+      {name === 'insurance' && (
+        <>
+          <Path {...s} {...tint} d="M12 3 5 6v5.5c0 4.4 3 8 7 9.5 4-1.5 7-5.1 7-9.5V6z" />
+          <Path {...s} d="m9 12 2 2 4-4" />
+        </>
+      )}
+      {name === 'netflix' && (
+        <>
+          <Rect {...s} {...tint} x={3} y={4.5} width={18} height={13} rx={3.5} />
+          <Path {...s} d="M8.5 21h7" />
+          <Path {...s} d="m10.5 8.5 4 2.5-4 2.5z" />
+        </>
+      )}
+      {name === 'spotify' && (
+        <>
+          <Circle {...s} {...tint} cx={7.5} cy={17} r={3} />
+          <Circle {...s} {...tint} cx={17.5} cy={15} r={3} />
+          <Path {...s} d="M10.5 17V6l10-2v11" />
+        </>
+      )}
+      {name === 'other' && <Path {...line(color, 2.2)} d="M12 5.5v13M5.5 12h13" />}
+    </Svg>
+  );
+}
+
+export function ChevronDownIcon({ color }: { color: string }) {
+  return (
+    <Svg width={16} height={16} viewBox="0 0 24 24" accessible={false}>
+      <Path {...line(color, 2.4)} d="m6 9 6 6 6-6" />
+    </Svg>
+  );
+}

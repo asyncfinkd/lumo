@@ -37,10 +37,12 @@ type Props = {
   value: string;
   onChange: (next: string) => void;
   currency: CurrencyCode;
+  /** 54pt in the add sheet, 52pt in onboarding. */
+  keyHeight?: number;
 };
 
 /** The design's 3 × 4 keypad, with a light haptic on every key. */
-export function Numpad({ value, onChange, currency }: Props) {
+export function Numpad({ value, onChange, currency, keyHeight = size.key }: Props) {
   const { t } = useTranslation();
   const label = (key: NumpadKey) =>
     key === 'back'
@@ -59,7 +61,7 @@ export function Numpad({ value, onChange, currency }: Props) {
               haptic
               accessibilityLabel={label(key)}
               onPress={() => onChange(pressKey(value, key, currency))}
-              style={styles.key}
+              style={[styles.key, { height: keyHeight }]}
             >
               {key === 'back' ? (
                 <BackspaceIcon color={color.ink} />

@@ -11,6 +11,13 @@ export const shadow = {
   key: '0px 1px 0px 0px rgba(200,145,106,0.14), 0px 4px 12px -8px rgba(200,145,106,0.25)',
   cta: '0px 10px 24px -12px rgba(43,37,34,0.5)',
   thumb: '0px 2px 8px 0px rgba(200,145,106,0.18)',
+  field: '0px 8px 24px -14px rgba(200,145,106,0.35)',
+  fieldFocus: 'inset 0px 0px 0px 2px #2B2522, 0px 8px 24px -14px rgba(200,145,106,0.5)',
+  search: '0px 6px 20px -12px rgba(200,145,106,0.3)',
+  list: '0px 8px 24px -12px rgba(200,145,106,0.3)',
+  tile: '0px 6px 18px -12px rgba(200,145,106,0.35)',
+  amountFocus: 'inset 0px 0px 0px 1.5px #2B2522',
+  back: '0px 6px 16px -10px rgba(200,145,106,0.4)',
   switchKnob: '0px 2px 6px 0px rgba(43,37,34,0.18)',
   /** Selected chip: a white inner ring plus a glow in the category color. */
   chipSelected: (fg: string) =>

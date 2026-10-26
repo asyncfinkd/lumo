@@ -5,6 +5,7 @@ import { Tabs, usePathname, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { BottomFade, Orbs } from '@/components/Backdrop';
 import { GlassTabBar, type Tab } from '@/components/GlassTabBar';
+import { WelcomeToast } from '@/features/onboarding/welcomeToast';
 import { color } from '@/theme';
 
 const PATHS: Record<Tab, '/' | '/insights' | '/budgets' | '/profile'> = {
@@ -48,6 +49,7 @@ export default function TabsLayout() {
         onAdd={() => router.push('/add-transaction')}
         blurTarget={blurTarget}
       />
+      <WelcomeToast />
     </View>
   );
 }

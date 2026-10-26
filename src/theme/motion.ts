@@ -38,6 +38,10 @@ export const duration = {
   scrim: 500,
   caretBlink: 1100,
   orbDrift: 30000,
+  /** Onboarding step content sliding in from the right. */
+  slide: 700,
+  /** Onboarding progress bar growing to the next step. */
+  progress: 800,
 } as const;
 
 /** Pressed buttons shrink to this scale. */
