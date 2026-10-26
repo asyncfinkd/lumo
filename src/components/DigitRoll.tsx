@@ -16,6 +16,10 @@ import { easing } from './motion';
 // baseline stays where the design puts it.
 const HEIGHT = text.hero.lineHeight + 12;
 const OVERFLOW = (HEIGHT - text.hero.lineHeight) / 2;
+
+// The same for the 26pt symbol and fraction: a taller line, less bottom margin.
+const SMALL_LINE = 34;
+const SMALL_BOTTOM = 6 - (SMALL_LINE - 26) / 2;
 const DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 // One 0–9 column that rolls to its digit.
@@ -111,18 +115,18 @@ const styles = StyleSheet.create({
   symbol: {
     fontFamily: text.subtitle.fontFamily,
     fontSize: 26,
-    lineHeight: 26,
+    lineHeight: SMALL_LINE,
     color: color.subtle,
     marginRight: 3,
-    marginBottom: 6,
+    marginBottom: SMALL_BOTTOM,
   },
   fraction: {
     fontFamily: text.subtitle.fontFamily,
     fontSize: 26,
-    lineHeight: 26,
+    lineHeight: SMALL_LINE,
     color: color.subtle,
     letterSpacing: -0.8,
     marginLeft: 1,
-    marginBottom: 6,
+    marginBottom: SMALL_BOTTOM,
   },
 });
