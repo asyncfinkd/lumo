@@ -15,6 +15,7 @@ Lumo is built by one person, with the rules of a team. Every change goes through
 
 - No direct pushes, for admins too
 - A pull request is required
+- CI must pass: typecheck, lint, format and tests
 - Linear history (squash merges only)
 - All review conversations must be resolved
 - No force pushes or deletion
@@ -48,7 +49,7 @@ A change is done when:
 - [ ] It is accessible: labels, 4.5:1 text contrast, 44px touch targets, Reduce Motion
 - [ ] It works on a real iPhone and a real Android device (for UI changes)
 - [ ] No user data leaves the device ([local-only](docs/mvp-scope.md))
-- [ ] CI is green *(once CI exists)*
+- [ ] CI is green
 
 ## Decisions
 

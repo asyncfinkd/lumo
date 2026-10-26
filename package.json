@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@expo-google-fonts/nunito": "^0.4.2",
@@ -30,11 +32,25 @@
     "react-native-web": "^0.21.4"
   },
   "devDependencies": {
+    "@testing-library/react-native": "^14.1.0",
+    "@types/jest": "30.0.0",
     "@types/react": "~19.3.0",
     "eslint": "^9.39.5",
     "eslint-config-expo": "~58.0.4",
     "eslint-config-prettier": "^10.1.8",
+    "jest": "~30.5.2",
+    "jest-expo": "~58.0.12",
     "prettier": "^3.9.10",
     "typescript": "~6.0.3"
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    },
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "<rootDir>/spikes/"
+    ]
   }
 }
