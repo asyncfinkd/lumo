@@ -12,7 +12,7 @@ import { finishOnboarding } from '@/features/onboarding/finish';
 import { chosenBills } from '@/features/onboarding/save';
 import { useOnboarding } from '@/features/onboarding/store';
 import { useCountUp } from '@/features/onboarding/useCountUp';
-import { categoryColor, color, gradient, radius, shadow, space, text } from '@/theme';
+import { categoryPalette, color, gradient, radius, shadow, space, text } from '@/theme';
 
 // OBReveal: income − bills = yours to spend, then save everything.
 export default function YourMonthScreen() {
@@ -67,8 +67,8 @@ export default function YourMonthScreen() {
             />
             <Row
               icon={
-                <View style={[styles.rowIcon, { backgroundColor: categoryColor.home.bg }]}>
-                  <CategoryIcon id="home" size={20} color={categoryColor.home.fg} />
+                <View style={[styles.rowIcon, { backgroundColor: categoryPalette.lilac.bg }]}>
+                  <CategoryIcon icon="house" size={20} color={categoryPalette.lilac.fg} />
                 </View>
               }
               label={t('onboarding.reveal.bills')}

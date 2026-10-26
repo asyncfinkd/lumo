@@ -10,16 +10,12 @@ import { Numpad } from '@/components/Numpad';
 import { Press } from '@/components/Press';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Sheet } from '@/components/Sheet';
-import {
-  type CategoryId,
-  EXPENSE_CATEGORIES,
-  type ExpenseCategoryId,
-  INCOME_CATEGORIES,
-} from '@/db/categories';
+import type { CategoryId } from '@/db/categories';
 import { db } from '@/db/client';
 import { addDays, type CalendarDate } from '@/domain/dates';
 import type { TransactionKind } from '@/domain/leftToSpend';
 import { type CurrencyCode, currencies, formatMoney, parseAmount } from '@/domain/money';
+import { useCategories } from '@/features/categories/categories';
 import { CATEGORY_EMOJI } from '@/features/categoryEmoji';
 import { useActiveBills, useAllTransactions, useBudgets, useMoneyMonth } from '@/features/live';
 import { type AddMessage, addMessage, messageTone } from '@/features/transactions/addMessage';
@@ -31,8 +27,6 @@ import {
 } from '@/features/transactions/addForm';
 import { addTransaction } from '@/features/transactions/repo';
 import { color, radius, size, text } from '@/theme';
-
-const CATEGORIES = { expense: EXPENSE_CATEGORIES, income: INCOME_CATEGORIES } as const;
 
 // AddTransaction: type, amount, a line on how it lands, category, date, note.
 // Saves a `manual` transaction; Home and budgets update through live queries.
@@ -56,11 +50,13 @@ export default function AddTransactionScreen() {
   const [savedMessage, setSavedMessage] = useState<AddMessage | null>(null);
 
   const currency: CurrencyCode = profile?.currency ?? 'GEL';
-  const options = CATEGORIES[kind];
-  const category = picked && options.some((c) => c.id === picked) ? picked : options[0].id;
+  const categories = useCategories();
+  const options = categories.ofKind(kind);
+  const category =
+    picked && options.some((c) => c.id === picked) ? picked : (options[0]?.id ?? null);
   const day = date ?? today;
   const amountMinor = parseAmount(typed, currency) ?? 0;
-  const categoryName = (id: CategoryId) => t(`categories.${id}`);
+  const categoryName = (id: CategoryId | null) => categories.get(id).label;
 
   const live = summary
     ? addMessage({
@@ -157,8 +153,8 @@ export default function AddTransactionScreen() {
               {options.map((c) => (
                 <Chip
                   key={c.id}
-                  category={c.id}
-                  label={categoryName(c.id)}
+                  tint={c.tint}
+                  label={c.label}
                   selected={c.id === category}
                   onPress={() => setPicked(c.id)}
                 />
@@ -257,15 +253,17 @@ export default function AddTransactionScreen() {
 function MessagePill({ message, currency }: { message: AddMessage; currency: CurrencyCode }) {
   const { t, i18n } = useTranslation();
   const money = (minor: number) => formatMoney(minor, currency);
-  const word = (id: CategoryId) => t(`categories.${id}`).toLocaleLowerCase(i18n.language);
-  const emoji = (id: CategoryId) => CATEGORY_EMOJI[id as ExpenseCategoryId] ?? '';
+  const categories = useCategories();
+  const name = (id: CategoryId) => categories.get(id).label;
+  const word = (id: CategoryId) => name(id).toLocaleLowerCase(i18n.language);
+  const emoji = (id: CategoryId) => CATEGORY_EMOJI[id] ?? '';
 
   const line =
     message.type === 'income'
       ? t('addTransaction.message.income')
       : message.type === 'covered'
         ? t('addTransaction.message.covered', {
-            category: t(`categories.${message.category}`),
+            category: name(message.category),
             emoji: emoji(message.category),
           })
         : message.type === 'stillLeft'

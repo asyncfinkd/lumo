@@ -1,5 +1,5 @@
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
-import type { CategoryId } from '@/db/categories';
+import type { CategoryIconKey } from '@/db/categories';
 
 // Icons copied path-for-path from the Budget Tracker design boards.
 // Most share one style: 1.8 stroke, round caps/joins, 22% tinted fill.
@@ -14,83 +14,62 @@ const line = (color: string, width = 1.8) => ({
   fill: 'none',
 });
 
-// Income categories share one icon: money coming in.
-const INCOME: CategoryId[] = ['salary', 'freelance', 'gift', 'refund'];
+// The twelve category icons (ProfileCategoryEdit): a filled shape and its lines.
+const CATEGORY_PATHS: Record<CategoryIconKey | 'none', [string, string]> = {
+  basket: ['M4 9.5h16l-1.5 8.8a2 2 0 0 1-2 1.7h-9a2 2 0 0 1-2-1.7z', 'm8 9.5 3-5.5M16 9.5l-3-5.5'],
+  coffee: [
+    'M4.5 9h12v4.5a5.5 5.5 0 0 1-5.5 5.5h-1a5.5 5.5 0 0 1-5.5-5.5z',
+    'M16.5 10.5H18a2.5 2.5 0 0 1 0 5h-1.8M8.5 3.5c-.6.8-.6 1.7 0 2.5M12.5 3.5c-.6.8-.6 1.7 0 2.5',
+  ],
+  car: [
+    'M4 13.5 5.8 8.4A2 2 0 0 1 7.7 7h8.6a2 2 0 0 1 1.9 1.4l1.8 5.1V17a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z',
+    'M7 18v1.5M17 18v1.5M4 13.5h16',
+  ],
+  gift: [
+    'M4 12a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z',
+    'M12 9v11M4 13.5h16M12 9c-1.4-2.8-4.5-3.3-4.5-1.2S10.2 9 12 9s4.5-.9 4.5-1.2S13.4 6.2 12 9z',
+  ],
+  bolt: ['M13 3 5 13.5h6l-1 7.5 8-10.5h-6z', ''],
+  house: ['M4 10.5 12 4l8 6.5V19a2 2 0 0 1-2 2h-3.5v-5h-5v5H6a2 2 0 0 1-2-2z', ''],
+  heart: [
+    'M12 20s-7.5-4.4-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.6 12 20 12 20z',
+    '',
+  ],
+  wallet: [
+    'M6.5 6.5h11a3.5 3.5 0 0 1 3.5 3.5v4a3.5 3.5 0 0 1-3.5 3.5h-11A3.5 3.5 0 0 1 3 14v-4a3.5 3.5 0 0 1 3.5-3.5z',
+    'M9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0 -5 0',
+  ],
+  music: [
+    'M4.5 17a3 3 0 1 0 6 0a3 3 0 1 0 -6 0M14.5 15a3 3 0 1 0 6 0a3 3 0 1 0 -6 0',
+    'M10.5 17V6l10-2v11',
+  ],
+  book: [
+    'M5 4.5h9.5A2.5 2.5 0 0 1 17 7v13H7.5A2.5 2.5 0 0 1 5 17.5z',
+    'M5 17.5A2.5 2.5 0 0 1 7.5 15H17',
+  ],
+  paw: [
+    'M12 12c-3 0-5 3-5 5.2 0 1.6 1.4 2.3 2.8 1.8 1.6-.6 2.8-.6 4.4 0 1.4.5 2.8-.2 2.8-1.8C17 15 15 12 12 12z',
+    'M5.2 10a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0M8.7 6.5a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0M12.7 6.5a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0M16.2 10a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0',
+  ],
+  shirt: [
+    'M8 4 4 6.5l1.8 4L8 9.5V20h8V9.5l2.2 1 1.8-4L16 4c-.6 1.6-2.1 2.5-4 2.5S8.6 5.6 8 4z',
+    '',
+  ],
+  // "No category" (ProfileCategoryDelete).
+  none: ['M12 4a8 8 0 1 0 0 16a8 8 0 1 0 0-16z', 'M8.5 12h7'],
+};
 
-export function CategoryIcon({ id, size = 24, color }: IconProps & { id: CategoryId }) {
+export function CategoryIcon({
+  icon,
+  size = 24,
+  color,
+}: IconProps & { icon: CategoryIconKey | 'none' }) {
   const s = line(color);
+  const [shape, lines] = CATEGORY_PATHS[icon] ?? CATEGORY_PATHS.none;
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
-      {INCOME.includes(id) && (
-        <>
-          <Rect
-            {...s}
-            fill={color}
-            fillOpacity={0.22}
-            x={3}
-            y={6.5}
-            width={18}
-            height={11}
-            rx={3.5}
-          />
-          <Circle {...s} cx={12} cy={12} r={2.5} />
-        </>
-      )}
-      {id === 'home' && (
-        <Path
-          {...s}
-          fill={color}
-          fillOpacity={0.22}
-          d="M4 10.5 12 4l8 6.5V19a2 2 0 0 1-2 2h-3.5v-5h-5v5H6a2 2 0 0 1-2-2z"
-        />
-      )}
-      {id === 'groceries' && (
-        <>
-          <Path
-            {...s}
-            fill={color}
-            fillOpacity={0.22}
-            d="M4 9.5h16l-1.5 8.8a2 2 0 0 1-2 1.7h-9a2 2 0 0 1-2-1.7z"
-          />
-          <Path {...s} d="m8 9.5 3-5.5M16 9.5l-3-5.5" />
-        </>
-      )}
-      {id === 'transport' && (
-        <>
-          <Path
-            {...s}
-            fill={color}
-            fillOpacity={0.22}
-            d="M4 13.5 5.8 8.4A2 2 0 0 1 7.7 7h8.6a2 2 0 0 1 1.9 1.4l1.8 5.1V17a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"
-          />
-          <Path {...s} d="M7 18v1.5M17 18v1.5M4 13.5h16" />
-        </>
-      )}
-      {id === 'coffee' && (
-        <>
-          <Path
-            {...s}
-            fill={color}
-            fillOpacity={0.22}
-            d="M4.5 9h12v4.5a5.5 5.5 0 0 1-5.5 5.5h-1a5.5 5.5 0 0 1-5.5-5.5z"
-          />
-          <Path {...s} d="M16.5 10.5H18a2.5 2.5 0 0 1 0 5h-1.8" />
-          <Path {...s} d="M8.5 3.5c-.6.8-.6 1.7 0 2.5M12.5 3.5c-.6.8-.6 1.7 0 2.5" />
-        </>
-      )}
-      {id === 'treats' && (
-        <>
-          <Rect {...s} fill={color} fillOpacity={0.22} x={4} y={9} width={16} height={11} rx={3} />
-          <Path {...s} d="M12 9v11M4 13.5h16" />
-          <Path
-            {...s}
-            d="M12 9c-1.4-2.8-4.5-3.3-4.5-1.2S10.2 9 12 9s4.5-.9 4.5-1.2S13.4 6.2 12 9z"
-          />
-        </>
-      )}
-      {id === 'bills' && (
-        <Path {...s} fill={color} fillOpacity={0.22} d="M13 3 5 13.5h6l-1 7.5 8-10.5h-6z" />
-      )}
+      <Path {...s} fill={color} fillOpacity={0.22} d={shape} />
+      {lines ? <Path {...s} d={lines} /> : null}
     </Svg>
   );
 }
@@ -463,6 +442,17 @@ export function GridIcon({ color }: { color: string }) {
       <Rect {...s} x={13} y={4} width={7} height={7} rx={2.2} />
       <Rect {...s} x={4} y={13} width={7} height={7} rx={2.2} />
       <Rect {...s} fill={color} fillOpacity={0.22} x={13} y={13} width={7} height={7} rx={2.2} />
+    </Svg>
+  );
+}
+
+/** Money coming in: Profile's Monthly income row. */
+export function MoneyIcon({ color, size = 20 }: IconProps) {
+  const s = rowLine(color);
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
+      <Rect {...s} fill={color} fillOpacity={0.22} x={3} y={6.5} width={18} height={11} rx={3.5} />
+      <Circle {...s} cx={12} cy={12} r={2.5} />
     </Svg>
   );
 }

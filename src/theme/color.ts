@@ -1,7 +1,7 @@
 // Every color in the app, from the Budget Tracker design. Nothing outside
 // src/theme may use a raw hex value (checked by a test).
 
-import type { CategoryId } from '@/db/categories';
+import type { CategoryColorKey } from '@/db/categories';
 import type { CurrencyCode } from '@/domain/money';
 import type { BillKey } from '@/features/onboarding/bills';
 
@@ -128,21 +128,34 @@ type CategoryColors = {
   selected: string;
   /** Icon and dot. */
   fg: string;
-  /** Donut segment and bar (expense categories). */
+  /** Donut segment and bar. */
   chart: string;
+  /** Text on the soft tile color (the category chip in TransactionDetail). */
+  chip: string;
 };
 
-export const categoryColor: Record<CategoryId, CategoryColors> = {
-  coffee: { bg: '#F3E6DA', selected: '#EBD5C1', fg: '#946649', chart: '#CDA98C' },
-  groceries: { bg: '#FFF0C7', selected: '#FFE39A', fg: '#A0761C', chart: '#F5C86A' },
-  transport: { bg: '#DCEBF8', selected: '#C7DDF3', fg: '#4A7EAD', chart: '#94BDE6' },
-  treats: { bg: '#FBDDE3', selected: '#F6C8D3', fg: '#B9566E', chart: '#EFA3B6' },
-  bills: { bg: '#DDEEE3', selected: '#C8E4D2', fg: '#4E8A6A', chart: '#8FC4A6' },
-  home: { bg: '#ECE6F7', selected: '#DDD3F1', fg: '#7A62A8', chart: '#B7A6E0' },
-  salary: { bg: '#DDEEE3', selected: '#C8E4D2', fg: '#4E8A6A', chart: '#8FC4A6' },
-  freelance: { bg: '#DCEBF8', selected: '#C7DDF3', fg: '#4A7EAD', chart: '#94BDE6' },
-  gift: { bg: '#FBDDE3', selected: '#F6C8D3', fg: '#B9566E', chart: '#EFA3B6' },
-  refund: { bg: '#FFF0C7', selected: '#FFE39A', fg: '#A0761C', chart: '#F5C86A' },
+/**
+ * The eight category colors (ProfileCategoryEdit). `selected` and `chart` for
+ * coral and mint follow the same steps as the others; no board shows them yet.
+ */
+export const categoryPalette: Record<CategoryColorKey, CategoryColors> = {
+  butter: { bg: '#FFF0C7', selected: '#FFE39A', fg: '#A0761C', chart: '#F5C86A', chip: '#6E5210' },
+  latte: { bg: '#F3E6DA', selected: '#EBD5C1', fg: '#946649', chart: '#CDA98C', chip: '#6E4A33' },
+  sky: { bg: '#DCEBF8', selected: '#C7DDF3', fg: '#4A7EAD', chart: '#94BDE6', chip: '#2F5A84' },
+  blush: { bg: '#FBDDE3', selected: '#F6C8D3', fg: '#B9566E', chart: '#EFA3B6', chip: '#8A3A50' },
+  sage: { bg: '#DDEEE3', selected: '#C8E4D2', fg: '#4E8A6A', chart: '#8FC4A6', chip: '#355F49' },
+  lilac: { bg: '#ECE6F7', selected: '#DDD3F1', fg: '#7A62A8', chart: '#B7A6E0', chip: '#57437F' },
+  coral: { bg: '#FCE3DA', selected: '#F8CDBE', fg: '#B5593F', chart: '#EBA38C', chip: '#8A3F2C' },
+  mint: { bg: '#D6F0E4', selected: '#BFE6D3', fg: '#3F7D5E', chart: '#86C7A6', chip: '#2F6B52' },
+};
+
+/** "No category" (after its category was deleted): a quiet grey. */
+export const noCategoryColors: CategoryColors = {
+  bg: '#EFE9E3',
+  selected: '#E4DBD2',
+  fg: '#8A7F78',
+  chart: '#CFC5BC',
+  chip: '#5E554F',
 };
 
 /** ProfilePhotoSheet's colors for the initial when there's no photo. */

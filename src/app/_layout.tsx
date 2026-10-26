@@ -11,6 +11,7 @@ import {
 } from '@expo-google-fonts/nunito';
 import { Placeholder } from '@/components/Placeholder';
 import { useDatabase } from '@/db/useDatabase';
+import { CategoriesProvider } from '@/features/categories/CategoriesProvider';
 import { useProfileStatus } from '@/features/live';
 import { DueTransactionsSync } from '@/features/recurring/DueTransactionsSync';
 import i18n from '@/i18n';
@@ -66,29 +67,34 @@ function AppStack() {
   if (!loaded) return null;
 
   return (
-    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
-      <Stack.Protected guard={onboarded} redirectTo="/welcome">
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="add-transaction" options={sheetOptions} />
-        <Stack.Screen name="balance" options={sheetOptions} />
-        <Stack.Screen name="edit-budget" options={sheetOptions} />
-        <Stack.Screen name="profile-photo" options={sheetOptions} />
-        <Stack.Screen name="profile-name" />
-        <Stack.Screen name="profile-currency" />
-        <Stack.Screen name="profile-income" />
-        <Stack.Screen name="profile-delete-all" options={{ ...sheetOptions, animation: 'fade' }} />
-        <Stack.Screen
-          name="profile-photo-crop"
-          options={{
-            presentation: 'fullScreenModal',
-            contentStyle: { backgroundColor: color.cropBg },
-          }}
-        />
-      </Stack.Protected>
-      <Stack.Protected guard={!onboarded} redirectTo="/">
-        <Stack.Screen name="(onboarding)" />
-      </Stack.Protected>
-      <Stack.Screen name="dev-reset" />
-    </Stack>
+    <CategoriesProvider>
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
+        <Stack.Protected guard={onboarded} redirectTo="/welcome">
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="add-transaction" options={sheetOptions} />
+          <Stack.Screen name="balance" options={sheetOptions} />
+          <Stack.Screen name="edit-budget" options={sheetOptions} />
+          <Stack.Screen name="profile-photo" options={sheetOptions} />
+          <Stack.Screen name="profile-name" />
+          <Stack.Screen name="profile-currency" />
+          <Stack.Screen name="profile-income" />
+          <Stack.Screen
+            name="profile-delete-all"
+            options={{ ...sheetOptions, animation: 'fade' }}
+          />
+          <Stack.Screen
+            name="profile-photo-crop"
+            options={{
+              presentation: 'fullScreenModal',
+              contentStyle: { backgroundColor: color.cropBg },
+            }}
+          />
+        </Stack.Protected>
+        <Stack.Protected guard={!onboarded} redirectTo="/">
+          <Stack.Screen name="(onboarding)" />
+        </Stack.Protected>
+        <Stack.Screen name="dev-reset" />
+      </Stack>
+    </CategoriesProvider>
   );
 }

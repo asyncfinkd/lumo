@@ -2,10 +2,11 @@ export {
   avatarColor,
   type AvatarColor,
   billColor,
-  categoryColor,
+  categoryPalette,
   color,
   currencyColor,
   gradient,
+  noCategoryColors,
 } from './color';
 export { fontFamily, tabularNums, text } from './font';
 export { curve, duration, pressScale } from './motion';

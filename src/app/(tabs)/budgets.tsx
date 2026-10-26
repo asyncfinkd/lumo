@@ -8,8 +8,9 @@ import { Fill, Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
 import { type CurrencyCode, formatMoney } from '@/domain/money';
 import { type BudgetRow, budgetRows, budgetsSummary } from '@/features/budgets/budgetRows';
+import { useCategories } from '@/features/categories/categories';
 import { useActiveBills, useAllTransactions, useBudgets, useMoneyMonth } from '@/features/live';
-import { categoryColor, color, gradient, radius, shadow, space, text } from '@/theme';
+import { color, gradient, radius, shadow, space, text } from '@/theme';
 
 // Budgets: what's left in each category this pay period. Tap one to edit it.
 export default function BudgetsScreen() {
@@ -98,8 +99,9 @@ function BudgetCard({
   onPress: () => void;
 }) {
   const { t } = useTranslation();
-  const tint = categoryColor[row.category];
-  const name = t(`categories.${row.category}`);
+  const category = useCategories().get(row.category);
+  const tint = category.tint;
+  const name = category.label;
   const money = (minor: number) => formatMoney(minor, currency, { decimals: 'auto' });
   const left = money(row.leftMinor);
 
@@ -128,7 +130,7 @@ function BudgetCard({
     >
       <View style={styles.cardTop}>
         <View style={[styles.icon, { backgroundColor: tint.bg }]}>
-          <CategoryIcon id={row.category} size={22} color={tint.fg} />
+          <CategoryIcon icon={category.icon} size={22} color={tint.fg} />
         </View>
         <View style={styles.cardBody}>
           <Text style={styles.name}>{name}</Text>

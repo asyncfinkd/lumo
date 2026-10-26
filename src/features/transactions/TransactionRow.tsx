@@ -1,11 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { CategoryIcon } from '@/components/Icons';
-import type { CategoryId } from '@/db/categories';
 import type { Transaction } from '@/db/schema';
 import { formatMoney } from '@/domain/money';
+import { useCategories } from '@/features/categories/categories';
 import { clockTime } from '@/features/home/home';
-import { categoryColor, color, radius, size, text } from '@/theme';
+import { color, radius, size, text } from '@/theme';
 
 /**
  * One transaction as in the design's lists: category tile, title, "Coffee · 8:40"
@@ -15,8 +15,7 @@ import { categoryColor, color, radius, size, text } from '@/theme';
 export function TransactionRow({ transaction }: { transaction: Transaction }) {
   const { t } = useTranslation();
   const { kind, source } = transaction;
-  const categoryId = transaction.categoryId as CategoryId | null;
-  const tint = categoryId ? categoryColor[categoryId] : undefined;
+  const category = useCategories().get(transaction.categoryId);
 
   const when =
     source === 'bill'
@@ -24,7 +23,7 @@ export function TransactionRow({ transaction }: { transaction: Transaction }) {
       : source === 'recurring_income'
         ? t('home.monthlyIncome')
         : clockTime(transaction.occurredAt);
-  const meta = categoryId ? `${t(`categories.${categoryId}`)} · ${when}` : when;
+  const meta = transaction.categoryId ? `${category.label} · ${when}` : when;
   const amount = formatMoney(transaction.amountMinor, transaction.currency, {
     sign: kind === 'income' ? 'income' : 'expense',
   });
@@ -35,8 +34,8 @@ export function TransactionRow({ transaction }: { transaction: Transaction }) {
       accessibilityLabel={`${transaction.title}, ${meta}, ${amount}`}
       style={styles.row}
     >
-      <View style={[styles.tile, { backgroundColor: tint?.bg ?? color.track }]}>
-        {categoryId ? <CategoryIcon id={categoryId} color={tint?.fg ?? color.muted} /> : null}
+      <View style={[styles.tile, { backgroundColor: category.tint.bg }]}>
+        <CategoryIcon icon={category.icon} color={category.tint.fg} />
       </View>
       <View style={styles.body}>
         <Text numberOfLines={1} style={styles.title}>

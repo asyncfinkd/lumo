@@ -14,7 +14,7 @@ import { setAvatarColor, setPhoto } from '@/features/profile/repo';
 import {
   avatarColor,
   type AvatarColor,
-  categoryColor,
+  categoryPalette,
   color,
   fontFamily,
   radius,
@@ -81,14 +81,14 @@ export default function ProfilePhotoScreen() {
 
           <View style={styles.list}>
             <Option
-              tile={categoryColor.transport}
-              icon={<CameraIcon color={categoryColor.transport.fg} />}
+              tile={categoryPalette.sky}
+              icon={<CameraIcon color={categoryPalette.sky.fg} />}
               label={t('profile.photo.take')}
               onPress={() => choose('camera')}
             />
             <Option
-              tile={categoryColor.bills}
-              icon={<ImageIcon color={categoryColor.bills.fg} />}
+              tile={categoryPalette.sage}
+              icon={<ImageIcon color={categoryPalette.sage.fg} />}
               label={t('profile.photo.choose')}
               onPress={() => choose('library')}
             />

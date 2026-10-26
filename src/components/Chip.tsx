@@ -1,18 +1,17 @@
 import { StyleSheet, Text, View } from 'react-native';
-import type { CategoryId } from '@/db/categories';
-import { categoryColor, color, radius, shadow, size, text } from '@/theme';
+import { categoryPalette, color, radius, shadow, size, text } from '@/theme';
 import { Press } from './Press';
 
 type Props = {
-  category: CategoryId;
+  /** The category's colors. */
+  tint: (typeof categoryPalette)[keyof typeof categoryPalette];
   label: string;
   selected: boolean;
   onPress: () => void;
 };
 
 /** A category to pick, as in the add sheet: a colored dot and its name. */
-export function Chip({ category, label, selected, onPress }: Props) {
-  const c = categoryColor[category];
+export function Chip({ tint: c, label, selected, onPress }: Props) {
   return (
     <Press
       accessibilityRole="radio"

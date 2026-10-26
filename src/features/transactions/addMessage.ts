@@ -34,7 +34,8 @@ export function addMessage({
   left,
 }: {
   kind: TransactionKind;
-  category: CategoryId;
+  /** `null` when the type has no categories left. */
+  category: CategoryId | null;
   amountMinor: number;
   budgets: readonly { categoryId: string; limitMinor: number }[];
   /** Active bills only. */
@@ -44,10 +45,12 @@ export function addMessage({
   left: LeftToSpend;
 }): AddMessage {
   if (kind === 'income') return { type: 'income' };
-  if (bills.some((b) => b.categoryId === category)) return { type: 'covered', category };
+  if (category && bills.some((b) => b.categoryId === category)) {
+    return { type: 'covered', category };
+  }
 
-  const budget = budgets.find((b) => b.categoryId === category);
-  if (budget) {
+  const budget = category ? budgets.find((b) => b.categoryId === category) : undefined;
+  if (category && budget) {
     const after = budget.limitMinor - categorySpent(transactions, category, period) - amountMinor;
     return after >= 0
       ? { type: 'stillLeft', category, amountMinor: after }

@@ -277,7 +277,8 @@
     "salary": "Salary",
     "freelance": "Freelance",
     "gift": "Gift",
-    "refund": "Refund"
+    "refund": "Refund",
+    "none": "No category"
   },
   "currencies": {
     "GEL": "Georgian lari",

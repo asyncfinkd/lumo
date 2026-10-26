@@ -47,11 +47,18 @@ export const profile = sqliteTable('profile', {
 });
 
 /** The fixed v1 set from the design: 6 expense and 4 income categories. */
+/** The defaults plus any the person added (#18). See src/db/categories.ts. */
 export const categories = sqliteTable('categories', {
   id: text('id').primaryKey(),
   kind: text('kind', { enum: ['expense', 'income'] }).notNull(),
   name: text('name').notNull(),
   sortOrder: integer('sort_order').notNull(),
+  /** One of CATEGORY_ICONS. */
+  icon: text('icon').notNull().default('basket'),
+  /** One of CATEGORY_COLORS. */
+  color: text('color').notNull().default('butter'),
+  /** A default keeps its translated name until it's renamed. */
+  renamed: integer('renamed', { mode: 'boolean' }).notNull().default(false),
 });
 
 export const transactions = sqliteTable(

@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { CATEGORY_ROWS } from '@/db/categories';
-import { categoryColor, color } from '../color';
+import { categoryPalette, color, noCategoryColors } from '../color';
 
 // WCAG relative luminance and contrast ratio for #RRGGBB colors.
 function luminance(hex: string): number {
@@ -40,13 +40,17 @@ describe('contrast (WCAG AA)', () => {
     expect(contrast(fg, bg)).toBeGreaterThanOrEqual(3);
   });
 
-  it.each(Object.entries(categoryColor))('the %s icon is at least 3:1 on its tile', (_, c) => {
-    expect(contrast(c.fg, c.bg)).toBeGreaterThanOrEqual(3);
-  });
+  it.each([...Object.entries(categoryPalette), ['none', noCategoryColors] as const])(
+    'the %s icon is at least 3:1 on its tile, its chip text 4.5:1',
+    (_, c) => {
+      expect(contrast(c.fg, c.bg)).toBeGreaterThanOrEqual(3);
+      expect(contrast(c.chip, c.bg)).toBeGreaterThanOrEqual(4.5);
+    },
+  );
 });
 
-it('has colors for every category', () => {
-  expect(Object.keys(categoryColor).sort()).toEqual(CATEGORY_ROWS.map((c) => c.id).sort());
+it('gives every default category a color from the palette', () => {
+  for (const c of CATEGORY_ROWS) expect(categoryPalette[c.color]).toBeDefined();
 });
 
 it('keeps raw hex colors inside src/theme (illustrations aside)', () => {

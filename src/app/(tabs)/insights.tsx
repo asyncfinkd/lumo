@@ -7,6 +7,7 @@ import { CategoryIcon, SparkleIcon } from '@/components/Icons';
 import { Fill, Rise } from '@/components/motion';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { type CurrencyCode, formatMoney, percent } from '@/domain/money';
+import { useCategories } from '@/features/categories/categories';
 import { CATEGORY_EMOJI } from '@/features/categoryEmoji';
 import {
   biggestDrop,
@@ -17,7 +18,7 @@ import {
   weekRange,
 } from '@/features/insights/insights';
 import { useAllTransactions, useMoneyMonth } from '@/features/live';
-import { categoryColor, color, radius, shadow, space, text } from '@/theme';
+import { color, radius, shadow, space, text } from '@/theme';
 
 type Range = 'week' | 'month';
 
@@ -29,6 +30,7 @@ export default function InsightsScreen() {
   const [view, setView] = useState<Range>('month');
   const { today, profile, summary } = useMoneyMonth();
   const transactions = useAllTransactions();
+  const categories = useCategories();
 
   const data = useMemo(() => {
     if (!profile || !summary) return null;
@@ -75,7 +77,10 @@ export default function InsightsScreen() {
 
       <Rise delay={80} style={styles.chartCard}>
         <Donut
-          items={data.items}
+          items={data.items.map((item) => {
+            const c = categories.get(item.category);
+            return { key: item.category, label: c.label, chart: c.tint.chart, minor: item.minor };
+          })}
           currency={profile.currency}
           label={view === 'week' ? t('insights.spentThisWeek') : t('insights.spentThisMonth')}
         />
@@ -111,7 +116,7 @@ export default function InsightsScreen() {
 
 function InsightCard({ insight }: { insight: Insight }) {
   const { t, i18n } = useTranslation();
-  const category = t(`categories.${insight.category}`);
+  const category = useCategories().get(insight.category).label;
 
   let line: string | null = null;
   if (insight.type === 'less') {
@@ -120,7 +125,7 @@ function InsightCard({ insight }: { insight: Insight }) {
       percent: insight.percent,
       category: category.toLocaleLowerCase(i18n.language),
       month: new Date(y!, m! - 1, 1).toLocaleDateString(i18n.language, { month: 'long' }),
-      emoji: CATEGORY_EMOJI[insight.category],
+      emoji: CATEGORY_EMOJI[insight.category] ?? '',
     });
   } else if (insight.category === 'groceries') {
     // The design only words this for groceries so far.
@@ -153,8 +158,9 @@ function CategoryRow({
   currency: CurrencyCode;
 }) {
   const { t } = useTranslation();
-  const tint = categoryColor[item.category];
-  const name = t(`categories.${item.category}`);
+  const view = useCategories().get(item.category);
+  const tint = view.tint;
+  const name = view.label;
   const amount = formatMoney(item.minor, currency, { decimals: 'auto' });
   const share = percent(item.minor, total);
 
@@ -165,7 +171,7 @@ function CategoryRow({
       style={styles.row}
     >
       <View style={[styles.rowIcon, { backgroundColor: tint.bg }]}>
-        <CategoryIcon id={item.category} size={22} color={tint.fg} />
+        <CategoryIcon icon={view.icon} size={22} color={tint.fg} />
       </View>
       <View style={styles.rowBody}>
         <View style={styles.rowTop}>
