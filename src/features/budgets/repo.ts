@@ -8,6 +8,10 @@ export function budgetsQuery(db: Db) {
   return db.select().from(budgets);
 }
 
+export function getBudget(db: Db, categoryId: CategoryId): Budget | undefined {
+  return db.select().from(budgets).where(eq(budgets.categoryId, categoryId)).get();
+}
+
 export type BudgetInput = {
   categoryId: CategoryId;
   limitMinor: number;

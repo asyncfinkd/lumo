@@ -98,6 +98,7 @@
     }
   },
   "editBudget": {
+    "title": "Edit {{category}} budget",
     "monthly": "Monthly budget",
     "lower": "Lower by {{amount}}",
     "raise": "Raise by {{amount}}",
@@ -230,7 +231,6 @@
     "UAH": "Ukrainian hryvnia"
   },
   "placeholder": {
-    "budgets": "Per-category budgets come here.",
     "profile": "Settings come here.",
     "onboarding": "Onboarding starts here."
   }
