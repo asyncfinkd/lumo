@@ -63,6 +63,31 @@ npm test
 
 Changing the database: edit `src/db/schema.ts`, run `npm run db:generate`, and commit the new migration in `src/db/migrations/`. In development an empty database is filled with [docs/sample-data.md](docs/sample-data.md).
 
+### Install on an Android phone
+
+Lumo ships to a real phone as an APK built by [EAS](https://docs.expo.dev/eas/). Your data lives in a SQLite file inside the app, so installing a newer build over the old one, or receiving an update, keeps it. Uninstalling the app deletes it.
+
+One-time setup (writes `updates.url` and `extra.eas.projectId` to `app.json`; commit that change):
+
+```bash
+npx eas-cli@latest login
+npx eas-cli@latest update:configure
+```
+
+Build the APK, then open the link EAS prints on the phone and install it:
+
+```bash
+npx eas-cli@latest build --profile preview --platform android
+```
+
+Ship JavaScript changes (screens, logic, new migrations) without reinstalling. The app picks the update up on its next launch:
+
+```bash
+npx eas-cli@latest update --channel preview --message "What changed"
+```
+
+Native changes (a new library with native code, an SDK upgrade, native settings in `app.json`) change the runtime fingerprint, so they need a new build instead of an update. Install it over the existing app.
+
 How we work: [CONTRIBUTING.md](CONTRIBUTING.md). Decisions: [docs/adr](docs/adr).
 
 ## Roadmap
