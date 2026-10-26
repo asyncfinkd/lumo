@@ -1,7 +1,8 @@
-import type { ExpenseCategoryId } from '@/db/categories';
-
-/** The design's emoji for each expense category, at the end of friendly lines. */
-export const CATEGORY_EMOJI: Record<ExpenseCategoryId, string> = {
+/**
+ * The design's emoji for the default spending categories, at the end of
+ * friendly lines. Categories people add go without one.
+ */
+export const CATEGORY_EMOJI: Partial<Record<string, string>> = {
   coffee: '☕',
   groceries: '🧺',
   transport: '🚲',

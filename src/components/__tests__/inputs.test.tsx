@@ -3,6 +3,7 @@ import { Text } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import '@/i18n';
 import { parseAmount } from '@/domain/money';
+import { categoryPalette } from '@/theme';
 import { Chip } from '../Chip';
 import { Numpad, pressKey } from '../Numpad';
 import { SegmentedControl } from '../SegmentedControl';
@@ -98,7 +99,7 @@ describe('SegmentedControl', () => {
 describe('Chip', () => {
   it('is a radio named after its category', async () => {
     const onPress = jest.fn();
-    await render(<Chip category="coffee" label="Coffee" selected onPress={onPress} />);
+    await render(<Chip tint={categoryPalette.latte} label="Coffee" selected onPress={onPress} />);
     const chip = screen.getByRole('radio', { name: 'Coffee' });
     expect(chip).toBeChecked();
     await fireEvent.press(chip);

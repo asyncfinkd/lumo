@@ -1,11 +1,11 @@
 // What Insights shows: spending by category for this week or this pay period,
 // and the one sentence about it. Pure, so it's tested without React.
 
-import type { ExpenseCategoryId } from '@/db/categories';
+import type { CategoryId } from '@/db/categories';
 import { addDays, type CalendarDate, diffDays, type PayPeriod, payPeriod } from '@/domain/dates';
 import type { MoneyTransaction } from '@/domain/leftToSpend';
 
-export type CategoryTotal = { category: ExpenseCategoryId; minor: number };
+export type CategoryTotal = { category: CategoryId; minor: number };
 
 type Spent = MoneyTransaction & { categoryId: string | null };
 
@@ -32,7 +32,7 @@ export function spendingByCategory(
     totals.set(t.categoryId, (totals.get(t.categoryId) ?? 0) + t.amountMinor);
   }
   return [...totals.entries()]
-    .map(([category, minor]) => ({ category: category as ExpenseCategoryId, minor }))
+    .map(([category, minor]) => ({ category: category, minor }))
     .sort((a, b) => b.minor - a.minor);
 }
 
@@ -53,9 +53,9 @@ export function previousWindow(
 
 export type Insight =
   /** Week: "Groceries led this week. …" */
-  | { type: 'led'; category: ExpenseCategoryId }
+  | { type: 'led'; category: CategoryId }
   /** Month: "You spent 18% less on coffee than in September. Nice!" */
-  | { type: 'less'; category: ExpenseCategoryId; percent: number; previousStart: CalendarDate };
+  | { type: 'less'; category: CategoryId; percent: number; previousStart: CalendarDate };
 
 /** The category that went down the most against the previous period, if any did. */
 export function biggestDrop(

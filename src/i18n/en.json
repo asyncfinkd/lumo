@@ -201,12 +201,71 @@
   },
   "profile": {
     "title": "Profile",
+    "since": "Using Lumo since {{month}}",
+    "changePhoto": "Change profile photo",
+    "yourMoney": "Your money",
+    "preferences": "Preferences",
     "name": "Name",
     "currency": "Currency",
-    "income": "Income",
-    "bills": "Bills",
-    "deleteAll": "Delete all data",
-    "deleteAllConfirm": "This removes everything you've entered from this phone. It can't be undone."
+    "income": "Monthly income",
+    "incomeValue": "{{amount}} · {{day}}",
+    "bills": "Monthly bills",
+    "billsCount_one": "{{count}} bill",
+    "billsCount_other": "{{count}} bills",
+    "reminders": "Reminders",
+    "appIcon": "App icon",
+    "appIconLight": "Light",
+    "language": "Language",
+    "languageName": "English",
+    "export": "Export my data",
+    "exportFormat": "CSV · PDF",
+    "footer": "Lumo {{version}} · made with care",
+    "deleteAll": {
+      "row": "Delete all data",
+      "title": "Delete all your data?",
+      "body": "Every transaction, budget, bill and goal on this phone goes away, and Lumo starts fresh. This can't be undone.",
+      "typeBefore": "Type ",
+      "typeAfter": " to confirm",
+      "typeLabel": "Type {{word}} to confirm",
+      "confirm": "Delete everything"
+    },
+    "photo": {
+      "title": "Profile photo",
+      "take": "Take a photo",
+      "choose": "Choose from library",
+      "remove": "Remove photo",
+      "keepInitial": "Or keep your initial",
+      "colors": {
+        "butter": "Butter",
+        "peach": "Peach",
+        "blush": "Blush",
+        "lilac": "Lilac",
+        "sky": "Sky",
+        "sage": "Sage"
+      },
+      "done": "Done",
+      "updated": "Looking good! Photo updated"
+    },
+    "crop": {
+      "title": "Move and scale",
+      "hint": "Drag to fit your face in the circle.",
+      "zoom": "Zoom",
+      "photo": "Your chosen photo",
+      "use": "Use photo"
+    },
+    "back": "Back to Profile",
+    "categories": "Categories",
+    "categoriesCount_one": "{{count}} category",
+    "categoriesCount_other": "{{count}} categories",
+    "remindersSub": "Bills, payday and low budgets",
+    "on": "On",
+    "off": "Off",
+    "yourData": "Your data",
+    "currencyHint": "New amounts use this. What you've already added stays as it is.",
+    "nameHint": "This is how Lumo greets you on Home.",
+    "nameCount": "{{count}} / {{max}}",
+    "preview": "Preview",
+    "friend": "friend"
   },
   "categories": {
     "coffee": "Coffee",
@@ -218,7 +277,8 @@
     "salary": "Salary",
     "freelance": "Freelance",
     "gift": "Gift",
-    "refund": "Refund"
+    "refund": "Refund",
+    "none": "No category"
   },
   "currencies": {
     "GEL": "Georgian lari",
@@ -231,7 +291,60 @@
     "UAH": "Ukrainian hryvnia"
   },
   "placeholder": {
-    "profile": "Settings come here.",
     "onboarding": "Onboarding starts here."
+  },
+  "categoryManage": {
+    "title": "Categories",
+    "intro": "Tap a category to rename it, change its look, or remove it.",
+    "spending": "Spending",
+    "income": "Income",
+    "new": "New category",
+    "spentWithBudget": "{{amount}} this month · budget {{budget}}",
+    "spentNoBudget": "{{amount}} this month · no budget",
+    "earned": "{{amount}} this month",
+    "rowLabel": "{{name}}, {{detail}}. Edit",
+    "edit": "Edit category",
+    "namePlaceholder": "e.g. Pets",
+    "nameLabel": "Category name",
+    "type": "Type",
+    "icon": "Icon",
+    "color": "Color",
+    "budget": "Monthly budget",
+    "setBudget": "Set one",
+    "save": "Save",
+    "add": "Add category",
+    "delete": "Delete",
+    "icons": {
+      "basket": "Basket",
+      "coffee": "Cup",
+      "car": "Car",
+      "gift": "Gift",
+      "bolt": "Bolt",
+      "house": "House",
+      "heart": "Heart",
+      "wallet": "Wallet",
+      "music": "Music",
+      "book": "Book",
+      "paw": "Paw",
+      "shirt": "Shirt"
+    },
+    "colors": {
+      "butter": "Butter",
+      "latte": "Latte",
+      "sky": "Sky",
+      "blush": "Blush",
+      "sage": "Sage",
+      "lilac": "Lilac",
+      "coral": "Coral",
+      "mint": "Mint"
+    },
+    "deleteTitle": "Delete {{name}}?",
+    "deleteBody_one": "{{count}} transaction uses {{name}}. Nothing gets lost — choose where it goes.",
+    "deleteBody_other": "{{count}} transactions use {{name}}. Nothing gets lost — choose where they go.",
+    "moveTo": "Move them to",
+    "budgetRemoved": "Its {{amount}} monthly budget will be removed.",
+    "deleteAndMove": "Delete and move",
+    "deleteOnly": "Delete category",
+    "keep": "Keep it"
   }
 }

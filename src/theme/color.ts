@@ -1,7 +1,7 @@
 // Every color in the app, from the Budget Tracker design. Nothing outside
 // src/theme may use a raw hex value (checked by a test).
 
-import type { CategoryId } from '@/db/categories';
+import type { CategoryColorKey } from '@/db/categories';
 import type { CurrencyCode } from '@/domain/money';
 import type { BillKey } from '@/features/onboarding/bills';
 
@@ -53,11 +53,33 @@ export const color = {
   placeholder: '#A0958D',
   progressTrack: 'rgba(43,37,34,0.07)',
   radioRing: '#DDD2C8',
+  /** An empty radio dot in a dialog (ProfileCategoryDelete). */
+  radioRingSoft: '#D9CEC5',
   selectedRow: 'rgba(255,240,199,0.75)',
   listCard: 'rgba(255,255,255,0.8)',
   /** Unselected bill tile. */
   tileOff: 'rgba(255,255,255,0.8)',
 
+  // Profile photo
+  toast: 'rgba(255,255,255,0.92)',
+  /** ProfilePhotoCrop's dark ground and its soft text. */
+  cropBg: '#1E1A18',
+  cropHint: 'rgba(255,248,241,0.72)',
+  cropTrack: 'rgba(255,255,255,0.22)',
+  /** Destructive tile and text (Remove photo, Delete). */
+  dangerSoft: '#FBE7DF',
+  danger: '#A4402B',
+  /** The solid destructive button ("Delete everything"). */
+  dangerStrong: '#B5452F',
+  /** Behind a confirm dialog: darker than a sheet's scrim. */
+  dim: 'rgba(43,37,34,0.34)',
+  dialog: 'rgba(255,252,248,0.97)',
+  /** Secondary text one step darker than muted (labels in dialogs). */
+  softInk: '#5E554F',
+  /** A disabled solid button (Save without a name). */
+  disabled: '#BDB3AC',
+  /** A disabled destructive button and similar quiet fills. */
+  washStrong: 'rgba(43,37,34,0.06)',
   // Switch
   switchOn: '#6BAF8D',
   switchOff: '#E2D8CF',
@@ -108,22 +130,47 @@ type CategoryColors = {
   selected: string;
   /** Icon and dot. */
   fg: string;
-  /** Donut segment and bar (expense categories). */
+  /** Donut segment and bar. */
   chart: string;
+  /** Text on the soft tile color (the category chip in TransactionDetail). */
+  chip: string;
 };
 
-export const categoryColor: Record<CategoryId, CategoryColors> = {
-  coffee: { bg: '#F3E6DA', selected: '#EBD5C1', fg: '#946649', chart: '#CDA98C' },
-  groceries: { bg: '#FFF0C7', selected: '#FFE39A', fg: '#A0761C', chart: '#F5C86A' },
-  transport: { bg: '#DCEBF8', selected: '#C7DDF3', fg: '#4A7EAD', chart: '#94BDE6' },
-  treats: { bg: '#FBDDE3', selected: '#F6C8D3', fg: '#B9566E', chart: '#EFA3B6' },
-  bills: { bg: '#DDEEE3', selected: '#C8E4D2', fg: '#4E8A6A', chart: '#8FC4A6' },
-  home: { bg: '#ECE6F7', selected: '#DDD3F1', fg: '#7A62A8', chart: '#B7A6E0' },
-  salary: { bg: '#DDEEE3', selected: '#C8E4D2', fg: '#4E8A6A', chart: '#8FC4A6' },
-  freelance: { bg: '#DCEBF8', selected: '#C7DDF3', fg: '#4A7EAD', chart: '#94BDE6' },
-  gift: { bg: '#FBDDE3', selected: '#F6C8D3', fg: '#B9566E', chart: '#EFA3B6' },
-  refund: { bg: '#FFF0C7', selected: '#FFE39A', fg: '#A0761C', chart: '#F5C86A' },
+/**
+ * The eight category colors (ProfileCategoryEdit). `selected` and `chart` for
+ * coral and mint follow the same steps as the others; no board shows them yet.
+ */
+export const categoryPalette: Record<CategoryColorKey, CategoryColors> = {
+  butter: { bg: '#FFF0C7', selected: '#FFE39A', fg: '#A0761C', chart: '#F5C86A', chip: '#6E5210' },
+  latte: { bg: '#F3E6DA', selected: '#EBD5C1', fg: '#946649', chart: '#CDA98C', chip: '#6E4A33' },
+  sky: { bg: '#DCEBF8', selected: '#C7DDF3', fg: '#4A7EAD', chart: '#94BDE6', chip: '#2F5A84' },
+  blush: { bg: '#FBDDE3', selected: '#F6C8D3', fg: '#B9566E', chart: '#EFA3B6', chip: '#8A3A50' },
+  sage: { bg: '#DDEEE3', selected: '#C8E4D2', fg: '#4E8A6A', chart: '#8FC4A6', chip: '#355F49' },
+  lilac: { bg: '#ECE6F7', selected: '#DDD3F1', fg: '#7A62A8', chart: '#B7A6E0', chip: '#57437F' },
+  coral: { bg: '#FCE3DA', selected: '#F8CDBE', fg: '#B5593F', chart: '#EBA38C', chip: '#8A3F2C' },
+  mint: { bg: '#D6F0E4', selected: '#BFE6D3', fg: '#3F7D5E', chart: '#86C7A6', chip: '#2F6B52' },
 };
+
+/** "No category" (after its category was deleted): a quiet grey. */
+export const noCategoryColors: CategoryColors = {
+  bg: '#EFE9E3',
+  selected: '#E4DBD2',
+  fg: '#8A7F78',
+  chart: '#CFC5BC',
+  chip: '#5E554F',
+};
+
+/** ProfilePhotoSheet's colors for the initial when there's no photo. */
+export const avatarColor = {
+  butter: '#FFE7A6',
+  peach: '#FFD9C7',
+  blush: '#F8D3DD',
+  lilac: '#E2D9F4',
+  sky: '#D3E5F6',
+  sage: '#D3EADB',
+} as const;
+
+export type AvatarColor = keyof typeof avatarColor;
 
 /** Bill tiles in onboarding: soft tile, selected tile, icon color. */
 export const billColor: Record<BillKey, { bg: string; selected: string; fg: string }> = {

@@ -34,14 +34,31 @@ export const profile = sqliteTable('profile', {
   /** Day of the month the pay period starts, 1–31 (#2). */
   payday: integer('payday').notNull(),
   onboardedAt: text('onboarded_at'),
+  /** Background of the initial when there's no photo (ProfilePhotoSheet). */
+  avatarColor: text('avatar_color', {
+    enum: ['butter', 'peach', 'blush', 'lilac', 'sky', 'sage'],
+  })
+    .notNull()
+    .default('butter'),
+  /** The cropped profile photo, a file in the app's document directory. */
+  photoUri: text('photo_uri'),
+  /** The Reminders switch in Profile. */
+  reminders: integer('reminders', { mode: 'boolean' }).notNull().default(true),
 });
 
 /** The fixed v1 set from the design: 6 expense and 4 income categories. */
+/** The defaults plus any the person added (#18). See src/db/categories.ts. */
 export const categories = sqliteTable('categories', {
   id: text('id').primaryKey(),
   kind: text('kind', { enum: ['expense', 'income'] }).notNull(),
   name: text('name').notNull(),
   sortOrder: integer('sort_order').notNull(),
+  /** One of CATEGORY_ICONS. */
+  icon: text('icon').notNull().default('basket'),
+  /** One of CATEGORY_COLORS. */
+  color: text('color').notNull().default('butter'),
+  /** A default keeps its translated name until it's renamed. */
+  renamed: integer('renamed', { mode: 'boolean' }).notNull().default(false),
 });
 
 export const transactions = sqliteTable(
@@ -98,9 +115,8 @@ export const recurringBills = sqliteTable(
     ...money,
     /** Day of the month it's due, 1–31; short months use their last day. */
     day: integer('day').notNull(),
-    categoryId: text('category_id')
-      .notNull()
-      .references(() => categories.id),
+    /** `null` once its category was deleted with "No category" (#18). */
+    categoryId: text('category_id').references(() => categories.id),
     active: integer('active', { mode: 'boolean' }).notNull().default(true),
   },
   (t) => [

@@ -5,6 +5,7 @@ import type { Db } from '@/db/types';
 import { balanceAdjustment, totalBalance } from '@/domain/balance';
 import type { CalendarDate } from '@/domain/dates';
 import type { CurrencyCode } from '@/domain/money';
+import type { AvatarColor } from '@/theme/color';
 
 export function profileQuery(db: Db) {
   return db.select().from(profile).limit(1);
@@ -37,6 +38,20 @@ export function saveProfile(db: Db, input: ProfileInput, newId = defaultNewId): 
     .values({ id: newId(), name, currency: input.currency, payday: input.payday })
     .returning()
     .get();
+}
+
+/** Profile → photo sheet: the initial's color, the photo file, the Reminders switch. */
+export function setAvatarColor(db: Db, color: AvatarColor): void {
+  db.update(profile).set({ avatarColor: color }).run();
+}
+
+/** `null` removes the photo; the initial shows again. */
+export function setPhoto(db: Db, uri: string | null): void {
+  db.update(profile).set({ photoUri: uri }).run();
+}
+
+export function setReminders(db: Db, on: boolean): void {
+  db.update(profile).set({ reminders: on }).run();
 }
 
 export function markOnboarded(db: Db, at = new Date()): void {

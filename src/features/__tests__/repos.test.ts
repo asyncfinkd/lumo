@@ -15,6 +15,9 @@ import {
   getProfile,
   markOnboarded,
   saveProfile,
+  setAvatarColor,
+  setPhoto,
+  setReminders,
 } from '../profile/repo';
 import { saveBill, saveIncome, setBillActive, syncDueTransactions } from '../recurring/repo';
 import {
@@ -42,6 +45,25 @@ const coffee = {
 };
 
 describe('profile', () => {
+  it('starts with the butter initial, no photo and reminders on (#53)', () => {
+    const db = withProfile();
+    expect(getProfile(db)).toMatchObject({
+      avatarColor: 'butter',
+      photoUri: null,
+      reminders: true,
+    });
+    setAvatarColor(db, 'lilac');
+    setPhoto(db, 'file:///photo.jpg');
+    setReminders(db, false);
+    expect(getProfile(db)).toMatchObject({
+      avatarColor: 'lilac',
+      photoUri: 'file:///photo.jpg',
+      reminders: false,
+    });
+    setPhoto(db, null);
+    expect(getProfile(db)!.photoUri).toBeNull();
+  });
+
   it('creates once, then updates', () => {
     const db = openTestDb();
     saveProfile(db, { name: ' Nika ', currency: 'GEL', payday: 5 }, id);
