@@ -6,3 +6,4 @@ ios/
 android/
 package-lock.json
 *.md
+src/db/migrations/

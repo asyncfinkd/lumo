@@ -36,7 +36,8 @@
           "imageWidth": 120,
           "backgroundColor": "#FBF7F2"
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true
