@@ -39,10 +39,10 @@ export function FlowCard({
         <Text style={styles.label}>{t(label)}</Text>
       </View>
       <View style={styles.bottom}>
-        <Text style={styles.amount}>
+        <View style={styles.amountRow}>
           <Text style={styles.symbol}>{symbol}</Text>
-          {amount.slice(symbol.length)}
-        </Text>
+          <Text style={styles.amount}>{amount.slice(symbol.length)}</Text>
+        </View>
         <Sparkline kind={kind} />
       </View>
     </View>
@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
   },
   label: { ...text.label, fontSize: 14, color: color.muted },
   bottom: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 6 },
+  amountRow: { flexDirection: 'row', alignItems: 'baseline' },
   amount: { ...text.stat, color: color.ink },
-  symbol: { fontSize: 15, color: color.subtle },
+  symbol: { ...text.stat, fontSize: 15, color: color.subtle, marginRight: 2 },
 });

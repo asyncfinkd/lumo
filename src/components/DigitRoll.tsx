@@ -11,7 +11,15 @@ import { type CurrencyCode, currencies, formatMoney } from '@/domain/money';
 import { color, duration, text } from '@/theme';
 import { easing } from './motion';
 
-const HEIGHT = text.hero.lineHeight;
+// Nunito's digits reach above and below a 48pt line, so each column's window
+// gets room around the glyph; the extra is pulled back out of the layout so the
+// baseline stays where the design puts it.
+const HEIGHT = text.hero.lineHeight + 12;
+const OVERFLOW = (HEIGHT - text.hero.lineHeight) / 2;
+
+// The same for the 26pt symbol and fraction: a taller line, less bottom margin.
+const SMALL_LINE = 34;
+const SMALL_BOTTOM = 6 - (SMALL_LINE - 26) / 2;
 const DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 // One 0–9 column that rolls to its digit.
@@ -96,23 +104,29 @@ export function DigitRoll({ minor, currency, replayKey = 0 }: Props) {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'flex-end', height: 50 },
-  window: { height: HEIGHT, overflow: 'hidden' },
-  digit: { ...text.hero, height: HEIGHT, color: color.ink, includeFontPadding: false },
+  window: { height: HEIGHT, marginVertical: -OVERFLOW, overflow: 'hidden' },
+  digit: {
+    ...text.hero,
+    height: HEIGHT,
+    lineHeight: HEIGHT,
+    color: color.ink,
+    includeFontPadding: false,
+  },
   symbol: {
     fontFamily: text.subtitle.fontFamily,
     fontSize: 26,
-    lineHeight: 26,
+    lineHeight: SMALL_LINE,
     color: color.subtle,
     marginRight: 3,
-    marginBottom: 6,
+    marginBottom: SMALL_BOTTOM,
   },
   fraction: {
     fontFamily: text.subtitle.fontFamily,
     fontSize: 26,
-    lineHeight: 26,
+    lineHeight: SMALL_LINE,
     color: color.subtle,
     letterSpacing: -0.8,
     marginLeft: 1,
-    marginBottom: 6,
+    marginBottom: SMALL_BOTTOM,
   },
 });
