@@ -19,8 +19,14 @@ export type { Db } from './types';
 type NewId = () => string;
 
 /** Adds the fixed categories; safe to run on every start. */
+/**
+ * Puts the default categories into an empty table (a new install). Once there
+ * are categories they're the person's: a deleted default doesn't come back.
+ */
 export function ensureCategories(db: Db): void {
-  db.insert(schema.categories).values(CATEGORY_ROWS).onConflictDoNothing().run();
+  const [row] = db.select({ n: count() }).from(schema.categories).all();
+  if ((row?.n ?? 0) > 0) return;
+  db.insert(schema.categories).values(CATEGORY_ROWS).run();
 }
 
 export function hasProfile(db: Db): boolean {
@@ -108,5 +114,8 @@ export function deleteAllData(db: Db): void {
     tx.delete(schema.recurringBills).where(all).run();
     tx.delete(schema.incomes).where(all).run();
     tx.delete(schema.profile).where(all).run();
+    // Back to the default categories, as on a new install.
+    tx.delete(schema.categories).where(all).run();
+    tx.insert(schema.categories).values(CATEGORY_ROWS).run();
   });
 }

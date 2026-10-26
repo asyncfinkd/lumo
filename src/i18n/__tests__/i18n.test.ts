@@ -1,4 +1,4 @@
-import { categoryColor } from '@/theme';
+import { CATEGORY_ROWS } from '@/db/categories';
 import { currencies } from '@/domain/money';
 import i18n from '../index';
 import en from '../en.json';
@@ -52,7 +52,9 @@ describe('i18n', () => {
   });
 
   it('names every category and currency', () => {
-    expect(Object.keys(en.categories).sort()).toEqual(Object.keys(categoryColor).sort());
+    expect(Object.keys(en.categories).sort()).toEqual(
+      [...CATEGORY_ROWS.map((c) => c.id), 'none'].sort(),
+    );
     expect(Object.keys(en.currencies).sort()).toEqual(Object.keys(currencies).sort());
   });
 

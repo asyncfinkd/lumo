@@ -7,15 +7,16 @@ import { BellIcon, CategoryIcon, CloseIcon, MinusIcon, PlusIcon } from '@/compon
 import { Press } from '@/components/Press';
 import { Sheet } from '@/components/Sheet';
 import { Switch } from '@/components/Switch';
-import type { ExpenseCategoryId } from '@/db/categories';
+import type { CategoryId } from '@/db/categories';
 import { db } from '@/db/client';
 import { categorySpent } from '@/domain/budgets';
 import { currencies, formatMoney } from '@/domain/money';
 import { quickAmounts } from '@/features/budgets/budgetRows';
+import { useCategories } from '@/features/categories/categories';
 import { getBudget, saveBudget } from '@/features/budgets/repo';
 import { useAllTransactions, useMoneyMonth } from '@/features/live';
 import { getProfile } from '@/features/profile/repo';
-import { categoryColor, color, fontFamily, radius, shadow, size, text } from '@/theme';
+import { color, fontFamily, radius, shadow, size, text } from '@/theme';
 
 /** − / + move the limit by 50 whole units, between 50 and 5,000 (design). */
 const STEP = 50;
@@ -25,7 +26,7 @@ const MAX = 5000;
 export default function EditBudgetScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { category: param } = useLocalSearchParams<{ category: ExpenseCategoryId }>();
+  const { category: param } = useLocalSearchParams<{ category: CategoryId }>();
   const category = param ?? 'groceries';
   const { summary } = useMoneyMonth();
   const transactions = useAllTransactions();
@@ -47,8 +48,9 @@ export default function EditBudgetScreen() {
   const [limitMinor, setLimitMinor] = useState(start.limitMinor);
   const [nudge, setNudge] = useState(start.nudge);
 
-  const tint = categoryColor[category];
-  const name = t(`categories.${category}`);
+  const view = useCategories().get(category);
+  const tint = view.tint;
+  const name = view.label;
   const money = (minor: number) => formatMoney(minor, currency, { decimals: 'auto' });
   const spent = summary ? categorySpent(transactions, category, summary.period) : 0;
   const left = limitMinor - spent;
@@ -74,7 +76,7 @@ export default function EditBudgetScreen() {
         <>
           <View style={styles.header}>
             <View style={[styles.icon, { backgroundColor: tint.bg }]}>
-              <CategoryIcon id={category} color={tint.fg} />
+              <CategoryIcon icon={view.icon} color={tint.fg} />
             </View>
             <View style={styles.headerText}>
               <Text accessibilityRole="header" style={styles.name}>

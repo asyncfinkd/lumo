@@ -1,4 +1,4 @@
-import type { ExpenseCategoryId } from '@/db/categories';
+import type { CategoryId } from '@/db/categories';
 
 // The monthly bills onboarding offers (OBBills), in the design's order, and the
 // category each one counts toward (#4: rent is Home, the rest are Bills).
@@ -16,7 +16,7 @@ export const BILL_KEYS = [
 
 export type BillKey = (typeof BILL_KEYS)[number];
 
-export const billCategory: Record<BillKey, ExpenseCategoryId> = {
+export const billCategory: Record<BillKey, CategoryId> = {
   rent: 'home',
   utilities: 'bills',
   internet: 'bills',

@@ -1,7 +1,7 @@
 // What the Budgets board shows for each budget, from plain rows (#51). Pure,
 // so it's tested without React. All amounts in minor units (ADR 0003).
 
-import type { ExpenseCategoryId } from '@/db/categories';
+import type { CategoryId } from '@/db/categories';
 import { categorySpent } from '@/domain/budgets';
 import { isInPeriod, type PayPeriod } from '@/domain/dates';
 import type { MoneyTransaction } from '@/domain/leftToSpend';
@@ -13,7 +13,7 @@ import type { MoneyTransaction } from '@/domain/leftToSpend';
 export type BudgetState = 'allPaid' | 'low' | 'some' | 'plenty';
 
 export type BudgetRow = {
-  category: ExpenseCategoryId;
+  category: CategoryId;
   limitMinor: number;
   spentMinor: number;
   /** Never negative. */
@@ -24,7 +24,9 @@ export type BudgetRow = {
 };
 
 // The order of the design's Budgets board.
-const ORDER: ExpenseCategoryId[] = ['groceries', 'bills', 'coffee', 'transport', 'treats', 'home'];
+const ORDER: CategoryId[] = ['groceries', 'bills', 'coffee', 'transport', 'treats', 'home'];
+/** Categories people added come after the defaults, in the order they were made. */
+const place = (id: CategoryId) => (ORDER.includes(id) ? ORDER.indexOf(id) : ORDER.length);
 
 type Tx = MoneyTransaction & { categoryId: string | null; recurringId: string | null };
 
@@ -48,7 +50,7 @@ export function budgetRows({
 
   return budgets
     .map((b) => {
-      const category = b.categoryId as ExpenseCategoryId;
+      const category = b.categoryId;
       const spentMinor = categorySpent(transactions, category, period);
       const leftMinor = Math.max(b.limitMinor - spentMinor, 0);
       const leftPercent = b.limitMinor > 0 ? (leftMinor / b.limitMinor) * 100 : 0;
@@ -63,7 +65,7 @@ export function budgetRows({
               : 'plenty';
       return { category, limitMinor: b.limitMinor, spentMinor, leftMinor, leftPercent, state };
     })
-    .sort((a, b) => ORDER.indexOf(a.category) - ORDER.indexOf(b.category));
+    .sort((a, b) => place(a.category) - place(b.category));
 }
 
 /** The header: "₾369.70 left across budgets", "5 of 6 on track". */

@@ -29,12 +29,12 @@ describe('Donut', () => {
         currency="GEL"
         label="spent this month"
         items={[
-          { category: 'groceries', minor: 81240 },
-          { category: 'home', minor: 80000 },
-          { category: 'treats', minor: 50330 },
-          { category: 'bills', minor: 35000 },
-          { category: 'transport', minor: 28600 },
-          { category: 'coffee', minor: 24860 },
+          { key: 'groceries', label: 'Groceries', chart: '#000', minor: 81240 },
+          { key: 'home', label: 'Home', chart: '#000', minor: 80000 },
+          { key: 'treats', label: 'Treats', chart: '#000', minor: 50330 },
+          { key: 'bills', label: 'Bills', chart: '#000', minor: 35000 },
+          { key: 'transport', label: 'Getting around', chart: '#000', minor: 28600 },
+          { key: 'coffee', label: 'Coffee', chart: '#000', minor: 24860 },
         ]}
       />,
     );

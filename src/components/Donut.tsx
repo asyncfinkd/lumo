@@ -10,9 +10,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Circle, G } from 'react-native-svg';
-import type { CategoryId } from '@/db/categories';
 import { type CurrencyCode, currencies, formatMoney, percent } from '@/domain/money';
-import { categoryColor, color, duration, text } from '@/theme';
+import { color, duration, text } from '@/theme';
 import { easing } from './motion';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -60,7 +59,7 @@ function Segment({
 
 type Props = {
   /** Largest first, at most six. */
-  items: readonly { category: CategoryId; minor: number }[];
+  items: readonly { key: string; label: string; chart: string; minor: number }[];
   currency: CurrencyCode;
   /** Under the total: "spent this month". */
   label: string;
@@ -101,7 +100,8 @@ export function Donut({ items, currency, label, replayKey = 0 }: Props) {
 
   // Each arc starts where the previous one ended.
   const segments: {
-    category: CategoryId;
+    key: string;
+    chart: string;
     length: number;
     startAngle: number;
     progress: SharedValue<number>;
@@ -110,7 +110,8 @@ export function Donut({ items, currency, label, replayKey = 0 }: Props) {
   for (const [i, item] of shown.entries()) {
     const len = total > 0 ? (item.minor / total) * C : 0;
     segments.push({
-      category: item.category,
+      key: item.key,
+      chart: item.chart,
       length: Math.max(len - STROKE - GAP, 0.01),
       // -90° starts at 12 o'clock; skip half a cap and half a gap.
       startAngle: -90 + ((cum + STROKE / 2 + GAP / 2) / C) * 360,
@@ -119,9 +120,7 @@ export function Donut({ items, currency, label, replayKey = 0 }: Props) {
     cum += len;
   }
 
-  const parts = shown
-    .map((item) => `${t(`categories.${item.category}`)} ${percent(item.minor, total)}%`)
-    .join(', ');
+  const parts = shown.map((item) => `${item.label} ${percent(item.minor, total)}%`).join(', ');
   const wholeTotal = formatMoney(
     Math.round(total / 10 ** currencies[currency].minorUnits) *
       10 ** currencies[currency].minorUnits,
@@ -147,10 +146,10 @@ export function Donut({ items, currency, label, replayKey = 0 }: Props) {
         />
         {segments.map((s) => (
           <Segment
-            key={s.category}
+            key={s.key}
             length={s.length}
             startAngle={s.startAngle}
-            tint={categoryColor[s.category].chart}
+            tint={s.chart}
             progress={s.progress}
           />
         ))}

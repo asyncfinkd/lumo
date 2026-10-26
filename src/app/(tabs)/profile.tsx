@@ -7,11 +7,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BellIcon,
   CameraIcon,
-  CategoryIcon,
   ChevronRightIcon,
   DownloadIcon,
   GlobeIcon,
   GridIcon,
+  MoneyIcon,
   PersonIcon,
   RepeatIcon,
   TrashIcon,
@@ -23,7 +23,7 @@ import { useActiveBills, useCategories, useIncomes, useProfile } from '@/feature
 import { Avatar } from '@/features/profile/Avatar';
 import { PhotoToast } from '@/features/profile/photoToast';
 import {
-  categoryColor,
+  categoryPalette,
   color,
   currencyColor,
   fontFamily,
@@ -100,8 +100,8 @@ export default function ProfileScreen() {
           </Text>
           <View style={styles.list}>
             <Row
-              tile={categoryColor.home}
-              icon={<PersonIcon color={categoryColor.home.fg} />}
+              tile={categoryPalette.lilac}
+              icon={<PersonIcon color={categoryPalette.lilac.fg} />}
               label={t('profile.name')}
               value={profile.name}
               onPress={() => router.push('/profile-name')}
@@ -118,8 +118,8 @@ export default function ProfileScreen() {
               onPress={() => router.push('/profile-currency')}
             />
             <Row
-              tile={categoryColor.salary}
-              icon={<CategoryIcon id="salary" size={20} color={categoryColor.salary.fg} />}
+              tile={categoryPalette.sage}
+              icon={<MoneyIcon color={categoryPalette.sage.fg} />}
               label={t('profile.income')}
               value={t('profile.incomeValue', {
                 amount: formatMoney(income, currency, { decimals: 'auto' }),
@@ -128,14 +128,14 @@ export default function ProfileScreen() {
               onPress={() => router.push('/profile-income')}
             />
             <Row
-              tile={categoryColor.transport}
-              icon={<RepeatIcon color={categoryColor.transport.fg} />}
+              tile={categoryPalette.sky}
+              icon={<RepeatIcon color={categoryPalette.sky.fg} />}
               label={t('profile.bills')}
               value={t('profile.billsCount', { count: bills.length })}
             />
             <Row
-              tile={categoryColor.home}
-              icon={<GridIcon color={categoryColor.home.fg} />}
+              tile={categoryPalette.lilac}
+              icon={<GridIcon color={categoryPalette.lilac.fg} />}
               label={t('profile.categories')}
               value={t('profile.categoriesCount', { count: categories.length })}
             />
@@ -148,8 +148,8 @@ export default function ProfileScreen() {
           </Text>
           <View style={styles.list}>
             <Row
-              tile={categoryColor.groceries}
-              icon={<BellIcon color={categoryColor.groceries.fg} />}
+              tile={categoryPalette.butter}
+              icon={<BellIcon color={categoryPalette.butter.fg} />}
               label={t('profile.reminders')}
               sub={t('profile.remindersSub')}
               value={profile.reminders ? t('profile.on') : t('profile.off')}
@@ -174,8 +174,8 @@ export default function ProfileScreen() {
           </Text>
           <View style={styles.list}>
             <Row
-              tile={categoryColor.bills}
-              icon={<DownloadIcon color={categoryColor.bills.fg} />}
+              tile={categoryPalette.sage}
+              icon={<DownloadIcon color={categoryPalette.sage.fg} />}
               label={t('profile.export')}
               value={t('profile.exportFormat')}
             />
