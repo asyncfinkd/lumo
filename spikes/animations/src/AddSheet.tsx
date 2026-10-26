@@ -3,39 +3,41 @@ import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-n
 import { BlurView } from 'expo-blur';
 import { GestureDetector, usePanGesture } from 'react-native-gesture-handler';
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
   withDelay,
   withRepeat,
   withSequence,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
-import Svg, { Path } from 'react-native-svg';
 import type { BlurTarget } from './GlassTabBar';
+import { BackspaceIcon, CalendarIcon, CloseIcon, NoteIcon } from './Icons';
+import { ease } from './motion';
 import { Press } from './Press';
-import { color, font, springs } from './theme';
+import { color, font, shadow } from './theme';
 
 type Kind = 'expense' | 'income';
+type Cat = { id: string; label: string; bg: string; sel: string; fg: string; left: number; word: string; emoji: string };
 
-// "left" values come from docs/sample-data.md budgets, in tetri.
-const EXPENSE = [
-  { id: 'coffee', label: 'Coffee', fg: '#946649', bg: '#F3E6DA', sel: '#EBD5C1', left: 7140, emoji: '☕' },
-  { id: 'groceries', label: 'Groceries', fg: '#A0761C', bg: '#FFF0C7', sel: '#FFE39A', left: 8760, emoji: '🧺' },
-  { id: 'transport', label: 'Getting around', fg: '#4A7EAD', bg: '#DCEBF8', sel: '#C7DDF3', left: 11400, emoji: '🚲' },
-  { id: 'treats', label: 'Treats', fg: '#B9566E', bg: '#FBDDE3', sel: '#F6C8D3', left: 9670, emoji: '🍰' },
-  { id: 'bills', label: 'Bills', fg: '#4E8A6A', bg: '#DDEEE3', sel: '#C8E4D2', left: 0, emoji: '💡' },
-  { id: 'home', label: 'Home', fg: '#7A62A8', bg: '#ECE6F7', sel: '#DDD3F1', left: 0, emoji: '🏡' },
+// "left" is from docs/sample-data.md budgets, in tetri.
+const EXPENSE: Cat[] = [
+  { id: 'coffee', label: 'Coffee', bg: '#F3E6DA', sel: '#EBD5C1', fg: '#946649', left: 7140, word: 'coffee', emoji: '☕' },
+  { id: 'groceries', label: 'Groceries', bg: '#FFF0C7', sel: '#FFE39A', fg: '#A0761C', left: 8760, word: 'groceries', emoji: '🧺' },
+  { id: 'transport', label: 'Getting around', bg: '#DCEBF8', sel: '#C7DDF3', fg: '#4A7EAD', left: 11400, word: 'getting around', emoji: '🚲' },
+  { id: 'treats', label: 'Treats', bg: '#FBDDE3', sel: '#F6C8D3', fg: '#B9566E', left: 9670, word: 'treats', emoji: '🍰' },
+  { id: 'bills', label: 'Bills', bg: '#DDEEE3', sel: '#C8E4D2', fg: '#4E8A6A', left: 0, word: 'bills', emoji: '💡' },
+  { id: 'home', label: 'Home', bg: '#ECE6F7', sel: '#DDD3F1', fg: '#7A62A8', left: 0, word: 'home', emoji: '🏡' },
 ];
-const INCOME = [
-  { id: 'salary', label: 'Salary', fg: '#4E8A6A', bg: '#DDEEE3', sel: '#C8E4D2', left: 0, emoji: '' },
-  { id: 'freelance', label: 'Freelance', fg: '#4A7EAD', bg: '#DCEBF8', sel: '#C7DDF3', left: 0, emoji: '' },
-  { id: 'gift', label: 'Gift', fg: '#B9566E', bg: '#FBDDE3', sel: '#F6C8D3', left: 0, emoji: '' },
-  { id: 'refund', label: 'Refund', fg: '#A0761C', bg: '#FFF0C7', sel: '#FFE39A', left: 0, emoji: '' },
+const INCOME: Cat[] = [
+  { id: 'salary', label: 'Salary', bg: '#DDEEE3', sel: '#C8E4D2', fg: '#4E8A6A', left: 0, word: '', emoji: '' },
+  { id: 'freelance', label: 'Freelance', bg: '#DCEBF8', sel: '#C7DDF3', fg: '#4A7EAD', left: 0, word: '', emoji: '' },
+  { id: 'gift', label: 'Gift', bg: '#FBDDE3', sel: '#F6C8D3', fg: '#B9566E', left: 0, word: '', emoji: '' },
+  { id: 'refund', label: 'Refund', bg: '#FFF0C7', sel: '#FFE39A', fg: '#A0761C', left: 0, word: '', emoji: '' },
 ];
-const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'back'];
+const KEY_ROWS = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], ['.', '0', 'back']];
 
 // Keypad text to tetri without floats (ADR 0003).
 function toMinor(text: string) {
@@ -43,9 +45,7 @@ function toMinor(text: string) {
   return Number(whole || '0') * 100 + Number((frac + '00').slice(0, 2));
 }
 
-function fmt(minor: number) {
-  return (minor / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+const fmt = (minor: number) => (minor / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function pressKey(current: string, key: string) {
   if (key === 'back') return current.length > 1 ? current.slice(0, -1) : '0';
@@ -66,31 +66,35 @@ export function AddSheet({ blurTarget, onClosed }: Props) {
   const [kind, setKind] = useState<Kind>('expense');
   const [amount, setAmount] = useState('24.50');
   const [cat, setCat] = useState('coffee');
+  const [segW, setSegW] = useState(0);
 
-  const y = useSharedValue(sheetH);
-  const scrim = useSharedValue(0);
+  const y = useSharedValue(reduceMotion ? 0 : sheetH);
+  const scrim = useSharedValue(reduceMotion ? 1 : 0);
   const thumb = useSharedValue(0);
   const caret = useSharedValue(1);
 
   useEffect(() => {
-    y.value = withSpring(0, springs.sheet);
-    scrim.value = withTiming(1, { duration: 350 });
-    if (!reduceMotion) {
-      caret.value = withRepeat(
-        withSequence(withDelay(550, withTiming(0, { duration: 0 })), withDelay(550, withTiming(1, { duration: 0 }))),
-        -1,
-      );
-    }
+    if (reduceMotion) return;
+    // .sheet: sheetUp .7s cubic-bezier(.32,1.15,.5,1) · .scrim: .5s ease-out
+    y.value = withTiming(0, { duration: 700, easing: ease.sheet });
+    scrim.value = withTiming(1, { duration: 500, easing: Easing.out(Easing.ease) });
+    // .caret: blink 1.1s steps(1)
+    caret.value = withRepeat(
+      withSequence(withDelay(550, withTiming(0, { duration: 0 })), withDelay(550, withTiming(1, { duration: 0 }))),
+      -1,
+    );
   }, [caret, reduceMotion, scrim, y]);
 
-  const close = () => {
-    scrim.value = withTiming(0, { duration: 250 });
-    y.value = withTiming(sheetH, { duration: 280 }, (done) => {
+  const dismiss = (duration: number) => {
+    'worklet';
+    scrim.value = withTiming(0, { duration });
+    y.value = withTiming(sheetH, { duration, easing: Easing.in(Easing.quad) }, (done) => {
       if (done) scheduleOnRN(onClosed);
     });
   };
+  const close = () => dismiss(280);
 
-  // Drag the sheet down to dismiss; small drags spring back.
+  // Drag down to dismiss; small drags snap back.
   const pan = usePanGesture({
     activeOffsetY: 10,
     onUpdate: (e) => {
@@ -101,12 +105,9 @@ export function AddSheet({ blurTarget, onClosed }: Props) {
     onDeactivate: (e) => {
       'worklet';
       if (e.translationY > 140 || e.velocityY > 900) {
-        scrim.value = withTiming(0, { duration: 200 });
-        y.value = withTiming(sheetH, { duration: 220 }, (done) => {
-          if (done) scheduleOnRN(onClosed);
-        });
+        dismiss(220);
       } else {
-        y.value = withSpring(0, springs.sheet);
+        y.value = withTiming(0, { duration: 450, easing: ease.sheet });
         scrim.value = withTiming(1, { duration: 200 });
       }
     },
@@ -117,11 +118,11 @@ export function AddSheet({ blurTarget, onClosed }: Props) {
   const thumbStyle = useAnimatedStyle(() => ({ transform: [{ translateX: thumb.value }] }));
   const caretStyle = useAnimatedStyle(() => ({ opacity: caret.value }));
 
-  const [segW, setSegW] = useState(0);
   const pickKind = (k: Kind) => {
     setKind(k);
     setCat(k === 'expense' ? EXPENSE[0].id : INCOME[0].id);
-    thumb.value = withSpring(k === 'expense' ? 0 : segW, springs.thumb);
+    // transform .45s cubic-bezier(.34,1.3,.64,1)
+    thumb.value = withTiming(k === 'expense' ? 0 : segW, { duration: 450, easing: ease.thumb });
   };
 
   const list = kind === 'expense' ? EXPENSE : INCOME;
@@ -137,9 +138,9 @@ export function AddSheet({ blurTarget, onClosed }: Props) {
       message = `${current.label} already covered this month ${current.emoji}`;
       calm = true;
     } else if (current.left - value >= 0) {
-      message = `Nice! Still ₾${fmt(current.left - value)} left for ${current.label.toLowerCase()} ${current.emoji}`;
+      message = `Nice! Still ₾${fmt(current.left - value)} left for ${current.word} ${current.emoji}`;
     } else {
-      message = `₾${fmt(value - current.left)} over on ${current.label.toLowerCase()}, that's okay 🤍`;
+      message = `₾${fmt(value - current.left)} over on ${current.word} — that’s okay 🤍`;
       calm = true;
     }
   }
@@ -147,69 +148,50 @@ export function AddSheet({ blurTarget, onClosed }: Props) {
   return (
     <View style={StyleSheet.absoluteFill}>
       <Animated.View style={[StyleSheet.absoluteFill, scrimStyle]}>
-        <BlurView
-          intensity={12}
-          tint="default"
-          blurTarget={blurTarget}
-          blurMethod="dimezisBlurViewSdk31Plus"
-          style={StyleSheet.absoluteFill}
-        />
-        <Press accessibilityLabel="Close" onPress={close} style={[StyleSheet.absoluteFill, styles.scrimTint]} />
+        {/* backdrop-filter: blur(6px); no tint, the scrim color below is the design's. */}
+        <BlurView intensity={30} blurTarget={blurTarget} blurMethod="dimezisBlurViewSdk31Plus" style={StyleSheet.absoluteFill} />
+        <Press accessibilityLabel="Close" onPress={close} style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(43,37,34,0.22)' }]} />
       </Animated.View>
 
       <GestureDetector gesture={pan}>
         <Animated.View accessibilityViewIsModal style={[styles.sheet, { height: sheetH }, sheetStyle]}>
+          <View style={styles.sheetGlass}>
+            <BlurView intensity={100} blurTarget={blurTarget} blurMethod="dimezisBlurViewSdk31Plus" style={StyleSheet.absoluteFill} />
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,252,248,0.9)' }]} />
+          </View>
+
           <View style={styles.grabber} />
 
           <View style={styles.header}>
             <Press accessibilityRole="button" accessibilityLabel="Close" onPress={close} style={styles.close}>
-              <Svg width={18} height={18} viewBox="0 0 24 24">
-                <Path d="M6.5 6.5l11 11M17.5 6.5l-11 11" stroke={color.muted} strokeWidth={2.4} strokeLinecap="round" />
-              </Svg>
+              <CloseIcon color={color.muted} />
             </Press>
             <Text style={styles.title}>{kind === 'expense' ? 'New expense' : 'New income'}</Text>
             <View style={{ width: 44 }} />
           </View>
 
-          <View
-            accessibilityRole="radiogroup"
-            style={styles.segment}
-            onLayout={(e) => setSegW((e.nativeEvent.layout.width - 8) / 2)}
-          >
-            {segW > 0 && <Animated.View style={[styles.segThumb, { width: segW }, thumbStyle]} />}
+          <View accessibilityRole="radiogroup" accessibilityLabel="Type" style={styles.segment} onLayout={(e) => setSegW((e.nativeEvent.layout.width - 8) / 2)}>
+            <Animated.View style={[styles.segThumb, { width: segW || '50%' }, thumbStyle]} />
             {(['expense', 'income'] as Kind[]).map((k) => (
-              <Press
-                key={k}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: kind === k }}
-                onPress={() => pickKind(k)}
-                style={styles.segItem}
-              >
-                <Text style={[styles.segText, { color: kind === k ? color.ink : color.muted }]}>
-                  {k === 'expense' ? 'Expense' : 'Income'}
-                </Text>
+              <Press key={k} accessibilityRole="radio" accessibilityState={{ checked: kind === k }} onPress={() => pickKind(k)} style={styles.segItem}>
+                <Text style={[styles.segText, { color: kind === k ? color.ink : color.muted }]}>{k === 'expense' ? 'Expense' : 'Income'}</Text>
               </Press>
             ))}
           </View>
 
-          <View accessible accessibilityLabel={`Amount ${amountText} lari`} style={styles.amountRow}>
+          <View accessible accessibilityRole="text" accessibilityLabel={`Amount ${amountText} lari`} style={styles.amountRow}>
             <Text style={styles.amountSymbol}>₾</Text>
             <Text style={styles.amount}>{amountText}</Text>
             <Animated.View style={[styles.caret, caretStyle]} />
           </View>
 
           <View style={styles.msgWrap}>
-            <View style={[styles.msg, { backgroundColor: calm ? '#F5EEE6' : color.goodSoft }]}>
+            <View style={[styles.msg, { backgroundColor: calm ? color.calmSoft : color.goodSoft }]}>
               <Text style={[styles.msgText, { color: calm ? color.muted : color.good }]}>{message}</Text>
             </View>
           </View>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.chipsScroll}
-            contentContainerStyle={styles.chips}
-          >
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll} contentContainerStyle={styles.chips}>
             {list.map((c) => {
               const on = c.id === current.id;
               return (
@@ -218,7 +200,12 @@ export function AddSheet({ blurTarget, onClosed }: Props) {
                   accessibilityRole="radio"
                   accessibilityState={{ checked: on }}
                   onPress={() => setCat(c.id)}
-                  style={[styles.chip, { backgroundColor: on ? c.sel : 'rgba(43,37,34,0.05)' }]}
+                  style={[
+                    styles.chip,
+                    on
+                      ? { backgroundColor: c.sel, boxShadow: `inset 0px 0px 0px 1px rgba(255,255,255,0.7), 0px 4px 12px -6px ${c.fg}55` }
+                      : { backgroundColor: 'rgba(43,37,34,0.05)' },
+                  ]}
                 >
                   <View style={[styles.chipDot, { backgroundColor: on ? 'rgba(255,255,255,0.75)' : c.bg }]}>
                     <View style={[styles.chipDotInner, { backgroundColor: c.fg }]} />
@@ -229,25 +216,33 @@ export function AddSheet({ blurTarget, onClosed }: Props) {
             })}
           </ScrollView>
 
+          <View style={styles.extras}>
+            <Press style={styles.extra}>
+              <CalendarIcon color={color.muted} />
+              <Text style={[styles.extraText, { color: color.ink }]}>Today, Oct 31</Text>
+            </Press>
+            <Press style={styles.extra}>
+              <NoteIcon color={color.muted} />
+              <Text style={[styles.extraText, { color: color.muted }]}>Add a note</Text>
+            </Press>
+          </View>
+
           <View style={styles.keys}>
-            {KEYS.map((k) => (
-              <Press
-                key={k}
-                haptic
-                accessibilityRole="button"
-                accessibilityLabel={k === 'back' ? 'Delete' : k === '.' ? 'Decimal point' : k}
-                onPress={() => setAmount((a) => pressKey(a, k))}
-                style={styles.key}
-              >
-                {k === 'back' ? (
-                  <Svg width={26} height={26} viewBox="0 0 24 24">
-                    <Path d="M9 6h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-5.5-6z" fill={color.ink} fillOpacity={0.1} stroke={color.ink} strokeWidth={1.8} strokeLinejoin="round" />
-                    <Path d="m12 10 4 4M16 10l-4 4" stroke={color.ink} strokeWidth={1.8} strokeLinecap="round" />
-                  </Svg>
-                ) : (
-                  <Text style={styles.keyText}>{k}</Text>
-                )}
-              </Press>
+            {KEY_ROWS.map((row) => (
+              <View key={row.join()} style={styles.keyRow}>
+                {row.map((k) => (
+                  <Press
+                    key={k}
+                    haptic
+                    accessibilityRole="button"
+                    accessibilityLabel={k === 'back' ? 'Delete' : k === '.' ? 'Decimal point' : k}
+                    onPress={() => setAmount((a) => pressKey(a, k))}
+                    style={styles.key}
+                  >
+                    {k === 'back' ? <BackspaceIcon color={color.ink} /> : <Text style={styles.keyText}>{k}</Text>}
+                  </Press>
+                ))}
+              </View>
             ))}
           </View>
 
@@ -261,59 +256,66 @@ export function AddSheet({ blurTarget, onClosed }: Props) {
 }
 
 const styles = StyleSheet.create({
-  scrimTint: { backgroundColor: 'rgba(43,37,34,0.22)' },
   sheet: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    borderTopLeftRadius: 36,
-    borderTopRightRadius: 36,
     paddingTop: 10,
     paddingHorizontal: 24,
     paddingBottom: 34,
-    backgroundColor: 'rgba(255,252,248,0.97)',
-    shadowColor: '#C8916A',
-    shadowOpacity: 0.14,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: -12 },
+    borderTopLeftRadius: 36,
+    borderTopRightRadius: 36,
+    borderCurve: 'continuous',
+    boxShadow: shadow.sheet,
   },
+  sheetGlass: { ...StyleSheet.absoluteFill, borderTopLeftRadius: 36, borderTopRightRadius: 36, overflow: 'hidden' },
   grabber: { alignSelf: 'center', width: 40, height: 5, borderRadius: 999, backgroundColor: '#E2D8CF' },
   header: { marginTop: 10, height: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   close: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(43,37,34,0.05)', alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 17, fontFamily: font.bold, color: color.ink },
-  segment: { marginTop: 14, height: 44, padding: 4, borderRadius: 999, backgroundColor: color.track, flexDirection: 'row' },
-  segThumb: { position: 'absolute', top: 4, bottom: 4, left: 4, borderRadius: 999, backgroundColor: '#FFFFFF' },
-  segItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  segment: { marginTop: 14, height: 52, padding: 4, borderRadius: 999, backgroundColor: color.track, flexDirection: 'row' },
+  segThumb: { position: 'absolute', top: 4, bottom: 4, left: 4, borderRadius: 999, backgroundColor: '#FFFFFF', boxShadow: shadow.thumb },
+  segItem: { flex: 1, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
   segText: { fontSize: 15, fontFamily: font.bold },
   amountRow: { marginTop: 22, height: 64, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center' },
-  amountSymbol: { fontSize: 30, fontFamily: font.semibold, color: color.subtle, marginRight: 4, marginBottom: 9 },
-  amount: { fontSize: 56, lineHeight: 64, fontFamily: font.bold, color: color.ink, letterSpacing: -1, fontVariant: ['tabular-nums'] },
-  caret: { width: 3, height: 46, marginLeft: 4, marginBottom: 8, borderRadius: 999, backgroundColor: color.ink },
+  amountSymbol: { fontSize: 30, lineHeight: 30, fontFamily: font.semibold, color: color.subtle, marginRight: 4, marginBottom: 9 },
+  amount: { fontSize: 56, lineHeight: 56, fontFamily: font.bold, color: color.ink, letterSpacing: -1, fontVariant: ['tabular-nums'] },
+  caret: { width: 3, height: 46, marginLeft: 4, marginBottom: 6, borderRadius: 999, backgroundColor: color.ink },
   msgWrap: { marginTop: 10, alignItems: 'center' },
   msg: { height: 30, paddingHorizontal: 14, borderRadius: 999, justifyContent: 'center' },
   msgText: { fontSize: 13, fontFamily: font.bold },
-  chipsScroll: { marginTop: 20, marginHorizontal: -24, flexGrow: 0 },
+  chipsScroll: { marginTop: 20, marginHorizontal: -24, flexGrow: 0, overflow: 'visible' },
   chips: { paddingHorizontal: 24, gap: 8 },
   chip: { height: 44, paddingLeft: 12, paddingRight: 16, borderRadius: 999, flexDirection: 'row', alignItems: 'center', gap: 8 },
   chipDot: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   chipDotInner: { width: 8, height: 8, borderRadius: 4 },
   chipText: { fontSize: 15, fontFamily: font.bold, color: color.ink },
-  keys: { marginTop: 20, flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  key: {
-    width: '31.6%',
-    flexGrow: 1,
-    height: 54,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.95)',
+  extras: { marginTop: 12, flexDirection: 'row', gap: 8 },
+  extra: {
+    flex: 1,
+    height: 44,
+    borderRadius: 999,
+    backgroundColor: 'rgba(43,37,34,0.05)',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#C8916A',
-    shadowOpacity: 0.18,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
+    gap: 8,
+  },
+  extraText: { fontSize: 14, fontFamily: font.bold },
+  keys: { marginTop: 20, gap: 8 },
+  keyRow: { flexDirection: 'row', gap: 8 },
+  key: {
+    flex: 1,
+    height: 54,
+    borderRadius: 20,
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    boxShadow: shadow.key,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   keyText: { fontSize: 24, fontFamily: font.bold, color: color.ink, fontVariant: ['tabular-nums'] },
-  cta: { marginTop: 16, height: 56, borderRadius: 999, backgroundColor: color.ink, alignItems: 'center', justifyContent: 'center' },
-  ctaText: { fontSize: 17, fontFamily: font.bold, color: '#FFF8F1' },
+  cta: { marginTop: 16, height: 56, borderRadius: 999, backgroundColor: color.ink, boxShadow: shadow.cta, alignItems: 'center', justifyContent: 'center' },
+  ctaText: { fontSize: 17, fontFamily: font.bold, color: color.cream },
 });

@@ -5,14 +5,15 @@ import Animated, {
   useReducedMotion,
   useSharedValue,
   withDelay,
-  withSpring,
+  withTiming,
 } from 'react-native-reanimated';
-import { color, font, springs } from './theme';
+import { ease } from './motion';
+import { color, font } from './theme';
 
 const HEIGHT = 48;
 const DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
-// One column of 0–9 that springs to its digit, like the Home hero in the design.
+// One column of 0–9 that rolls to its digit, like the Home hero in the design.
 function Column({ digit, index, runKey }: { digit: number; index: number; runKey: number }) {
   const reduceMotion = useReducedMotion();
   const y = useSharedValue(reduceMotion ? -digit * HEIGHT : 0);
@@ -23,7 +24,8 @@ function Column({ digit, index, runKey }: { digit: number; index: number; runKey
       return;
     }
     y.value = 0;
-    y.value = withDelay(160 + index * 90, withSpring(-digit * HEIGHT, springs.digit));
+    // transform 1.1s cubic-bezier(.34,1.2,.64,1), staggered 90ms per digit.
+    y.value = withDelay(160 + index * 90, withTiming(-digit * HEIGHT, { duration: 1100, easing: ease.digit }));
   }, [digit, index, runKey, reduceMotion, y]);
 
   const style = useAnimatedStyle(() => ({ transform: [{ translateY: y.value }] }));
@@ -77,11 +79,12 @@ const styles = StyleSheet.create({
     height: HEIGHT,
     fontSize: 48,
     lineHeight: HEIGHT,
+    includeFontPadding: false,
     fontFamily: font.bold,
     color: color.ink,
     letterSpacing: -0.8,
     fontVariant: ['tabular-nums'],
   },
-  symbol: { fontSize: 26, fontFamily: font.semibold, color: color.subtle, marginRight: 3, marginBottom: 6 },
-  fraction: { fontSize: 26, fontFamily: font.semibold, color: color.subtle, marginLeft: 1, marginBottom: 6 },
+  symbol: { fontSize: 26, lineHeight: 26, fontFamily: font.semibold, color: color.subtle, marginRight: 3, marginBottom: 6 },
+  fraction: { fontSize: 26, lineHeight: 26, fontFamily: font.semibold, color: color.subtle, letterSpacing: -0.8, marginLeft: 1, marginBottom: 6 },
 });

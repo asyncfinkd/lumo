@@ -5,14 +5,18 @@ export const color = {
   muted: '#776C65',
   subtle: '#8A7F78',
   track: '#F2EAE2',
+  donutTrack: '#F5EEE6',
   card: 'rgba(255,255,255,0.75)',
   accent: '#F2845C',
   accentSoft: '#FFE4D8',
   accentDeep: '#B9532F',
+  inactive: 'rgba(43,37,34,0.5)',
   orbButter: '#FFE9B8',
   orbPeach: '#FFD8C9',
   good: '#3F7D5E',
   goodSoft: '#EEF6F0',
+  calmSoft: '#F5EEE6',
+  cream: '#FFF8F1',
 };
 
 export const font = {
@@ -21,16 +25,22 @@ export const font = {
   extrabold: 'Nunito_800ExtraBold',
 };
 
-// Spring from the design's cubic-bezier(.34,1.56,.64,1) "press" feel.
-export const springs = {
-  press: { damping: 14, stiffness: 320, mass: 0.6 },
-  sheet: { damping: 22, stiffness: 220, mass: 0.9 },
-  digit: { damping: 15, stiffness: 120, mass: 0.9 },
-  thumb: { damping: 18, stiffness: 260 },
+// box-shadow values from the design, used as RN `boxShadow` strings.
+export const shadow = {
+  card: '0px 6px 20px -10px rgba(200,145,106,0.16)',
+  hero: 'inset 0px 0px 0px 1px rgba(255,255,255,0.85), 0px 12px 40px 0px rgba(200,145,106,0.12)',
+  nav: 'inset 0px 0px 0px 1px rgba(255,255,255,0.85), 0px 12px 32px -10px rgba(200,145,106,0.25)',
+  fab: 'inset 0px 1.5px 0px 0px rgba(255,255,255,0.45), 0px 8px 20px -4px rgba(242,132,92,0.45)',
+  avatar: 'inset 0px 1px 0px 0px rgba(255,255,255,0.7), 0px 6px 14px -8px rgba(200,160,80,0.5)',
+  sheet: 'inset 0px 1px 0px 0px rgba(255,255,255,0.9), 0px -12px 40px 0px rgba(200,145,106,0.14)',
+  key: '0px 1px 0px 0px rgba(200,145,106,0.14), 0px 4px 12px -8px rgba(200,145,106,0.25)',
+  cta: '0px 10px 24px -12px rgba(43,37,34,0.5)',
+  thumb: '0px 2px 8px 0px rgba(200,145,106,0.18)',
 };
 
 export type CategoryId = 'groceries' | 'home' | 'treats' | 'bills' | 'transport' | 'coffee';
 
+// bg/fg: icon tiles and chips. color: donut and bars.
 export const categories: Record<CategoryId, { name: string; color: string; bg: string; fg: string }> = {
   home: { name: 'Home', color: '#B7A6E0', bg: '#ECE6F7', fg: '#7A62A8' },
   groceries: { name: 'Groceries', color: '#F5C86A', bg: '#FFF0C7', fg: '#A0761C' },
@@ -43,8 +53,6 @@ export const categories: Record<CategoryId, { name: string; color: string; bg: s
 // docs/sample-data.md, amounts in tetri (ADR 0003).
 export const sample = {
   leftToSpendMinor: 79970,
-  availableMinor: 265000,
-  balanceMinor: 1248050,
   month: [
     ['groceries', 81240],
     ['home', 80000],

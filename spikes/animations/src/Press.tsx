@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { springs } from './theme';
+import { ease } from './motion';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -12,7 +12,8 @@ type Props = Omit<PressableProps, 'style' | 'children'> & {
   haptic?: boolean;
 };
 
-// The design's ".press" behavior: shrink to 96% on touch, spring back on release.
+// The design's ".press": scale to .96 in 0.12s on touch, back over 0.5s with
+// cubic-bezier(.34,1.56,.64,1) on release.
 export function Press({ style, children, haptic = false, onPressIn, onPressOut, onPress, ...rest }: Props) {
   const scale = useSharedValue(1);
   const animated = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -21,11 +22,11 @@ export function Press({ style, children, haptic = false, onPressIn, onPressOut, 
     <AnimatedPressable
       {...rest}
       onPressIn={(e) => {
-        scale.value = withSpring(0.96, springs.press);
+        scale.value = withTiming(0.96, { duration: 120, easing: ease.press });
         onPressIn?.(e);
       }}
       onPressOut={(e) => {
-        scale.value = withSpring(1, springs.press);
+        scale.value = withTiming(1, { duration: 500, easing: ease.press });
         onPressOut?.(e);
       }}
       onPress={(e) => {

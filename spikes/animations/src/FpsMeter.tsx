@@ -69,14 +69,14 @@ export function FpsMeter() {
 const styles = StyleSheet.create({
   meter: {
     position: 'absolute',
-    top: 54,
+    top: 14,
     right: 12,
-    paddingHorizontal: 10,
-    height: 28,
+    paddingHorizontal: 8,
+    height: 22,
     borderRadius: 999,
     backgroundColor: 'rgba(43,37,34,0.82)',
     justifyContent: 'center',
     zIndex: 100,
   },
-  text: { color: '#FFF8F1', fontFamily: font.bold, fontSize: 12, fontVariant: ['tabular-nums'] },
+  text: { color: '#FFF8F1', fontFamily: font.bold, fontSize: 11, fontVariant: ['tabular-nums'] },
 });
