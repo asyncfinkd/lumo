@@ -49,14 +49,15 @@ it('has colors for every category', () => {
   expect(Object.keys(categoryColor).sort()).toEqual(CATEGORY_ROWS.map((c) => c.id).sort());
 });
 
-it('keeps raw hex colors inside src/theme', () => {
+it('keeps raw hex colors inside src/theme (illustrations aside)', () => {
   const src = path.join(__dirname, '../..');
   const offenders: string[] = [];
   const walk = (dir: string) => {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       const full = path.join(dir, entry.name);
       if (entry.isDirectory()) {
-        if (!['theme', 'migrations', '__tests__'].includes(entry.name)) walk(full);
+        // Illustrations are artwork with their own palette.
+        if (!['theme', 'migrations', '__tests__', 'illustrations'].includes(entry.name)) walk(full);
       } else if (/\.tsx?$/.test(entry.name)) {
         const content = fs.readFileSync(full, 'utf8');
         if (/#[0-9a-fA-F]{3,8}\b/.test(content)) offenders.push(path.relative(src, full));

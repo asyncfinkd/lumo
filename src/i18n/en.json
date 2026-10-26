@@ -6,7 +6,8 @@
     "save": "Save",
     "skipForNow": "Skip for now",
     "maybeLater": "Maybe later",
-    "comingSoon": "Coming soon."
+    "comingSoon": "Coming soon.",
+    "back": "Back"
   },
   "tabs": {
     "home": "Home",
@@ -106,19 +107,22 @@
     "welcome": {
       "title": "Money, but calmer.",
       "body": "Let's set things up together. It takes 2 minutes.",
-      "start": "Let's start"
+      "start": "Let's start",
+      "illustration": "A little savings jar with the sun rising behind it"
     },
     "name": {
       "label": "Your name",
       "title": "What should we call you?",
-      "hint": "Just your first name is perfect."
+      "hint": "Just your first name is perfect.",
+      "niceToMeet": "Nice to meet you, {{name}} 👋"
     },
     "currency": {
       "label": "Currency",
       "title": "Which currency do you use?",
       "hint": "We picked lari for you. Change it anytime.",
       "search": "Search currencies",
-      "empty": "Hmm, nothing by that name yet 🌱"
+      "empty": "Hmm, nothing by that name yet 🌱",
+      "continueWith": "Continue with {{currency}}"
     },
     "income": {
       "label": "Monthly income",
@@ -129,7 +133,12 @@
       "paydayValue_ordinal_two": "{{count}}nd",
       "paydayValue_ordinal_few": "{{count}}rd",
       "paydayValue_ordinal_other": "{{count}}th",
-      "addAnother": "+ Add another income"
+      "addAnother": "+ Add another income",
+      "currencyChip": "Currency: {{currency}}. Change",
+      "paydayEvery": "Every {{day}}",
+      "paydayLabel": "Payday, every {{day}}. Change",
+      "amountLabel": "{{amount}} a month",
+      "pickPayday": "Pick your payday"
     },
     "bills": {
       "label": "Monthly bills",
@@ -137,7 +146,20 @@
       "hint": "Tap what applies. You can change it later.",
       "perMonth": "{{amount}} / month",
       "tapToAdd": "Tap to add",
-      "addYourOwn": "Add your own"
+      "addYourOwn": "Add your own",
+      "items": {
+        "rent": "Rent",
+        "utilities": "Utilities",
+        "internet": "Internet",
+        "phone": "Phone",
+        "gym": "Gym",
+        "insurance": "Insurance",
+        "netflix": "Netflix",
+        "spotify": "Spotify",
+        "other": "Custom"
+      },
+      "amountLabel": "{{bill}} per month",
+      "total": "{{amount}} / month"
     },
     "reveal": {
       "title": "{{name}}, here's your month ✨",
@@ -146,7 +168,8 @@
       "bills": "Bills",
       "yoursToSpend": "Yours to spend",
       "perDay": "That's about {{amount}} a day.",
-      "looksGood": "Looks good"
+      "looksGood": "Looks good",
+      "breakdown": "Your monthly breakdown"
     }
   },
   "profile": {

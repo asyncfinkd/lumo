@@ -18,8 +18,13 @@ import { allTransactions, transactionsBetween } from './transactions/repo';
 export { useToday };
 
 export function useProfile() {
-  const { data } = useLiveQuery(profileQuery(db));
-  return data[0];
+  return useProfileStatus().profile;
+}
+
+/** The profile plus whether the first read has finished (so "none" isn't a guess). */
+export function useProfileStatus() {
+  const { data, updatedAt } = useLiveQuery(profileQuery(db));
+  return { loaded: updatedAt !== undefined, profile: data[0] };
 }
 
 export function useBudgets() {

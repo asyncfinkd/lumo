@@ -2,6 +2,8 @@
 // src/theme may use a raw hex value (checked by a test).
 
 import type { CategoryId } from '@/db/categories';
+import type { CurrencyCode } from '@/domain/money';
+import type { BillKey } from '@/features/onboarding/bills';
 
 export const color = {
   // Ground and text
@@ -44,6 +46,16 @@ export const color = {
   warning: '#A4513A',
   warningFill: '#E2775A',
 
+  // Inputs and onboarding
+  field: 'rgba(255,255,255,0.85)',
+  placeholder: '#A0958D',
+  progressTrack: 'rgba(43,37,34,0.07)',
+  radioRing: '#DDD2C8',
+  selectedRow: 'rgba(255,240,199,0.75)',
+  listCard: 'rgba(255,255,255,0.8)',
+  /** Unselected bill tile. */
+  tileOff: 'rgba(255,255,255,0.8)',
+
   // Switch
   switchOn: '#6BAF8D',
   switchOff: '#E2D8CF',
@@ -75,6 +87,18 @@ export const gradient = {
     'linear-gradient(180deg, rgba(251,247,242,0) 0%, rgba(251,247,242,0.8) 45%, #FBF7F2 100%)',
 } as const;
 
+/** Currency tiles in onboarding: symbol color on a soft tile. */
+export const currencyColor: Record<CurrencyCode, { bg: string; fg: string }> = {
+  GEL: { bg: '#FFF0C7', fg: '#A0761C' },
+  USD: { bg: '#DDEEE3', fg: '#4E8A6A' },
+  EUR: { bg: '#DCEBF8', fg: '#4A7EAD' },
+  GBP: { bg: '#ECE6F7', fg: '#7A62A8' },
+  TRY: { bg: '#FBDDE3', fg: '#B9566E' },
+  AMD: { bg: '#F3E6DA', fg: '#946649' },
+  AZN: { bg: '#DDEEE3', fg: '#4E8A6A' },
+  UAH: { bg: '#FFF0C7', fg: '#A0761C' },
+};
+
 type CategoryColors = {
   /** Icon tile and unselected chip dot. */
   bg: string;
@@ -97,4 +121,17 @@ export const categoryColor: Record<CategoryId, CategoryColors> = {
   freelance: { bg: '#DCEBF8', selected: '#C7DDF3', fg: '#4A7EAD', chart: '#94BDE6' },
   gift: { bg: '#FBDDE3', selected: '#F6C8D3', fg: '#B9566E', chart: '#EFA3B6' },
   refund: { bg: '#FFF0C7', selected: '#FFE39A', fg: '#A0761C', chart: '#F5C86A' },
+};
+
+/** Bill tiles in onboarding: soft tile, selected tile, icon color. */
+export const billColor: Record<BillKey, { bg: string; selected: string; fg: string }> = {
+  rent: { bg: '#ECE6F7', selected: '#DDD3F1', fg: '#7A62A8' },
+  utilities: { bg: '#FFF0C7', selected: '#FFE39A', fg: '#A0761C' },
+  internet: { bg: '#DCEBF8', selected: '#C7DDF3', fg: '#4A7EAD' },
+  phone: { bg: '#FBDDE3', selected: '#F6C8D3', fg: '#B9566E' },
+  gym: { bg: '#DDEEE3', selected: '#C8E4D2', fg: '#4E8A6A' },
+  insurance: { bg: '#F3E6DA', selected: '#EBD5C1', fg: '#946649' },
+  netflix: { bg: '#FBDDE3', selected: '#F6C8D3', fg: '#B9566E' },
+  spotify: { bg: '#DDEEE3', selected: '#C8E4D2', fg: '#4E8A6A' },
+  other: { bg: '#F2EAE2', selected: '#E8DDD2', fg: '#776C65' },
 };

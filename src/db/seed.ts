@@ -1,7 +1,7 @@
 // Writing fixed and sample rows, and wiping user data. Works with any synchronous
 // Drizzle SQLite database: expo-sqlite in the app, better-sqlite3 in tests.
 
-import { count } from 'drizzle-orm';
+import { count, sql } from 'drizzle-orm';
 import type { CalendarDate } from '@/domain/dates';
 import { CATEGORY_ROWS } from './categories';
 import {
@@ -98,11 +98,14 @@ export function seedSampleData(db: Db, today: CalendarDate, newId: NewId): void 
 
 /** "Delete all data" in Profile: everything the user entered. Categories stay. */
 export function deleteAllData(db: Db): void {
+  // `WHERE 1` turns off SQLite's truncate shortcut, which skips the change hook
+  // and would leave live queries showing the old rows.
+  const all = sql`1`;
   db.transaction((tx) => {
-    tx.delete(schema.transactions).run();
-    tx.delete(schema.budgets).run();
-    tx.delete(schema.recurringBills).run();
-    tx.delete(schema.incomes).run();
-    tx.delete(schema.profile).run();
+    tx.delete(schema.transactions).where(all).run();
+    tx.delete(schema.budgets).where(all).run();
+    tx.delete(schema.recurringBills).where(all).run();
+    tx.delete(schema.incomes).where(all).run();
+    tx.delete(schema.profile).where(all).run();
   });
 }

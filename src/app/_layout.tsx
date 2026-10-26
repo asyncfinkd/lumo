@@ -11,6 +11,7 @@ import {
 } from '@expo-google-fonts/nunito';
 import { Placeholder } from '@/components/Placeholder';
 import { useDatabase } from '@/db/useDatabase';
+import { useProfileStatus } from '@/features/live';
 import { DueTransactionsSync } from '@/features/recurring/DueTransactionsSync';
 import i18n from '@/i18n';
 import { color } from '@/theme';
@@ -26,13 +27,12 @@ export default function RootLayout() {
 
   const database = useDatabase();
   const fontsDone = fontsLoaded || !!fontError;
-  const dbDone = database.ready || !!database.error;
 
   useEffect(() => {
-    if (fontsDone && dbDone) SplashScreen.hideAsync();
-  }, [fontsDone, dbDone]);
+    if (fontsDone && database.error) SplashScreen.hideAsync();
+  }, [fontsDone, database.error]);
 
-  if (!fontsDone || !dbDone) return null;
+  if (!fontsDone || (!database.ready && !database.error)) return null;
   if (database.error) {
     return <Placeholder title={i18n.t('errors.generic')} note={database.error.message} />;
   }
@@ -41,9 +41,27 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar style="dark" />
       <DueTransactionsSync />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
+      <AppStack />
+    </GestureHandlerRootView>
+  );
+}
+
+// Onboarding until the profile is complete, the app after. Mounted once the
+// database is ready; keeps the splash up until the first profile read.
+function AppStack() {
+  const { loaded, profile } = useProfileStatus();
+  const onboarded = !!profile?.onboardedAt;
+
+  useEffect(() => {
+    if (loaded) SplashScreen.hideAsync();
+  }, [loaded]);
+
+  if (!loaded) return null;
+
+  return (
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
+      <Stack.Protected guard={onboarded} redirectTo="/welcome">
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="(onboarding)" />
         {/* The sheet draws and animates itself over the current screen. */}
         <Stack.Screen
           name="add-transaction"
@@ -53,7 +71,11 @@ export default function RootLayout() {
             contentStyle: { backgroundColor: 'transparent' },
           }}
         />
-      </Stack>
-    </GestureHandlerRootView>
+      </Stack.Protected>
+      <Stack.Protected guard={!onboarded} redirectTo="/">
+        <Stack.Screen name="(onboarding)" />
+      </Stack.Protected>
+      <Stack.Screen name="dev-reset" />
+    </Stack>
   );
 }

@@ -12,13 +12,16 @@ let prepared = false;
 function prepare() {
   if (prepared) return;
   ensureCategories(db);
-  if (__DEV__ && !hasProfile(db)) seedSampleData(db, toCalendarDate(new Date()), newId);
+  // EXPO_PUBLIC_SEED=false starts empty, to try onboarding.
+  const seed = process.env.EXPO_PUBLIC_SEED !== 'false';
+  if (__DEV__ && seed && !hasProfile(db)) seedSampleData(db, toCalendarDate(new Date()), newId);
   prepared = true;
 }
 
 /**
  * Migrates the database on start, adds the fixed categories and, in
- * development only, loads docs/sample-data.md into an empty database.
+ * development only, loads docs/sample-data.md into an empty database (unless
+ * EXPO_PUBLIC_SEED=false).
  */
 export function useDatabase(): { ready: boolean; error: Error | undefined } {
   const { success, error } = useMigrations(db, migrations);
