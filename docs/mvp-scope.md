@@ -33,9 +33,9 @@ Decided in [#1](https://github.com/asyncfinkd/lumo/issues/1). Constraints from [
 | Insights "Year" view ([#19](https://github.com/asyncfinkd/lumo/issues/19)) | A new app has no year of data |
 | Georgian language ([#20](https://github.com/asyncfinkd/lumo/issues/20)) | Planned for v1.1 |
 
-## Open questions that block v1
+## Product decisions
 
-- [#2](https://github.com/asyncfinkd/lumo/issues/2) "Left to spend" formula. With savings and loans out of v1, it is income − bills − expenses, or the sum of budgets.
-- [#4](https://github.com/asyncfinkd/lumo/issues/4) How recurring bills turn into spending
-- [#5](https://github.com/asyncfinkd/lumo/issues/5) Consistent sample numbers
-- [#6](https://github.com/asyncfinkd/lumo/issues/6) Where total balance comes from (it is in v1)
+- [#2](https://github.com/asyncfinkd/lumo/issues/2) Left to spend = planned income + extra income − bills − spending, payday to payday
+- [#4](https://github.com/asyncfinkd/lumo/issues/4) Bills are reserved up front and become transactions on their due day
+- [#5](https://github.com/asyncfinkd/lumo/issues/5) One sample dataset for mocks and dev seed: [sample-data.md](sample-data.md)
+- [#6](https://github.com/asyncfinkd/lumo/issues/6) Total balance = sum of all transactions; starting balance and fixes are adjustments
