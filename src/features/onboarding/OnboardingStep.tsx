@@ -19,6 +19,11 @@ export const ONBOARDING_STEPS = 4;
 type Props = {
   /** 1–4; drives the progress bar and "Step N of 4". */
   step: number;
+  /**
+   * Opened from Profile (the boards' `settings` mode): this title sits where
+   * the progress bar is.
+   */
+  heading?: string;
   onBack: () => void;
   title: string;
   hint: string;
@@ -33,7 +38,16 @@ type Props = {
  * growing from the previous step, the question sliding in, and the main button
  * at the bottom.
  */
-export function OnboardingStep({ step, onBack, title, hint, children, primary, secondary }: Props) {
+export function OnboardingStep({
+  step,
+  heading,
+  onBack,
+  title,
+  hint,
+  children,
+  primary,
+  secondary,
+}: Props) {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const target = (step / ONBOARDING_STEPS) * 100;
@@ -75,15 +89,21 @@ export function OnboardingStep({ step, onBack, title, hint, children, primary, s
             />
           </Svg>
         </Press>
-        <View
-          accessible
-          accessibilityRole="progressbar"
-          accessibilityLabel={t('onboarding.step', { step, total: ONBOARDING_STEPS })}
-          accessibilityValue={{ min: 0, max: ONBOARDING_STEPS, now: step }}
-          style={styles.track}
-        >
-          <Animated.View style={[styles.fill, bar]} />
-        </View>
+        {heading ? (
+          <Text accessibilityRole="header" style={styles.heading}>
+            {heading}
+          </Text>
+        ) : (
+          <View
+            accessible
+            accessibilityRole="progressbar"
+            accessibilityLabel={t('onboarding.step', { step, total: ONBOARDING_STEPS })}
+            accessibilityValue={{ min: 0, max: ONBOARDING_STEPS, now: step }}
+            style={styles.track}
+          >
+            <Animated.View style={[styles.fill, bar]} />
+          </View>
+        )}
         <View style={styles.backSpace} />
       </View>
 
@@ -135,6 +155,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   fill: { height: '100%', borderRadius: radius.pill, backgroundColor: color.accent },
+  heading: { ...text.section, flex: 1, textAlign: 'center', color: color.ink },
   main: { paddingTop: 28, paddingHorizontal: space.screen, paddingBottom: 16 },
   title: { ...text.h1, color: color.ink },
   hint: {

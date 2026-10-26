@@ -11,18 +11,17 @@ import {
   ChevronRightIcon,
   DownloadIcon,
   GlobeIcon,
+  GridIcon,
   PersonIcon,
   RepeatIcon,
+  TrashIcon,
 } from '@/components/Icons';
 import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
-import { Switch } from '@/components/Switch';
-import { db } from '@/db/client';
 import { currencies, formatMoney } from '@/domain/money';
-import { useActiveBills, useIncomes, useProfile } from '@/features/live';
+import { useActiveBills, useCategories, useIncomes, useProfile } from '@/features/live';
 import { Avatar } from '@/features/profile/Avatar';
 import { PhotoToast } from '@/features/profile/photoToast';
-import { setReminders } from '@/features/profile/repo';
 import {
   categoryColor,
   color,
@@ -44,6 +43,7 @@ export default function ProfileScreen() {
   const profile = useProfile();
   const incomes = useIncomes();
   const bills = useActiveBills();
+  const categories = useCategories();
   if (!profile) return null;
 
   const { currency } = profile;
@@ -104,6 +104,7 @@ export default function ProfileScreen() {
               icon={<PersonIcon color={categoryColor.home.fg} />}
               label={t('profile.name')}
               value={profile.name}
+              onPress={() => router.push('/profile-name')}
             />
             <Row
               tile={currencyColor[currency]}
@@ -114,6 +115,7 @@ export default function ProfileScreen() {
               }
               label={t('profile.currency')}
               value={currency}
+              onPress={() => router.push('/profile-currency')}
             />
             <Row
               tile={categoryColor.salary}
@@ -123,12 +125,19 @@ export default function ProfileScreen() {
                 amount: formatMoney(income, currency, { decimals: 'auto' }),
                 day: t('onboarding.income.paydayValue', { count: profile.payday, ordinal: true }),
               })}
+              onPress={() => router.push('/profile-income')}
             />
             <Row
               tile={categoryColor.transport}
               icon={<RepeatIcon color={categoryColor.transport.fg} />}
               label={t('profile.bills')}
               value={t('profile.billsCount', { count: bills.length })}
+            />
+            <Row
+              tile={categoryColor.home}
+              icon={<GridIcon color={categoryColor.home.fg} />}
+              label={t('profile.categories')}
+              value={t('profile.categoriesCount', { count: categories.length })}
             />
           </View>
         </Rise>
@@ -142,13 +151,8 @@ export default function ProfileScreen() {
               tile={categoryColor.groceries}
               icon={<BellIcon color={categoryColor.groceries.fg} />}
               label={t('profile.reminders')}
-              trailing={
-                <Switch
-                  value={profile.reminders}
-                  onChange={(on) => setReminders(db, on)}
-                  accessibilityLabel={t('profile.reminders')}
-                />
-              }
+              sub={t('profile.remindersSub')}
+              value={profile.reminders ? t('profile.on') : t('profile.off')}
             />
             <Row
               icon={<Image source={appIcon} accessible={false} style={styles.appIcon} />}
@@ -161,11 +165,26 @@ export default function ProfileScreen() {
               label={t('profile.language')}
               value={t('profile.languageName')}
             />
+          </View>
+        </Rise>
+
+        <Rise delay={160} style={styles.section}>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>
+            {t('profile.yourData')}
+          </Text>
+          <View style={styles.list}>
             <Row
               tile={categoryColor.bills}
               icon={<DownloadIcon color={categoryColor.bills.fg} />}
               label={t('profile.export')}
               value={t('profile.exportFormat')}
+            />
+            <Row
+              tile={{ bg: color.dangerSoft, fg: color.danger }}
+              icon={<TrashIcon color={color.danger} />}
+              label={t('profile.deleteAll.row')}
+              danger
+              onPress={() => router.push('/profile-delete-all')}
             />
           </View>
         </Rise>
@@ -179,34 +198,51 @@ export default function ProfileScreen() {
   );
 }
 
-/** One settings row: icon tile, label, the current value and a chevron, or a control. */
+/**
+ * One settings row: icon tile, label (with an optional second line), the
+ * current value and a chevron. Rows whose page isn't built yet don't open.
+ */
 function Row({
   tile,
   icon,
   label,
+  sub,
   value,
-  trailing,
+  danger = false,
+  onPress,
 }: {
   tile?: { bg: string; fg: string };
   icon: ReactNode;
   label: string;
+  sub?: string;
   value?: string;
-  trailing?: ReactNode;
+  danger?: boolean;
+  onPress?: () => void;
 }) {
-  return (
-    <View
-      accessible={!trailing}
-      accessibilityLabel={value ? `${label}, ${value}` : label}
-      style={styles.row}
-    >
+  const body = (
+    <>
       <View style={[styles.tile, tile && { backgroundColor: tile.bg }]}>{icon}</View>
-      <Text style={styles.rowLabel}>{label}</Text>
-      {trailing ?? (
-        <>
-          {value ? <Text style={styles.rowValue}>{value}</Text> : null}
-          <ChevronRightIcon color={color.placeholder} />
-        </>
-      )}
+      <View style={styles.rowText}>
+        <Text style={[styles.rowLabel, danger && { color: color.danger }]}>{label}</Text>
+        {sub ? <Text style={styles.rowSub}>{sub}</Text> : null}
+      </View>
+      {value ? <Text style={styles.rowValue}>{value}</Text> : null}
+      {danger ? null : <ChevronRightIcon color={color.placeholder} />}
+    </>
+  );
+  const a11y = value ? `${label}, ${value}` : label;
+  return onPress ? (
+    <Press
+      accessibilityRole="button"
+      accessibilityLabel={a11y}
+      onPress={onPress}
+      style={[styles.row, sub && styles.rowTall]}
+    >
+      {body}
+    </Press>
+  ) : (
+    <View accessible accessibilityLabel={a11y} style={[styles.row, sub && styles.rowTall]}>
+      {body}
     </View>
   );
 }
@@ -266,7 +302,10 @@ const styles = StyleSheet.create({
   },
   symbol: { fontFamily: fontFamily.bold, fontSize: 18 },
   appIcon: { width: 36, height: 36, borderRadius: 10, boxShadow: shadow.appIconRing },
-  rowLabel: { ...text.rowTitle, flex: 1, color: color.ink },
+  rowTall: { height: 64 },
+  rowText: { flex: 1, minWidth: 0, gap: 1 },
+  rowLabel: { ...text.rowTitle, color: color.ink },
+  rowSub: { ...text.small, fontFamily: fontFamily.semibold, color: color.muted },
   rowValue: { ...text.label, fontFamily: fontFamily.semibold, color: color.muted },
   footer: {
     ...text.meta,

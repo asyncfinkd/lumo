@@ -218,10 +218,17 @@
     "language": "Language",
     "languageName": "English",
     "export": "Export my data",
-    "exportFormat": "CSV",
+    "exportFormat": "CSV · PDF",
     "footer": "Lumo {{version}} · made with care",
-    "deleteAll": "Delete all data",
-    "deleteAllConfirm": "This removes everything you've entered from this phone. It can't be undone.",
+    "deleteAll": {
+      "row": "Delete all data",
+      "title": "Delete all your data?",
+      "body": "Every transaction, budget, bill and goal on this phone goes away, and Lumo starts fresh. This can't be undone.",
+      "typeBefore": "Type ",
+      "typeAfter": " to confirm",
+      "typeLabel": "Type {{word}} to confirm",
+      "confirm": "Delete everything"
+    },
     "photo": {
       "title": "Profile photo",
       "take": "Take a photo",
@@ -245,7 +252,20 @@
       "zoom": "Zoom",
       "photo": "Your chosen photo",
       "use": "Use photo"
-    }
+    },
+    "back": "Back to Profile",
+    "categories": "Categories",
+    "categoriesCount_one": "{{count}} category",
+    "categoriesCount_other": "{{count}} categories",
+    "remindersSub": "Bills, payday and low budgets",
+    "on": "On",
+    "off": "Off",
+    "yourData": "Your data",
+    "currencyHint": "New amounts use this. What you've already added stays as it is.",
+    "nameHint": "This is how Lumo greets you on Home.",
+    "nameCount": "{{count}} / {{max}}",
+    "preview": "Preview",
+    "friend": "friend"
   },
   "categories": {
     "coffee": "Coffee",

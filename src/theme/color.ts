@@ -67,6 +67,17 @@ export const color = {
   /** Destructive tile and text (Remove photo, Delete). */
   dangerSoft: '#FBE7DF',
   danger: '#A4402B',
+  /** The solid destructive button ("Delete everything"). */
+  dangerStrong: '#B5452F',
+  /** Behind a confirm dialog: darker than a sheet's scrim. */
+  dim: 'rgba(43,37,34,0.34)',
+  dialog: 'rgba(255,252,248,0.97)',
+  /** Secondary text one step darker than muted (labels in dialogs). */
+  softInk: '#5E554F',
+  /** A disabled solid button (Save without a name). */
+  disabled: '#BDB3AC',
+  /** A disabled destructive button and similar quiet fills. */
+  washStrong: 'rgba(43,37,34,0.06)',
   // Switch
   switchOn: '#6BAF8D',
   switchOff: '#E2D8CF',
