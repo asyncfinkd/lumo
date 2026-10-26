@@ -11,6 +11,7 @@ import {
 } from '@expo-google-fonts/nunito';
 import { Placeholder } from '@/components/Placeholder';
 import { useDatabase } from '@/db/useDatabase';
+import { DueTransactionsSync } from '@/features/recurring/DueTransactionsSync';
 import i18n from '@/i18n';
 import { color } from '@/theme';
 
@@ -39,6 +40,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar style="dark" />
+      <DueTransactionsSync />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(onboarding)" />

@@ -2,7 +2,6 @@
 // Drizzle SQLite database: expo-sqlite in the app, better-sqlite3 in tests.
 
 import { count } from 'drizzle-orm';
-import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 import type { CalendarDate } from '@/domain/dates';
 import { CATEGORY_ROWS } from './categories';
 import {
@@ -10,11 +9,13 @@ import {
   sampleBills,
   sampleBudgets,
   sampleIncomes,
+  sampleOnboardedOn,
   sampleProfile,
 } from './sampleData';
 import * as schema from './schema';
+import type { Db } from './types';
 
-export type Db = BaseSQLiteDatabase<'sync', unknown, typeof schema>;
+export type { Db } from './types';
 type NewId = () => string;
 
 /** Adds the fixed categories; safe to run on every start. */
@@ -35,7 +36,11 @@ export function seedSampleData(db: Db, today: CalendarDate, newId: NewId): void 
   const currency = sampleProfile.currency;
   db.transaction((tx) => {
     tx.insert(schema.profile)
-      .values({ id: newId(), ...sampleProfile, onboardedAt: new Date().toISOString() })
+      .values({
+        id: newId(),
+        ...sampleProfile,
+        onboardedAt: new Date(`${sampleOnboardedOn(today)}T09:00:00`).toISOString(),
+      })
       .run();
 
     const recurringIds = new Map<string, string>();

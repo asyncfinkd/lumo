@@ -4,23 +4,12 @@
 // Runs the real migrations on an in-memory SQLite database (better-sqlite3 in
 // Node instead of expo-sqlite on a phone) and exercises the seed helpers.
 import { randomUUID } from 'node:crypto';
-import path from 'node:path';
-import Database from 'better-sqlite3';
 import { eq } from 'drizzle-orm';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import { totalBalance } from '@/domain/balance';
 import { CATEGORY_ROWS } from '../categories';
 import * as schema from '../schema';
 import { deleteAllData, ensureCategories, hasProfile, seedSampleData } from '../seed';
-
-function openDb() {
-  const sqlite = new Database(':memory:');
-  sqlite.pragma('foreign_keys = ON');
-  const db = drizzle(sqlite, { schema });
-  migrate(db, { migrationsFolder: path.join(__dirname, '../migrations') });
-  return db;
-}
+import { openTestDb as openDb } from '../testing';
 
 describe('database', () => {
   it('migrates an empty database and adds the fixed categories once', () => {
