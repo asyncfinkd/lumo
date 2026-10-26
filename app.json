@@ -42,7 +42,15 @@
         }
       ],
       "expo-sqlite",
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Lumo uses the camera only when you take a profile photo.",
+          "photosPermission": "Lumo shows your photos only so you can pick a profile photo.",
+          "microphonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
