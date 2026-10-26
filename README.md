@@ -25,21 +25,17 @@ No account. No servers. No cloud. Lumo keeps everything in one small SQLite file
 
 - **Works offline.** Airplane mode? Still all here.
 - **No ads, no trackers.** Nothing watches how you spend.
-- **Export anytime.** CSV or PDF, saved where you choose.
-- **Erase it for real.** Delete everything. Nothing is left elsewhere.
+- **Yours to take or erase.** Export or delete everything, see [Your data, your rules](#your-data-your-rules).
 
 ## Features
 
 <p align="center"><img src="./docs/images/screens.png" alt="Home, Add expense, Budgets and Insights screens" width="100%"></p>
 
-- **Left to spend:** one clear number on the Home screen, with a soft progress bar and the days left in the month.
-- **Quick add:** a bottom sheet with a big amount, a number pad, Expense / Income switch and category chips. Fast to use with one thumb.
-- **Gentle budgets:** per-category budgets with friendly notes like _"Plenty left · treat yourself"_. Bars warm up as you get close to a limit; no harsh warnings.
-- **Insights:** a clean donut chart by category with Week / Month / Year views, plus one human sentence about your month.
-- **Savings jars:** set a goal, see it fill up, and know when you'll get there.
-- **2-minute setup:** onboarding asks one question per screen: name, currency, income, monthly bills and an optional savings goal. Then it reveals your month: _"Here's what's yours to spend."_
+- **Left to spend:** front and center, every day. One clear number on the Home screen with a soft progress bar and the days left, then what came in, what went out, and today's transactions.
+- **Add in seconds:** a bottom sheet with a big amount, a number pad, Expense / Income switch, category chips, date and note. Fast with one thumb, with kind feedback like _"Nice! Still ₾46.90 left for coffee"_.
+- **Budgets that nudge:** never nag, never shout. Per-category budgets with friendly notes like _"Running a little low · easy does it"_ and _"All paid this month ✓"_. Bars warm up as you get close to a limit.
+- **Where it went:** Insights shows a donut by category with Week / Month views, plus one human sentence like _"You spent 18% less on coffee than in September. Nice!"_
 - **Multiple currencies:** Georgian lari (₾) by default, plus US dollar, euro and more.
-- **Alternate app icons:** a light default icon, with dark and orange versions to choose from.
 
 ## Set up in two minutes, without an account
 
@@ -51,18 +47,18 @@ No email, no password. Just your first name, and Lumo sets up your month:
 2. **Currency:** lari, dollar, euro and more.
 3. **Income:** what lands in your account, and your payday.
 4. **Bills:** rent, phone, gym. Tap what applies.
-5. **Your month:** what's yours to spend.
+5. **Your month:** _"Nika, here's your month ✨"_. Income minus bills is what's yours to spend.
 
 ## Your data, your rules
 
 <p align="center"><img src="./docs/images/your-data.png" alt="Categories, search, export and delete-all screens" width="100%"></p>
 
-Everything lives on your phone, so you are the only one in control of it.
+Everything lives on your phone, so you are the only one in control of it. These screens are designed and coming soon.
 
 - **Make it yours:** add, rename and recolor categories.
 - **Find anything:** search every transaction.
 - **Take it with you:** export to CSV or PDF, made on the device.
-- **Erase it for real:** delete all your data, with no copies anywhere else.
+- **Erase it for real:** type DELETE to remove every transaction, budget and bill. No copies anywhere else.
 
 ## Design principles
 
@@ -137,6 +133,8 @@ How we work: [CONTRIBUTING.md](CONTRIBUTING.md). Decisions: [docs/adr](docs/adr)
 - [ ] Monthly recap story
 - [ ] Dark mode
 - [ ] Categories, search, export and delete-all
+- [ ] Savings jars
+- [ ] Alternate app icons (dark and orange)
 - [ ] Georgian language (ქართული)
 
 ## Contributing
