@@ -22,6 +22,8 @@ export const color = {
   key: 'rgba(255,255,255,0.95)',
   /** Quiet buttons and unselected chips. */
   wash: 'rgba(43,37,34,0.05)',
+  /** The dot inside a selected chip. */
+  chipDot: 'rgba(255,255,255,0.75)',
   scrim: 'rgba(43,37,34,0.22)',
   track: '#F2EAE2',
   donutTrack: '#F5EEE6',

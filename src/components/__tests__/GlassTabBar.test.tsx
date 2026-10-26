@@ -34,13 +34,13 @@ describe('GlassTabBar', () => {
 
   it('switches tabs', async () => {
     const { onChange } = await renderBar();
-    fireEvent.press(screen.getByRole('tab', { name: 'Budgets' }));
+    await fireEvent.press(screen.getByRole('tab', { name: 'Budgets' }));
     expect(onChange).toHaveBeenCalledWith('budgets');
   });
 
   it('opens the add sheet with a light haptic', async () => {
     const { onAdd } = await renderBar();
-    fireEvent.press(screen.getByRole('button', { name: 'Add transaction' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Add transaction' }));
     expect(onAdd).toHaveBeenCalledTimes(1);
     expect(Haptics.impactAsync).toHaveBeenCalledWith('light');
   });
