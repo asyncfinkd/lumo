@@ -8,6 +8,8 @@ import {
   Nunito_800ExtraBold,
   useFonts,
 } from '@expo-google-fonts/nunito';
+import { Placeholder } from '@/components/Placeholder';
+import { useDatabase } from '@/db/useDatabase';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -18,11 +20,18 @@ export default function RootLayout() {
     Nunito_800ExtraBold,
   });
 
-  useEffect(() => {
-    if (fontsLoaded || fontError) SplashScreen.hideAsync();
-  }, [fontsLoaded, fontError]);
+  const database = useDatabase();
+  const fontsDone = fontsLoaded || !!fontError;
+  const dbDone = database.ready || !!database.error;
 
-  if (!fontsLoaded && !fontError) return null;
+  useEffect(() => {
+    if (fontsDone && dbDone) SplashScreen.hideAsync();
+  }, [fontsDone, dbDone]);
+
+  if (!fontsDone || !dbDone) return null;
+  if (database.error) {
+    return <Placeholder title="Something went wrong" note={database.error.message} />;
+  }
 
   return (
     <>

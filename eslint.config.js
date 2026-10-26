@@ -8,6 +8,6 @@ module.exports = defineConfig([
   // Formatting is Prettier's job; turn off the rules that would fight it.
   prettierConfig,
   {
-    ignores: ['dist/*', 'spikes/*', '.expo/*'],
+    ignores: ['dist/*', 'spikes/*', '.expo/*', 'src/db/migrations/*'],
   },
 ]);
