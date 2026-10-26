@@ -38,17 +38,29 @@ It answers one question first: **how much can I still spend this month?** Everyt
 
 ## Getting started
 
-> Lumo is in active development. Setup instructions will be added soon.
+> Lumo is in active development. You need Node 22+, and for simulators Xcode and/or Android Studio.
 
 ```bash
-# Clone the repository
-git clone [REPOSITORY_URL]
+git clone https://github.com/asyncfinkd/lumo.git
 cd lumo
-
-# Install and run
-[INSTALL_COMMAND]
-[RUN_COMMAND]
+npm install
 ```
+
+```bash
+npm run ios       # iOS simulator (Expo Go)
+npm run android   # Android emulator (Expo Go)
+npm start         # QR code for Expo Go on a real phone
+```
+
+Before opening a PR:
+
+```bash
+npm run typecheck
+npm run lint
+npm run format:check
+```
+
+How we work: [CONTRIBUTING.md](CONTRIBUTING.md). Decisions: [docs/adr](docs/adr).
 
 ## Roadmap
 

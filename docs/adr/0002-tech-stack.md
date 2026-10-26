@@ -66,4 +66,4 @@ Rule: `domain/` has no React and no database imports, so it's fully unit-testabl
 **Costs**
 - Expo SDK upgrades ship breaking changes; we upgrade once per SDK, deliberately, in its own PR.
 - When we add a native module outside Expo Go (bank messages, [#9](https://github.com/asyncfinkd/lumo/issues/9)), development moves fully to a development build, which we can already make locally.
-- Metro's file watcher on this Mac sometimes misses changes; restart with `--clear` when the app looks stale.
+- Don't start Metro with `CI=1` while developing: CI mode turns off file watching and reloads, so the app keeps showing old code.
