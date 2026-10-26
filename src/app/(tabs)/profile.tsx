@@ -1,15 +1,16 @@
 import type { ReactNode } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+// Image: the App icon row, hidden until #17.
+import { /* Image, */ ScrollView, StyleSheet, Text, View } from 'react-native';
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  BellIcon,
+  // BellIcon, (Reminders, #15)
   CameraIcon,
   ChevronRightIcon,
-  DownloadIcon,
-  GlobeIcon,
+  // DownloadIcon, (Export, #16)
+  // GlobeIcon, (Language, #20)
   GridIcon,
   MoneyIcon,
   PersonIcon,
@@ -33,7 +34,8 @@ import {
   text,
 } from '@/theme';
 
-const appIcon = require('../../../assets/icon.png');
+// App icon row, hidden until #17.
+// const appIcon = require('../../../assets/icon.png');
 
 // Profile: who you are, your money settings and preferences.
 export default function ProfileScreen() {
@@ -143,6 +145,10 @@ export default function ProfileScreen() {
           </View>
         </Rise>
 
+        {/*
+          Hidden until their pages are built, so testers don't tap rows that do
+          nothing: Reminders (#15), App icon (#17), Language (#20).
+
         <Rise delay={120} style={styles.section}>
           <Text accessibilityRole="header" style={styles.sectionTitle}>
             {t('profile.preferences')}
@@ -168,18 +174,21 @@ export default function ProfileScreen() {
             />
           </View>
         </Rise>
+        */}
 
         <Rise delay={160} style={styles.section}>
           <Text accessibilityRole="header" style={styles.sectionTitle}>
             {t('profile.yourData')}
           </Text>
           <View style={styles.list}>
+            {/* Export, hidden until its page is built (#16).
             <Row
               tile={categoryPalette.sage}
               icon={<DownloadIcon color={categoryPalette.sage.fg} />}
               label={t('profile.export')}
               value={t('profile.exportFormat')}
             />
+            */}
             <Row
               tile={{ bg: color.dangerSoft, fg: color.danger }}
               icon={<TrashIcon color={color.danger} />}
