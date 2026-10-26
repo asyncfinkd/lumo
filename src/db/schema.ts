@@ -124,6 +124,20 @@ export const incomes = sqliteTable(
   ],
 );
 
+/**
+ * A bill or salary payment the user deleted (#50). `syncDueTransactions` treats
+ * it as already done, so it never comes back.
+ */
+export const skippedOccurrences = sqliteTable(
+  'skipped_occurrences',
+  {
+    ...base,
+    recurringId: text('recurring_id').notNull(),
+    date: text('date').notNull(),
+  },
+  (t) => [uniqueIndex('skipped_occurrences_idx').on(t.recurringId, t.date)],
+);
+
 export type Profile = typeof profile.$inferSelect;
 export type Category = typeof categories.$inferSelect;
 export type Transaction = typeof transactions.$inferSelect;

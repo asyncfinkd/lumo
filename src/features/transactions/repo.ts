@@ -4,7 +4,14 @@
 import { and, desc, eq, gte, lt } from 'drizzle-orm';
 import type { CategoryId } from '@/db/categories';
 import { newId as defaultNewId } from '@/db/id';
-import { profile, transactions, type Transaction } from '@/db/schema';
+import {
+  incomes,
+  profile,
+  recurringBills,
+  skippedOccurrences,
+  transactions,
+  type Transaction,
+} from '@/db/schema';
 import type { Db } from '@/db/types';
 import type { CalendarDate } from '@/domain/dates';
 import type { TransactionKind } from '@/domain/leftToSpend';
@@ -56,30 +63,104 @@ export function addTransaction(db: Db, input: TransactionInput, newId = defaultN
     .get();
 }
 
-/** Changes a transaction the user typed in. Automatic ones (bills, salary) can't be edited. */
-export function updateTransaction(db: Db, id: string, input: TransactionInput): Transaction {
+/**
+ * For a bill or salary payment: `one` changes only this payment, `future` also
+ * changes the bill or income it came from, so every later month follows (#50).
+ */
+export type Scope = 'one' | 'future';
+
+/** Marks a bill or salary date as handled so `syncDueTransactions` never recreates it. */
+function skip(db: Db, recurringId: string, date: CalendarDate, newId: () => string) {
+  db.insert(skippedOccurrences)
+    .values({ id: newId(), recurringId, date })
+    .onConflictDoNothing()
+    .run();
+}
+
+/**
+ * Changes a transaction. Bill and salary payments stay linked to their bill or
+ * income; moving one to another day marks its old day as handled.
+ */
+export function updateTransaction(
+  db: Db,
+  id: string,
+  input: TransactionInput,
+  scope: Scope = 'one',
+  newId = defaultNewId,
+): Transaction {
   assertAmount(input.amountMinor);
   const existing = db.select().from(transactions).where(eq(transactions.id, id)).get();
   if (!existing) throw new Error(`No transaction ${id}`);
-  if (existing.source !== 'manual') throw new Error(`Only manual transactions can be edited`);
-  return db
-    .update(transactions)
-    .set({
-      kind: input.kind,
-      amountMinor: input.amountMinor,
-      categoryId: input.categoryId,
-      title: input.title,
-      note: input.note ?? null,
-      date: input.date,
-      occurredAt: (input.occurredAt ?? new Date(existing.occurredAt)).toISOString(),
-    })
-    .where(eq(transactions.id, id))
-    .returning()
-    .get();
+
+  return db.transaction((tx) => {
+    const { recurringId } = existing;
+    if (recurringId && input.date !== existing.date) skip(tx, recurringId, existing.date, newId);
+
+    if (recurringId && scope === 'future') {
+      if (existing.source === 'bill') {
+        tx.update(recurringBills)
+          .set({
+            name: input.title,
+            amountMinor: input.amountMinor,
+            ...(input.categoryId ? { categoryId: input.categoryId } : {}),
+          })
+          .where(eq(recurringBills.id, recurringId))
+          .run();
+      } else if (existing.source === 'recurring_income') {
+        tx.update(incomes)
+          .set({ name: input.title, amountMinor: input.amountMinor })
+          .where(eq(incomes.id, recurringId))
+          .run();
+      }
+    }
+
+    return tx
+      .update(transactions)
+      .set({
+        kind: input.kind,
+        amountMinor: input.amountMinor,
+        categoryId: input.categoryId,
+        title: input.title,
+        note: input.note ?? null,
+        date: input.date,
+        occurredAt: (input.occurredAt ?? new Date(existing.occurredAt)).toISOString(),
+      })
+      .where(eq(transactions.id, id))
+      .returning()
+      .get();
+  });
 }
 
-export function deleteTransaction(db: Db, id: string): void {
-  db.delete(transactions).where(eq(transactions.id, id)).run();
+/**
+ * Deletes a transaction. A bill or salary payment is marked as handled so it
+ * doesn't come back; with `future` the bill stops (stays in Profile, turned
+ * off) or the salary stops being added (#50).
+ */
+export function deleteTransaction(
+  db: Db,
+  id: string,
+  scope: Scope = 'one',
+  newId = defaultNewId,
+): void {
+  const existing = db.select().from(transactions).where(eq(transactions.id, id)).get();
+  if (!existing) return;
+
+  db.transaction((tx) => {
+    const { recurringId } = existing;
+    if (recurringId) {
+      skip(tx, recurringId, existing.date, newId);
+      if (scope === 'future' && existing.source === 'bill') {
+        tx.update(recurringBills)
+          .set({ active: false })
+          .where(eq(recurringBills.id, recurringId))
+          .run();
+      }
+      if (scope === 'future' && existing.source === 'recurring_income') {
+        tx.delete(incomes).where(eq(incomes.id, recurringId)).run();
+      }
+    }
+    tx.delete(transactions).where(eq(transactions.id, id)).run();
+  });
 }
 
 /** Transactions with `start <= date < end`, newest first. */

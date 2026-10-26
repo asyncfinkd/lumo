@@ -3,7 +3,7 @@
 import { and, eq, gte, isNotNull, lt } from 'drizzle-orm';
 import type { CategoryId } from '@/db/categories';
 import { newId as defaultNewId } from '@/db/id';
-import { incomes, profile, recurringBills, transactions } from '@/db/schema';
+import { incomes, profile, recurringBills, skippedOccurrences, transactions } from '@/db/schema';
 import type { Db } from '@/db/types';
 import { type CalendarDate, payPeriod, toCalendarDate } from '@/domain/dates';
 import { dueTransactions } from '@/domain/leftToSpend';
@@ -111,6 +111,12 @@ export function syncDueTransactions(db: Db, today: CalendarDate, newId = default
     )
     .all()
     .map((row) => ({ recurringId: row.recurringId!, date: row.date }));
+  // Payments the user deleted or moved count as done too (#50).
+  const skipped = db
+    .select({ recurringId: skippedOccurrences.recurringId, date: skippedOccurrences.date })
+    .from(skippedOccurrences)
+    .where(and(gte(skippedOccurrences.date, period.start), lt(skippedOccurrences.date, period.end)))
+    .all();
 
   const due = dueTransactions({
     bills: bills.map((b) => ({ id: b.id, amountMinor: b.amountMinor, day: b.day })),
@@ -118,7 +124,7 @@ export function syncDueTransactions(db: Db, today: CalendarDate, newId = default
     period,
     today,
     trackingSince: toCalendarDate(new Date(me.onboardedAt)),
-    existing,
+    existing: [...existing, ...skipped],
   });
   if (due.length === 0) return 0;
 

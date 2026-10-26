@@ -103,6 +103,7 @@ export function deleteAllData(db: Db): void {
   const all = sql`1`;
   db.transaction((tx) => {
     tx.delete(schema.transactions).where(all).run();
+    tx.delete(schema.skippedOccurrences).where(all).run();
     tx.delete(schema.budgets).where(all).run();
     tx.delete(schema.recurringBills).where(all).run();
     tx.delete(schema.incomes).where(all).run();

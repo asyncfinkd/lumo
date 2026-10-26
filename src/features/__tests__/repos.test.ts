@@ -4,7 +4,7 @@
 // The write helpers and queries, run on the real migrations.
 import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
-import { budgets, transactions } from '@/db/schema';
+import { budgets, incomes, recurringBills, transactions } from '@/db/schema';
 import { seedSampleData } from '@/db/seed';
 import { openTestDb } from '@/db/testing';
 import { totalBalance } from '@/domain/balance';
@@ -71,16 +71,11 @@ describe('transactions', () => {
     expect(() => addTransaction(db, { ...coffee, amountMinor: 11.5 }, id)).toThrow(RangeError);
   });
 
-  it('edits keep the id; automatic ones can’t be edited', () => {
+  it('edits keep the id', () => {
     const db = withProfile();
     const row = addTransaction(db, coffee, id);
     const edited = updateTransaction(db, row.id, { ...coffee, amountMinor: 1300, title: 'Lab' });
     expect(edited).toMatchObject({ id: row.id, amountMinor: 1300, title: 'Lab' });
-
-    saveBill(db, { name: 'Rent', amountMinor: 80000, day: 10, categoryId: 'home' }, id);
-    syncDueTransactions(db, '2026-10-31', id);
-    const bill = db.select().from(transactions).where(eq(transactions.source, 'bill')).get()!;
-    expect(() => updateTransaction(db, bill.id, coffee)).toThrow(/manual/);
   });
 
   it('deletes', () => {
@@ -213,5 +208,87 @@ describe('dev seed and due sync', () => {
     seedSampleData(db, '2026-10-31', id);
     db.delete(transactions).where(eq(transactions.title, 'Rent')).run();
     expect(syncDueTransactions(db, '2026-10-31', id)).toBe(1);
+  });
+});
+
+describe('bill and salary payments (#50)', () => {
+  // Payday the 5th, onboarded Oct 1: Rent (the 10th) and salary (Oct 5) are due by Oct 31.
+  function withPayments() {
+    const db = withProfile();
+    const rent = saveBill(
+      db,
+      { name: 'Rent', amountMinor: 80000, day: 10, categoryId: 'home' },
+      id,
+    );
+    const salary = saveIncome(db, { name: 'Salary', amountMinor: 380000, day: 5 }, id);
+    syncDueTransactions(db, '2026-10-31', id);
+    const payment = (recurringId: string) =>
+      db.select().from(transactions).where(eq(transactions.recurringId, recurringId)).get();
+    return { db, rent, salary, payment };
+  }
+
+  it("deleting just this one doesn't bring it back", () => {
+    const { db, rent, payment } = withPayments();
+    deleteTransaction(db, payment(rent.id)!.id, 'one', id);
+    expect(syncDueTransactions(db, '2026-10-31', id)).toBe(0);
+    expect(payment(rent.id)).toBeUndefined();
+    // The bill itself stays on and reserved.
+    expect(db.select().from(recurringBills).get()!.active).toBe(true);
+  });
+
+  it('deleting this and future ones turns the bill off', () => {
+    const { db, rent, payment } = withPayments();
+    deleteTransaction(db, payment(rent.id)!.id, 'future', id);
+    expect(db.select().from(recurringBills).get()!.active).toBe(false);
+  });
+
+  it('deleting this and future salary stops adding it', () => {
+    const { db, salary, payment } = withPayments();
+    deleteTransaction(db, payment(salary.id)!.id, 'future', id);
+    expect(db.select().from(incomes).all()).toHaveLength(0);
+    expect(syncDueTransactions(db, '2026-10-31', id)).toBe(0);
+  });
+
+  it('editing just this one leaves the bill as it was', () => {
+    const { db, rent, payment } = withPayments();
+    const row = payment(rent.id)!;
+    updateTransaction(
+      db,
+      row.id,
+      { ...coffee, categoryId: 'home', title: 'Rent', amountMinor: 85000, date: row.date },
+      'one',
+      id,
+    );
+    expect(payment(rent.id)).toMatchObject({ amountMinor: 85000, source: 'bill' });
+    expect(db.select().from(recurringBills).get()!.amountMinor).toBe(80000);
+  });
+
+  it('editing this and future ones changes the bill too', () => {
+    const { db, rent, payment } = withPayments();
+    const row = payment(rent.id)!;
+    updateTransaction(
+      db,
+      row.id,
+      { ...coffee, categoryId: 'home', title: 'Rent', amountMinor: 85000, date: row.date },
+      'future',
+      id,
+    );
+    expect(db.select().from(recurringBills).get()!.amountMinor).toBe(85000);
+  });
+
+  it("moving a payment to another day doesn't create a second one", () => {
+    const { db, rent, payment } = withPayments();
+    const row = payment(rent.id)!;
+    updateTransaction(
+      db,
+      row.id,
+      { ...coffee, categoryId: 'home', title: 'Rent', amountMinor: 80000, date: '2026-10-12' },
+      'one',
+      id,
+    );
+    expect(syncDueTransactions(db, '2026-10-31', id)).toBe(0);
+    expect(
+      db.select().from(transactions).where(eq(transactions.recurringId, rent.id)).all(),
+    ).toHaveLength(1);
   });
 });
