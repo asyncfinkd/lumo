@@ -9,7 +9,7 @@
 - One developer who knows React and React Native, shipping v1 to iOS and Android in 1–2 months ([#7](https://github.com/asyncfinkd/lumo/issues/7)).
 - The design leans on motion and glass: rolling digits, sheets, blur, a drawn donut. The [#8](https://github.com/asyncfinkd/lumo/issues/8) spike rebuilt those screens in React Native + Expo, matched the design side by side, and ran at **60 FPS on a real iPhone and Android phone**.
 - All data stays on the device ([ADR 0001](0001-local-only-data.md)). Money is integer minor units ([ADR 0003](0003-money-as-minor-units.md)).
-- This Mac has no Xcode or Android Studio.
+- The development Mac has Xcode 26.6 (iOS 26 simulators) and Android Studio.
 
 ## Decision
 
@@ -33,7 +33,7 @@
 | Tests | **jest-expo** + React Native Testing Library | Domain logic first (money, left to spend, periods) |
 | Lint / format | **ESLint** (`npx expo lint`) + **Prettier** | One style, checked in CI |
 | Package manager | **npm** | Already in use, fully supported by Expo |
-| Builds | **Expo Go** while developing, **EAS Build** for dev and store builds | No local Xcode or Android Studio needed |
+| Builds | **Expo Go** for quick checks, local **development builds** (`npx expo run:ios` / `run:android`) on simulators and phones, **EAS Build** for store builds | Local builds give real native behavior and debugging; EAS keeps signing and store builds reproducible |
 
 ### Folder layout
 
@@ -65,5 +65,5 @@ Rule: `domain/` has no React and no database imports, so it's fully unit-testabl
 
 **Costs**
 - Expo SDK upgrades ship breaking changes; we upgrade once per SDK, deliberately, in its own PR.
-- When we add a native module outside Expo Go (bank messages, [#9](https://github.com/asyncfinkd/lumo/issues/9)), development moves to an EAS development build.
+- When we add a native module outside Expo Go (bank messages, [#9](https://github.com/asyncfinkd/lumo/issues/9)), development moves fully to a development build, which we can already make locally.
 - Metro's file watcher on this Mac sometimes misses changes; restart with `--clear` when the app looks stale.
