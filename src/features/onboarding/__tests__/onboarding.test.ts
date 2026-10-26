@@ -6,7 +6,7 @@ import { incomes, profile, recurringBills } from '@/db/schema';
 import { openTestDb } from '@/db/testing';
 import { summarizeMonth } from '../../money/summary';
 import { syncDueTransactions } from '../../recurring/repo';
-import { groupTyped } from '../AmountDisplay';
+import { groupTyped } from '@/components/AmountDisplay';
 import { BILL_KEYS, billCategory, cleanAmount } from '../bills';
 import { chosenBills, type OnboardingAnswers, saveOnboarding } from '../save';
 import { useOnboarding } from '../store';

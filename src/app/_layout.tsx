@@ -46,6 +46,13 @@ export default function RootLayout() {
   );
 }
 
+// Sheets draw and animate themselves over the current screen.
+const sheetOptions = {
+  presentation: 'transparentModal',
+  animation: 'none',
+  contentStyle: { backgroundColor: 'transparent' },
+} as const;
+
 // Onboarding until the profile is complete, the app after. Mounted once the
 // database is ready; keeps the splash up until the first profile read.
 function AppStack() {
@@ -62,15 +69,8 @@ function AppStack() {
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
       <Stack.Protected guard={onboarded} redirectTo="/welcome">
         <Stack.Screen name="(tabs)" />
-        {/* The sheet draws and animates itself over the current screen. */}
-        <Stack.Screen
-          name="add-transaction"
-          options={{
-            presentation: 'transparentModal',
-            animation: 'none',
-            contentStyle: { backgroundColor: 'transparent' },
-          }}
-        />
+        <Stack.Screen name="add-transaction" options={sheetOptions} />
+        <Stack.Screen name="balance" options={sheetOptions} />
       </Stack.Protected>
       <Stack.Protected guard={!onboarded} redirectTo="/">
         <Stack.Screen name="(onboarding)" />

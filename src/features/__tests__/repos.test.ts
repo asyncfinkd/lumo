@@ -9,7 +9,13 @@ import { seedSampleData } from '@/db/seed';
 import { openTestDb } from '@/db/testing';
 import { totalBalance } from '@/domain/balance';
 import { saveBudget } from '../budgets/repo';
-import { adjustBalance, getProfile, markOnboarded, saveProfile } from '../profile/repo';
+import {
+  adjustBalance,
+  currentBalance,
+  getProfile,
+  markOnboarded,
+  saveProfile,
+} from '../profile/repo';
 import { saveBill, saveIncome, setBillActive, syncDueTransactions } from '../recurring/repo';
 import {
   addTransaction,
@@ -98,12 +104,13 @@ describe('transactions', () => {
 describe('balance', () => {
   it('starts with the typed balance and fixes it with the difference', () => {
     const db = withProfile();
+    expect(currentBalance(db)).toBeNull();
     adjustBalance(db, 1248050, '2026-10-01', id);
     addTransaction(db, coffee, id);
     expect(totalBalance(db.select().from(transactions).all())).toBe(1248050 - 1150);
 
     adjustBalance(db, 1250000, '2026-10-31', id);
-    expect(totalBalance(db.select().from(transactions).all())).toBe(1250000);
+    expect(currentBalance(db)).toBe(1250000);
 
     // Already right: nothing new.
     const before = db.select().from(transactions).all().length;
