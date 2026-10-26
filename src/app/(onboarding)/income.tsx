@@ -7,7 +7,7 @@ import { Numpad } from '@/components/Numpad';
 import { Press } from '@/components/Press';
 import { Sheet } from '@/components/Sheet';
 import { currencies, parseAmount } from '@/domain/money';
-import { AmountDisplay, groupTyped } from '@/features/onboarding/AmountDisplay';
+import { AmountDisplay, groupTyped } from '@/components/AmountDisplay';
 import { OnboardingStep } from '@/features/onboarding/OnboardingStep';
 import { useOnboarding } from '@/features/onboarding/store';
 import { color, radius, shadow, text } from '@/theme';

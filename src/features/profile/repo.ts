@@ -43,6 +43,11 @@ export function markOnboarded(db: Db, at = new Date()): void {
   db.update(profile).set({ onboardedAt: at.toISOString() }).run();
 }
 
+/** The total balance right now (#6), or `null` before a starting balance is set. */
+export function currentBalance(db: Db): number | null {
+  return totalBalance(db.select().from(transactions).all());
+}
+
 /**
  * Sets the total balance to what the user typed (#6) by storing the difference
  * as an adjustment. The first one is the starting balance.
@@ -55,8 +60,7 @@ export function adjustBalance(
 ): void {
   const me = getProfile(db);
   if (!me) throw new Error('No profile yet');
-  const all = db.select().from(transactions).all();
-  const fix = balanceAdjustment(totalBalance(all), typedMinor);
+  const fix = balanceAdjustment(currentBalance(db), typedMinor);
   if (!fix) return;
   db.insert(transactions)
     .values({

@@ -28,19 +28,29 @@
     "doingGreat": "You're doing great this month.",
     "leftToSpend": "Left to spend",
     "ofAvailable": "of {{amount}}",
+    "leftOf": "{{left}} left of {{available}}",
     "spentPercent": "{{percent}}% spent",
     "daysLeft_one": "{{count}} day left",
     "daysLeft_other": "{{count}} days left",
+    "budgetLeft": "Budget left",
     "overspent": "{{amount}} over this month. That's okay, it happens.",
     "totalBalance": "Total balance",
     "addBalance": "Add your balance",
+    "changeBalance": "Change your balance",
     "cameIn": "Came in",
     "wentOut": "Went out",
     "today": "Today",
     "yesterday": "Yesterday",
+    "nothingToday": "Nothing yet today.",
     "seeAll": "See all",
     "monthlyBill": "monthly bill",
+    "monthlyIncome": "monthly income",
     "welcomeToast": "All set. You've got this 🌞"
+  },
+  "balance": {
+    "title": "What's in your account?",
+    "hint": "All your money, right now.",
+    "amountLabel": "Balance {{amount}}"
   },
   "addTransaction": {
     "newExpense": "New expense",
@@ -204,7 +214,6 @@
     "UAH": "Ukrainian hryvnia"
   },
   "placeholder": {
-    "home": "Left to spend comes here.",
     "budgets": "Per-category budgets come here.",
     "profile": "Settings come here.",
     "onboarding": "Onboarding starts here.",

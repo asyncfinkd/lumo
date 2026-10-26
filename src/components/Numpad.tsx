@@ -33,6 +33,16 @@ export function pressKey(current: string, key: NumpadKey, currency: CurrencyCode
   return current === '0' ? key : current + key;
 }
 
+/** Keypad text for an amount, to start editing it: 1248050 → "12480.50", 380000 → "3800". */
+export function typedAmount(minor: number, currency: CurrencyCode): string {
+  const { minorUnits } = currencies[currency];
+  const scale = 10 ** minorUnits;
+  const abs = Math.abs(minor);
+  const fraction = abs % scale;
+  const whole = String(Math.floor(abs / scale));
+  return fraction ? `${whole}.${String(fraction).padStart(minorUnits, '0')}` : whole;
+}
+
 type Props = {
   value: string;
   onChange: (next: string) => void;
