@@ -1,5 +1,7 @@
+import { useTranslation } from 'react-i18next';
 import { Placeholder } from '@/components/Placeholder';
 
 export default function InsightsScreen() {
-  return <Placeholder title="Insights" note="Where your money went, gently." />;
+  const { t } = useTranslation();
+  return <Placeholder title={t('insights.title')} note={t('insights.subtitle')} />;
 }
