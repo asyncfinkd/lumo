@@ -138,6 +138,14 @@ const spending: {
   },
 ];
 
+/**
+ * The sample user "onboarded" the day before the period, the same day as the
+ * starting balance, so all of its history counts as tracked (#4).
+ */
+export function sampleOnboardedOn(today: CalendarDate): CalendarDate {
+  return addDays(payPeriod(today, SAMPLE_PAYDAY).start, -1);
+}
+
 /** All sample transactions for the period that contains `today`. */
 export function buildSampleTransactions(today: CalendarDate): SampleTransaction[] {
   const period = payPeriod(today, SAMPLE_PAYDAY);
