@@ -138,6 +138,7 @@ export default function ProfileScreen() {
               icon={<GridIcon color={categoryPalette.lilac.fg} />}
               label={t('profile.categories')}
               value={t('profile.categoriesCount', { count: categories.length })}
+              onPress={() => router.push('/profile-categories')}
             />
           </View>
         </Rise>

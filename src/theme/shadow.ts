@@ -27,6 +27,8 @@ export const shadow = {
   initialIdle: 'inset 0px 0px 0px 1px rgba(43,37,34,0.06)',
   appIconRing: '0px 0px 0px 1px rgba(43,37,34,0.08)',
   dialog: 'inset 0px 0px 0px 1px rgba(255,255,255,0.9), 0px 24px 60px -16px rgba(43,37,34,0.45)',
+  /** A picked row in a dialog list ("Move them to"). */
+  pickedRow: 'inset 0px 0px 0px 2px #2B2522',
   cropThumb: '0px 2px 8px 0px rgba(0,0,0,0.35)',
   photoToast:
     'inset 0px 0px 0px 1px rgba(255,255,255,0.9), 0px 12px 32px -10px rgba(200,145,106,0.35)',

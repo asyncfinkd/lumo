@@ -1,13 +1,19 @@
 /**
  * @jest-environment node
  */
+import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { CATEGORY_ROWS } from '@/db/categories';
-import { categories } from '@/db/schema';
+import { budgets, categories, recurringBills, transactions } from '@/db/schema';
 import { deleteAllData, ensureCategories } from '@/db/seed';
 import { openTestDb } from '@/db/testing';
 import { categoryPalette } from '@/theme';
+import { saveBudget } from '../../budgets/repo';
+import { saveProfile } from '../../profile/repo';
+import { saveBill } from '../../recurring/repo';
+import { addTransaction } from '../../transactions/repo';
 import { buildCategories, type CategoryRow } from '../categories';
+import { categoryUsage, deleteCategory, saveCategory } from '../repo';
 
 const t = (key: string) => `t:${key}`;
 const rows: CategoryRow[] = CATEGORY_ROWS.map((c) => ({ ...c, renamed: false }));
@@ -101,5 +107,105 @@ describe('default categories in the database', () => {
       .all()
       .map((r) => r.id);
     expect(ids.sort()).toEqual(CATEGORY_ROWS.map((c) => c.id).sort());
+  });
+});
+
+describe('managing categories', () => {
+  // A profile, Coffee in use and budgeted, and a bill on Bills.
+  function setup() {
+    const db = openTestDb();
+    ensureCategories(db);
+    saveProfile(db, { name: 'Nika', currency: 'GEL', payday: 5 }, randomUUID);
+    addTransaction(
+      db,
+      {
+        kind: 'expense',
+        amountMinor: 1150,
+        categoryId: 'coffee',
+        title: 'Lab',
+        date: '2026-10-31',
+      },
+      randomUUID,
+    );
+    addTransaction(
+      db,
+      { kind: 'expense', amountMinor: 900, categoryId: 'coffee', title: 'Cup', date: '2026-10-30' },
+      randomUUID,
+    );
+    saveBudget(
+      db,
+      { categoryId: 'coffee', limitMinor: 32000, nudgeEnabled: true, nudgeAtMinor: null },
+      randomUUID,
+    );
+    saveBill(
+      db,
+      { name: 'Coffee club', amountMinor: 2000, day: 10, categoryId: 'coffee' },
+      randomUUID,
+    );
+    return db;
+  }
+
+  it('adds a category at the end of its kind', () => {
+    const db = setup();
+    const id = saveCategory(
+      db,
+      { name: ' Pets ', kind: 'expense', icon: 'paw', color: 'coral' },
+      () => 'pets-1',
+    );
+    expect(db.select().from(categories).where(eq(categories.id, id)).get()).toMatchObject({
+      name: 'Pets',
+      sortOrder: 6,
+      icon: 'paw',
+      color: 'coral',
+      renamed: false,
+    });
+  });
+
+  it('marks a renamed default so it keeps its new name', () => {
+    const db = setup();
+    saveCategory(db, {
+      id: 'coffee',
+      name: 'Cafés',
+      kind: 'expense',
+      icon: 'coffee',
+      color: 'latte',
+      renamed: true,
+    });
+    expect(db.select().from(categories).where(eq(categories.id, 'coffee')).get()).toMatchObject({
+      name: 'Cafés',
+      renamed: true,
+    });
+  });
+
+  it('refuses an empty name', () => {
+    expect(() =>
+      saveCategory(setup(), { name: '  ', kind: 'expense', icon: 'paw', color: 'coral' }),
+    ).toThrow(RangeError);
+  });
+
+  it('counts what uses a category', () => {
+    expect(categoryUsage(setup(), 'coffee')).toBe(2);
+  });
+
+  it('deletes and moves transactions and bills, and drops the budget', () => {
+    const db = setup();
+    deleteCategory(db, 'coffee', 'treats');
+    expect(categoryUsage(db, 'treats')).toBe(2);
+    expect(db.select().from(recurringBills).get()!.categoryId).toBe('treats');
+    expect(db.select().from(budgets).all()).toHaveLength(0);
+    expect(db.select().from(categories).where(eq(categories.id, 'coffee')).get()).toBeUndefined();
+  });
+
+  it('can leave them with no category', () => {
+    const db = setup();
+    deleteCategory(db, 'coffee', null);
+    expect(
+      db
+        .select()
+        .from(transactions)
+        .all()
+        .every((t) => t.categoryId === null),
+    ).toBe(true);
+    expect(db.select().from(recurringBills).get()!.categoryId).toBeNull();
   });
 });

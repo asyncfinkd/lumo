@@ -76,6 +76,12 @@ function AppStack() {
           <Stack.Screen name="edit-budget" options={sheetOptions} />
           <Stack.Screen name="profile-photo" options={sheetOptions} />
           <Stack.Screen name="profile-name" />
+          <Stack.Screen name="profile-categories" />
+          <Stack.Screen name="profile-category" options={sheetOptions} />
+          <Stack.Screen
+            name="profile-category-delete"
+            options={{ ...sheetOptions, animation: 'fade' }}
+          />
           <Stack.Screen name="profile-currency" />
           <Stack.Screen name="profile-income" />
           <Stack.Screen

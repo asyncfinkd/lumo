@@ -115,9 +115,8 @@ export const recurringBills = sqliteTable(
     ...money,
     /** Day of the month it's due, 1–31; short months use their last day. */
     day: integer('day').notNull(),
-    categoryId: text('category_id')
-      .notNull()
-      .references(() => categories.id),
+    /** `null` once its category was deleted with "No category" (#18). */
+    categoryId: text('category_id').references(() => categories.id),
     active: integer('active', { mode: 'boolean' }).notNull().default(true),
   },
   (t) => [

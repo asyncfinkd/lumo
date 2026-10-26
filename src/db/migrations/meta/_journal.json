@@ -29,6 +29,13 @@
       "when": 1793051264131,
       "tag": "0003_pink_warbound",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1793051666520,
+      "tag": "0004_complex_mariko_yashida",
+      "breakpoints": true
     }
   ]
 }
