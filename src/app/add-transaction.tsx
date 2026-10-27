@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { AmountDisplay, groupTyped } from '@/components/AmountDisplay';
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
-import { CalendarIcon, CloseIcon, NoteIcon } from '@/components/Icons';
+import { CalendarIcon, ClockIcon, CloseIcon, NoteIcon, TrashIcon } from '@/components/Icons';
 import { Numpad } from '@/components/Numpad';
 import { Press } from '@/components/Press';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Sheet } from '@/components/Sheet';
 import type { CategoryId } from '@/db/categories';
 import { db } from '@/db/client';
+import type { Transaction } from '@/db/schema';
 import { addDays, type CalendarDate } from '@/domain/dates';
 import type { TransactionKind } from '@/domain/leftToSpend';
 import { type CurrencyCode, currencies, formatMoney, parseAmount } from '@/domain/money';
@@ -20,17 +21,54 @@ import { CATEGORY_EMOJI } from '@/features/categoryEmoji';
 import { useActiveBills, useAllTransactions, useBudgets, useMoneyMonth } from '@/features/live';
 import { type AddMessage, addMessage, messageTone } from '@/features/transactions/addMessage';
 import {
+  editedTitle,
   occurredAt,
   pickableDays,
   shortDate,
   transactionTitle,
 } from '@/features/transactions/addForm';
-import { addTransaction } from '@/features/transactions/repo';
-import { color, radius, size, text } from '@/theme';
+import { clockTime } from '@/features/home/home';
+import { addTransaction, type Scope, updateTransaction } from '@/features/transactions/repo';
+import { color, fontFamily, radius, shadow, size, text } from '@/theme';
+
+/** Minor units back to what the keypad would have typed: 6420 → "64.20", 500 → "5". */
+function typedOf(minor: number, currency: CurrencyCode): string {
+  const scale = 10 ** currencies[currency].minorUnits;
+  const fraction = minor % scale;
+  const whole = Math.floor(minor / scale);
+  return fraction
+    ? `${whole}.${String(fraction).padStart(currencies[currency].minorUnits, '0')}`
+    : String(whole);
+}
 
 // AddTransaction: type, amount, a line on how it lands, category, date, note.
 // Saves a `manual` transaction; Home and budgets update through live queries.
+// With `id` it's EditTransaction: the same sheet, filled in, with Delete and
+// Save. `scope` is what EditScope chose for a bill or salary payment; `under`
+// counts the screens below (the details sheet) that close when it's deleted.
 export default function AddTransactionScreen() {
+  const { id, scope, under } = useLocalSearchParams<{
+    id?: string;
+    scope?: Scope;
+    under?: string;
+  }>();
+  const transactions = useAllTransactions();
+  if (!id) return <TransactionForm />;
+  const existing = transactions.find((x) => x.id === id);
+  // Wait for the live query, so the form starts filled in.
+  if (!existing) return null;
+  return <TransactionForm existing={existing} scope={scope ?? 'one'} under={Number(under ?? 0)} />;
+}
+
+function TransactionForm({
+  existing,
+  scope = 'one',
+  under = 0,
+}: {
+  existing?: Transaction;
+  scope?: Scope;
+  under?: number;
+}) {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const { today, profile, summary } = useMoneyMonth();
@@ -38,22 +76,26 @@ export default function AddTransactionScreen() {
   const bills = useActiveBills();
   const transactions = useAllTransactions();
 
-  const [kind, setKind] = useState<TransactionKind>('expense');
-  const [typed, setTyped] = useState('0');
-  const [picked, setPicked] = useState<CategoryId | null>(null);
-  const [date, setDate] = useState<CalendarDate | null>(null);
-  const [note, setNote] = useState('');
+  const currency: CurrencyCode = profile?.currency ?? existing?.currency ?? 'GEL';
+  const [kind, setKind] = useState<TransactionKind>(existing?.kind ?? 'expense');
+  const [typed, setTyped] = useState(existing ? typedOf(existing.amountMinor, currency) : '0');
+  const [picked, setPicked] = useState<CategoryId | null>(existing?.categoryId ?? null);
+  const [date, setDate] = useState<CalendarDate | null>(existing?.date ?? null);
+  const [note, setNote] = useState(existing?.note ?? '');
   const [writingNote, setWritingNote] = useState(false);
   const [pickingDay, setPickingDay] = useState(false);
   // Set on save: the sheet keeps showing what it said while it slides away,
   // instead of the line recomputed with the new transaction.
   const [savedMessage, setSavedMessage] = useState<AddMessage | null>(null);
 
-  const currency: CurrencyCode = profile?.currency ?? 'GEL';
   const categories = useCategories();
+  const adjust = existing?.source === 'adjustment';
   const options = categories.ofKind(kind);
-  const category =
-    picked && options.some((c) => c.id === picked) ? picked : (options[0]?.id ?? null);
+  const category = adjust
+    ? null
+    : picked && options.some((c) => c.id === picked)
+      ? picked
+      : (options[0]?.id ?? null);
   const day = date ?? today;
   const amountMinor = parseAmount(typed, currency) ?? 0;
   const categoryName = (id: CategoryId | null) => categories.get(id).label;
@@ -82,6 +124,34 @@ export default function AddTransactionScreen() {
   const save = (close: () => void) => {
     if (amountMinor <= 0 || savedMessage) return;
     setSavedMessage(live);
+    if (existing) {
+      const at = new Date(existing.occurredAt);
+      updateTransaction(
+        db,
+        existing.id,
+        {
+          kind,
+          amountMinor,
+          categoryId: category,
+          // Bills, salary and adjustments keep their names; what you typed is the title.
+          title:
+            existing.source === 'manual'
+              ? editedTitle(
+                  existing,
+                  categoryName(existing.categoryId),
+                  note,
+                  categoryName(category),
+                )
+              : existing.title,
+          note: note.trim() || null,
+          date: day,
+          occurredAt: day === existing.date ? at : occurredAt(day, at),
+        },
+        scope,
+      );
+      close();
+      return;
+    }
     addTransaction(db, {
       kind,
       amountMinor,
@@ -94,7 +164,29 @@ export default function AddTransactionScreen() {
     close();
   };
 
-  const title = kind === 'expense' ? t('addTransaction.newExpense') : t('addTransaction.newIncome');
+  const title = existing
+    ? kind === 'expense'
+      ? t('history.edit.editExpense')
+      : t('history.edit.editIncome')
+    : kind === 'expense'
+      ? t('addTransaction.newExpense')
+      : t('addTransaction.newIncome');
+
+  // "Fresh Market · added today, 13:15"
+  const added = existing
+    ? t(
+        existing.date === today
+          ? 'history.edit.addedToday'
+          : existing.date === addDays(today, -1)
+            ? 'history.edit.addedYesterday'
+            : 'history.edit.addedOn',
+        {
+          name: adjust ? t('history.adjusted') : existing.title,
+          date: shortDate(existing.date, i18n.language),
+          time: clockTime(existing.occurredAt),
+        },
+      )
+    : null;
 
   return (
     <>
@@ -136,30 +228,41 @@ export default function AddTransactionScreen() {
               />
             </View>
 
-            {message ? (
+            {added ? (
+              <View style={styles.messageRow}>
+                <View style={[styles.message, styles.added]}>
+                  <ClockIcon color={color.muted} />
+                  <Text numberOfLines={1} style={styles.addedText}>
+                    {added}
+                  </Text>
+                </View>
+              </View>
+            ) : message ? (
               <View style={styles.messageRow}>
                 <MessagePill message={message} currency={currency} />
               </View>
             ) : null}
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              accessibilityRole="radiogroup"
-              accessibilityLabel={t('addTransaction.category')}
-              style={styles.chips}
-              contentContainerStyle={styles.chipsContent}
-            >
-              {options.map((c) => (
-                <Chip
-                  key={c.id}
-                  tint={c.tint}
-                  label={c.label}
-                  selected={c.id === category}
-                  onPress={() => setPicked(c.id)}
-                />
-              ))}
-            </ScrollView>
+            {adjust ? null : (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                accessibilityRole="radiogroup"
+                accessibilityLabel={t('addTransaction.category')}
+                style={styles.chips}
+                contentContainerStyle={styles.chipsContent}
+              >
+                {options.map((c) => (
+                  <Chip
+                    key={c.id}
+                    tint={c.tint}
+                    label={c.label}
+                    selected={c.id === category}
+                    onPress={() => setPicked(c.id)}
+                  />
+                ))}
+              </ScrollView>
+            )}
 
             <View style={styles.extras}>
               <Press
@@ -203,14 +306,40 @@ export default function AddTransactionScreen() {
               <Numpad value={typed} onChange={setTyped} currency={currency} />
             </View>
 
-            <Button
-              label={
-                kind === 'expense' ? t('addTransaction.addExpense') : t('addTransaction.addIncome')
-              }
-              disabled={amountMinor <= 0}
-              onPress={() => save(close)}
-              style={styles.save}
-            />
+            {existing ? (
+              <View style={styles.editActions}>
+                <Press
+                  accessibilityRole="button"
+                  onPress={() =>
+                    router.push({
+                      pathname: '/transaction-delete',
+                      params: { id: existing.id, close: String(2 + under) },
+                    })
+                  }
+                  style={styles.delete}
+                >
+                  <TrashIcon color={color.danger} />
+                  <Text style={styles.deleteText}>{t('history.edit.delete')}</Text>
+                </Press>
+                <Button
+                  label={t('history.edit.save')}
+                  disabled={amountMinor <= 0}
+                  onPress={() => save(close)}
+                  style={styles.editSave}
+                />
+              </View>
+            ) : (
+              <Button
+                label={
+                  kind === 'expense'
+                    ? t('addTransaction.addExpense')
+                    : t('addTransaction.addIncome')
+                }
+                disabled={amountMinor <= 0}
+                onPress={() => save(close)}
+                style={styles.save}
+              />
+            )}
           </>
         )}
       </Sheet>
@@ -321,6 +450,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   messageText: { ...text.meta, fontFamily: text.label.fontFamily },
+  added: { backgroundColor: color.calmSoft, flexDirection: 'row', alignItems: 'center', gap: 6 },
+  addedText: { fontFamily: fontFamily.bold, fontSize: 13, color: color.muted, flexShrink: 1 },
+  editActions: { marginTop: 16, flexDirection: 'row', gap: 10 },
+  delete: {
+    width: 128,
+    height: size.button,
+    borderRadius: radius.pill,
+    backgroundColor: color.dangerSoft,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  deleteText: { fontFamily: fontFamily.bold, fontSize: 16, color: color.danger },
+  editSave: { flex: 1, boxShadow: shadow.cta },
   chips: { marginTop: 20, marginHorizontal: -24, flexGrow: 0 },
   chipsContent: { paddingHorizontal: 24, gap: 8 },
   extras: { marginTop: 12, flexDirection: 'row', gap: 8 },

@@ -216,10 +216,11 @@ export function BellIcon({ color }: { color: string }) {
   );
 }
 
-export function NoteIcon({ color }: { color: string }) {
+/** A pencil: the note field, and Edit. */
+export function NoteIcon({ color, size = 18 }: IconProps) {
   const s = line(color, 1.9);
   return (
-    <Svg width={18} height={18} viewBox="0 0 24 24" accessible={false}>
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
       <Path {...s} fill={color} fillOpacity={0.2} d="M14.5 5.5l4 4L9 19H5v-4z" />
       <Path {...s} d="M13 7l4 4" />
     </Svg>
@@ -360,6 +361,28 @@ export function SearchIcon({ color, size = 20 }: IconProps) {
     <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
       <Circle {...s} fill={color} fillOpacity={0.15} cx={11} cy={11} r={6.5} />
       <Path {...s} d="m16 16 4.5 4.5" />
+    </Svg>
+  );
+}
+
+/** "added today, 13:15" on the edit sheet. */
+export function ClockIcon({ color }: { color: string }) {
+  const s = line(color, 2.2);
+  return (
+    <Svg width={14} height={14} viewBox="0 0 24 24" accessible={false}>
+      <Circle {...s} cx={12} cy={12} r={8.5} />
+      <Path {...s} d="M12 7.5V12l3 2" />
+    </Svg>
+  );
+}
+
+/** An "i" in a circle: the notes on the details sheet. */
+export function InfoIcon({ color }: { color: string }) {
+  const s = line(color, 2.2);
+  return (
+    <Svg width={18} height={18} viewBox="0 0 24 24" accessible={false}>
+      <Circle {...s} cx={12} cy={12} r={8.5} />
+      <Path {...s} d="M12 11v5M12 7.8v.2" />
     </Svg>
   );
 }

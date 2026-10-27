@@ -9,7 +9,8 @@ import { EmptyClipboard } from '@/components/illustrations/EmptyClipboard';
 import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
 import { formatMoney } from '@/domain/money';
-import { dayGroups, monthSpent } from '@/features/history/history';
+import { dayGroups, isAutomatic, monthSpent } from '@/features/history/history';
+import { SwipeRow } from '@/features/history/SwipeRow';
 import { useDayLabel } from '@/features/history/useDayLabel';
 import { useAllTransactions, useProfile, useToday } from '@/features/live';
 import { HeaderButton } from '@/features/profile/SettingsHeader';
@@ -105,7 +106,25 @@ export default function HistoryScreen() {
                 </View>
                 <View style={styles.list}>
                   {item.rows.map((row) => (
-                    <TransactionRow key={row.id} transaction={row} variant="history" />
+                    <SwipeRow
+                      key={row.id}
+                      onEdit={() =>
+                        isAutomatic(row)
+                          ? router.push({ pathname: '/transaction-scope', params: { id: row.id } })
+                          : router.push({ pathname: '/add-transaction', params: { id: row.id } })
+                      }
+                      onDelete={() =>
+                        router.push({ pathname: '/transaction-delete', params: { id: row.id } })
+                      }
+                    >
+                      <TransactionRow
+                        transaction={row}
+                        variant="history"
+                        onPress={() =>
+                          router.push({ pathname: '/transaction', params: { id: row.id } })
+                        }
+                      />
+                    </SwipeRow>
                   ))}
                 </View>
               </View>
@@ -144,7 +163,7 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingVertical: 2,
-    paddingHorizontal: 12,
+    overflow: 'hidden',
     borderRadius: radius.card,
     borderCurve: 'continuous',
     backgroundColor: color.card,

@@ -133,7 +133,12 @@ export default function HistorySearchScreen() {
                 index === results.length - 1 && styles.itemLast,
               ]}
             >
-              <TransactionRow transaction={item} variant="search" day={dayLabel(item.date)} />
+              <TransactionRow
+                transaction={item}
+                variant="search"
+                day={dayLabel(item.date)}
+                onPress={() => router.push({ pathname: '/transaction', params: { id: item.id } })}
+              />
             </View>
           )}
         />
