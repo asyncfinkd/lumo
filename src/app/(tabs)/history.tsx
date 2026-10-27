@@ -12,6 +12,7 @@ import { dayGroups, isAutomatic, monthSpent } from '@/features/history/history';
 import { SwipeRow } from '@/features/history/SwipeRow';
 import { useDayLabel } from '@/features/history/useDayLabel';
 import { useAllTransactions, useProfile, useToday } from '@/features/live';
+import { usePullToRefresh } from '@/features/money/usePullToRefresh';
 import { HeaderButton } from '@/features/profile/SettingsHeader';
 import { TransactionRow } from '@/features/transactions/TransactionRow';
 import { color, fontFamily, radius, shadow, space, text } from '@/theme';
@@ -22,6 +23,7 @@ export default function HistoryScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const refreshControl = usePullToRefresh();
   const today = useToday();
   const profile = useProfile();
   const transactions = useAllTransactions();
@@ -84,6 +86,7 @@ export default function HistoryScreen() {
           ListHeaderComponent={header}
           contentContainerStyle={{ paddingBottom: space.screenBottom }}
           showsVerticalScrollIndicator={false}
+          refreshControl={refreshControl}
           initialNumToRender={6}
           windowSize={7}
           renderItem={({ item }) => {

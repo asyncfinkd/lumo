@@ -18,6 +18,7 @@ import {
   weekRange,
 } from '@/features/insights/insights';
 import { useAllTransactions, useMoneyMonth } from '@/features/live';
+import { usePullToRefresh } from '@/features/money/usePullToRefresh';
 import { color, radius, shadow, space, text } from '@/theme';
 
 type Range = 'week' | 'month';
@@ -27,6 +28,7 @@ type Range = 'week' | 'month';
 export default function InsightsScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const refreshControl = usePullToRefresh(insets.top);
   const [view, setView] = useState<Range>('month');
   const { today, profile, summary } = useMoneyMonth();
   const transactions = useAllTransactions();
@@ -54,6 +56,7 @@ export default function InsightsScreen() {
     <ScrollView
       contentContainerStyle={[styles.content, { paddingTop: insets.top }]}
       showsVerticalScrollIndicator={false}
+      refreshControl={refreshControl}
     >
       <Rise style={styles.header}>
         <Text accessibilityRole="header" style={styles.title}>
