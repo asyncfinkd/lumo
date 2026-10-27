@@ -10,6 +10,7 @@ type Listed = {
   amountMinor: number;
   date: CalendarDate;
   occurredAt: string;
+  createdAt: string;
   source: TransactionSource;
 };
 
@@ -17,7 +18,7 @@ export type DayGroup<T> = {
   date: CalendarDate;
   /** Came in minus went out that day; adjustments don't count. */
   totalMinor: number;
-  /** Earliest first, as on Home. */
+  /** The one added last first, as on Home. */
   rows: T[];
 };
 
@@ -43,7 +44,7 @@ export function dayGroups<T extends Listed>(transactions: readonly T[]): DayGrou
           t.source === 'adjustment' ? sum : sum + (t.kind === 'income' ? 1 : -1) * t.amountMinor,
         0,
       ),
-      rows: rows.sort((a, b) => a.occurredAt.localeCompare(b.occurredAt)),
+      rows: rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     }));
 }
 
