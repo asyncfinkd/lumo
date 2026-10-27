@@ -573,5 +573,9 @@
       "eveningTitle": "Anything to add today?",
       "eveningBody": "Nothing added yet today. It only takes a second."
     }
+  },
+  "launch": {
+    "opening": "Lumo is opening",
+    "private": "Everything stays on this phone"
   }
 }

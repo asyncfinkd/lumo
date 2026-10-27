@@ -387,6 +387,17 @@ export function SearchIcon({ color, size = 20 }: IconProps) {
   );
 }
 
+/** A padlock: "Everything stays on this phone" (Splash). */
+export function LockIcon({ color }: { color: string }) {
+  const s = line(color, 2.2);
+  return (
+    <Svg width={14} height={14} viewBox="0 0 24 24" accessible={false}>
+      <Rect {...s} fill={color} fillOpacity={0.2} x={5} y={10.5} width={14} height={10} rx={3} />
+      <Path {...s} d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" />
+    </Svg>
+  );
+}
+
 /** "Evening check-in" (ProfileReminders). */
 export function MoonIcon({ color }: { color: string }) {
   const s = line(color, 1.9);
