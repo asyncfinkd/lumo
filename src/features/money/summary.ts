@@ -23,6 +23,7 @@ export function summarizeMonth({
   incomes,
   bills,
   transactions,
+  jarEntries = [],
 }: {
   today: CalendarDate;
   payday: number;
@@ -31,6 +32,8 @@ export function summarizeMonth({
   bills: readonly { amountMinor: number }[];
   /** Every transaction: the balance needs all of them. */
   transactions: readonly MoneyTransaction[];
+  /** Money moved into savings jars comes off the balance. */
+  jarEntries?: readonly { amountMinor: number }[];
 }): MonthSummary {
   const period = payPeriod(today, payday);
   const sum = (rows: readonly { amountMinor: number }[]) =>
@@ -55,6 +58,6 @@ export function summarizeMonth({
     }),
     cameInMinor,
     wentOutMinor,
-    balanceMinor: totalBalance(transactions),
+    balanceMinor: totalBalance(transactions, jarEntries),
   };
 }

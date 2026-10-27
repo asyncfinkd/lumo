@@ -2,8 +2,10 @@ import { useMemo } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useScreenTop } from '@/components/useScreenTop';
-import { PlusIcon, SearchIcon } from '@/components/Icons';
+import { BottomFade, Orbs } from '@/components/Backdrop';
+import { ChevronLeftIcon, PlusIcon, SearchIcon } from '@/components/Icons';
 import { EmptyClipboard } from '@/components/illustrations/EmptyClipboard';
 import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
@@ -19,11 +21,12 @@ import { TransactionRow } from '@/features/transactions/TransactionRow';
 import { color, fontFamily, radius, shadow, space, text } from '@/theme';
 
 // History: every transaction by day, newest day first, with each day's total
-// (History, HistoryEmpty). A tab after the add button.
+// (History, HistoryEmpty). Opens from Home's "See all"; Savings has its tab.
 export default function HistoryScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const screenTop = useScreenTop();
+  const insets = useSafeAreaInsets();
   const refreshControl = usePullToRefresh();
   const today = useToday();
   const profile = useProfile();
@@ -53,7 +56,11 @@ export default function HistoryScreen() {
 
   return (
     <View style={[styles.root, { paddingTop: screenTop }]}>
+      <Orbs />
       <View style={styles.bar}>
+        <HeaderButton label={t('history.back')} onPress={() => router.back()}>
+          <ChevronLeftIcon color={color.ink} />
+        </HeaderButton>
         <HeaderButton label={t('history.search')} onPress={() => router.push('/history-search')}>
           <SearchIcon color={color.ink} />
         </HeaderButton>
@@ -86,7 +93,7 @@ export default function HistoryScreen() {
           data={groups}
           keyExtractor={(g) => g.date}
           ListHeaderComponent={header}
-          contentContainerStyle={{ paddingBottom: space.screenBottom }}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 48 }}
           showsVerticalScrollIndicator={false}
           refreshControl={refreshControl}
           initialNumToRender={6}
@@ -132,18 +139,17 @@ export default function HistoryScreen() {
           }}
         />
       )}
+      <BottomFade />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // The tabs layout draws the background and orbs.
-  root: { flex: 1 },
+  root: { flex: 1, backgroundColor: color.bg },
   bar: {
     paddingHorizontal: space.screen,
     flexDirection: 'row',
-    // A tab (no back button): search sits on the right.
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
   },
   header: { paddingTop: 12, paddingHorizontal: space.screen },
   title: { ...text.h1, color: color.ink },

@@ -12,6 +12,7 @@ import { budgetsQuery } from './budgets/repo';
 import { summarizeMonth } from './money/summary';
 import { useToday } from './money/useToday';
 import { profileQuery } from './profile/repo';
+import { jarEntriesQuery, openJarsQuery } from './savings/repo';
 import { billsQuery, incomesQuery } from './recurring/repo';
 import { allTransactions, transactionsBetween } from './transactions/repo';
 
@@ -48,6 +49,16 @@ export function useIncomes() {
   return useLiveQuery(incomesQuery(db)).data;
 }
 
+/** Savings jars still open, oldest first (Savings). */
+export function useJars() {
+  return useLiveQuery(openJarsQuery(db)).data;
+}
+
+/** Every move into or out of a jar: the balance takes them off. */
+export function useJarEntries() {
+  return useLiveQuery(jarEntriesQuery(db)).data;
+}
+
 export function useAllTransactions() {
   return useLiveQuery(allTransactions(db)).data;
 }
@@ -64,13 +75,21 @@ export function useMoneyMonth() {
   const incomes = useIncomes();
   const bills = useActiveBills();
   const transactions = useAllTransactions();
+  const jarEntries = useJarEntries();
 
   const summary = useMemo(
     () =>
       profile
-        ? summarizeMonth({ today, payday: profile.payday, incomes, bills, transactions })
+        ? summarizeMonth({
+            today,
+            payday: profile.payday,
+            incomes,
+            bills,
+            transactions,
+            jarEntries,
+          })
         : undefined,
-    [today, profile, incomes, bills, transactions],
+    [today, profile, incomes, bills, transactions, jarEntries],
   );
   return { today, profile, summary };
 }

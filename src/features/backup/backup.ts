@@ -20,6 +20,8 @@ const TABLES = {
   budgets: schema.budgets,
   transactions: schema.transactions,
   skippedOccurrences: schema.skippedOccurrences,
+  jars: schema.jars,
+  jarEntries: schema.jarEntries,
 } as const;
 
 type TableName = keyof typeof TABLES;

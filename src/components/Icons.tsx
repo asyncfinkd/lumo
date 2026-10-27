@@ -79,7 +79,7 @@ export function CategoryIcon({
   );
 }
 
-export type TabIconName = 'home' | 'insights' | 'budgets' | 'history' | 'profile';
+export type TabIconName = 'home' | 'insights' | 'budgets' | 'savings' | 'profile';
 
 export function TabIcon({ name, color }: { name: TabIconName; color: string }) {
   const s = line(color);
@@ -115,11 +115,19 @@ export function TabIcon({ name, color }: { name: TabIconName; color: string }) {
           <Path {...s} d="M6.5 6.5 15 3.8a1.5 1.5 0 0 1 2 1.4v1.3" />
         </>
       )}
-      {name === 'history' && (
-        // A receipt: every transaction, day by day.
+      {name === 'savings' && (
+        // A jar with a lid, a quarter full (Savings).
         <>
-          <Path {...s} fill={color} fillOpacity={0.22} d="M6 3.5h12v17l-3-2-3 2-3-2-3 2z" />
-          <Path {...s} d="M9 8.5h6M9 12.5h4" />
+          <Rect {...s} x={8} y={2.8} width={8} height={3.2} rx={1.4} />
+          <Path
+            {...s}
+            d="M9 6v1.2C6.6 8 5 10 5 12.6V17a4 4 0 0 0 4 4h6a4 4 0 0 0 4-4v-4.4C19 10 17.4 8 15 7.2V6"
+          />
+          <Path
+            fill={color}
+            fillOpacity={0.25}
+            d="M5.2 14.5h13.6V17a4 4 0 0 1-4 4H9.2a4 4 0 0 1-4-4z"
+          />
         </>
       )}
       {name === 'profile' && (

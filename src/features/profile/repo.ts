@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { newId as defaultNewId } from '@/db/id';
-import { profile, transactions, type Profile } from '@/db/schema';
+import { jarEntries, profile, transactions, type Profile } from '@/db/schema';
 import type { Db } from '@/db/types';
 import { balanceAdjustment, totalBalance } from '@/domain/balance';
 import type { CalendarDate } from '@/domain/dates';
@@ -84,7 +84,7 @@ export function markOnboarded(db: Db, at = new Date()): void {
 
 /** The total balance right now (#6), or `null` before a starting balance is set. */
 export function currentBalance(db: Db): number | null {
-  return totalBalance(db.select().from(transactions).all());
+  return totalBalance(db.select().from(transactions).all(), db.select().from(jarEntries).all());
 }
 
 /**

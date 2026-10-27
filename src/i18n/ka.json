@@ -14,6 +14,7 @@
     "insights": "ანალიზი",
     "budgets": "ბიუჯეტები",
     "history": "ისტორია",
+    "savings": "დანაზოგი",
     "profile": "პროფილი",
     "add": "ტრანზაქციის დამატება"
   },
@@ -239,6 +240,39 @@
     },
     "rowLabel": "{{category}}, {{amount}}, {{percent}}%",
     "percent": "{{percent}}%"
+  },
+  "savings": {
+    "title": "დანაზოგი",
+    "summary_one": "{{count}} ქილა · გადადებულია {{amount}}",
+    "summary_other": "{{count}} ქილა · გადადებულია {{amount}}",
+    "newJar": "ახალი ქილა",
+    "of": " / {{goal}}",
+    "ofBoth": "{{saved}} / {{goal}}",
+    "paceReady": "თვეში {{amount}} · მზად იქნება: {{month}}",
+    "paceAhead": "✨ გეგმას ერთი თვით უსწრებ",
+    "add": "ქილაში ჩადება",
+    "otherJars": "სხვა ქილები",
+    "tile": "{{amount}} · {{percent}}%",
+    "tileLabel": "{{name}}, {{amount}}, {{percent}}%",
+    "jarLabel": "ქილა „{{name}}“, სავსეა {{percent}}%-ით",
+    "toast": "{{amount}} ქილაშია. უკვე {{percent}}%!",
+    "addSheet": {
+      "title": "ჩადება: {{name}}",
+      "usual": "ჩვეული",
+      "after": "ამის შემდეგ",
+      "afterValue": "{{percent}}% · დარჩა {{left}}",
+      "onTrack": "გეგმით მზად იქნება: {{month}}",
+      "fills": "ეს ქილას აავსებს!",
+      "fromBalance": "გადადის ბალანსიდან · ახლა {{amount}}",
+      "drop": "ჩააგდე {{amount}} ქილაში"
+    },
+    "done": {
+      "title": "შენ შეძელი, {{name}}!",
+      "body_one": "დააგროვე „{{jar}}“-სთვის, წვეთ-წვეთად. დაგჭირდა {{count}} თვე.",
+      "body_other": "დააგროვე „{{jar}}“-სთვის, წვეთ-წვეთად. დაგჭირდა {{count}} თვე.",
+      "treat": "დროა, თავი გაანებივრო",
+      "keep": "ამ ქილაში დაზოგვის გაგრძელება"
+    }
   },
   "onboarding": {
     "step": "ნაბიჯი {{step}} / {{total}}",

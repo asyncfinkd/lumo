@@ -46,10 +46,14 @@ export function recentDays<T extends Listed>(
 export function monthChange(
   transactions: readonly (MoneyTransaction & { date: CalendarDate })[],
   today: CalendarDate,
+  jarEntries: readonly { amountMinor: number; date: CalendarDate }[] = [],
 ): { since: CalendarDate; deltaMinor: number } | null {
   const since = `${today.slice(0, 7)}-01`;
-  const start = totalBalance(transactions.filter((t) => t.date < since));
-  const now = totalBalance(transactions);
+  const start = totalBalance(
+    transactions.filter((t) => t.date < since),
+    jarEntries.filter((e) => e.date < since),
+  );
+  const now = totalBalance(transactions, jarEntries);
   if (start === null || now === null) return null;
   return { since, deltaMinor: now - start };
 }

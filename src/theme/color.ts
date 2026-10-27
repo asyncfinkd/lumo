@@ -133,6 +133,10 @@ export const gradient = {
   /** The warm glow behind the icon while Lumo opens (Splash). */
   launchHalo: 'radial-gradient(circle, rgba(255,226,170,0.75) 0%, rgba(255,226,170,0) 65%)',
   heroGlow: 'linear-gradient(150deg, rgba(255,241,204,0.45) 0%, rgba(255,255,255,0) 70%)',
+  /** Behind the featured jar (Savings). */
+  jarGlow: 'radial-gradient(circle, rgba(255,240,205,0.95) 0%, rgba(255,240,205,0) 68%)',
+  /** Behind the full jar (SavingsDone). */
+  jarDoneGlow: 'radial-gradient(circle, rgba(255,231,160,0.95) 0%, rgba(255,231,160,0) 66%)',
   bottomFade:
     'linear-gradient(180deg, rgba(251,247,242,0) 0%, rgba(251,247,242,0.8) 45%, #FBF7F2 100%)',
 } as const;
@@ -185,6 +189,61 @@ export const noCategoryColors: CategoryColors = {
   chart: '#CFC5BC',
   chip: '#5E554F',
 };
+
+/**
+ * The savings jar (Jar board): each tone's liquid top, deep color and coins,
+ * plus the glass, lid and falling coin every jar shares.
+ */
+export const jarColor = {
+  tone: {
+    gold: { top: '#FFE4A0', deep: '#F6BC55', coins: '#E0A53E', swatch: '#F6BC55' },
+    sky: { top: '#D6E8FA', deep: '#93BDE8', coins: '#6E9FCF', swatch: '#93BDE8' },
+    blush: { top: '#FCDDE4', deep: '#F0A2B4', coins: '#D9849A', swatch: '#F0A2B4' },
+    sage: { top: '#D6EEDD', deep: '#8FC4A6', coins: '#6BAF8D', swatch: '#8FC4A6' },
+  },
+  shadow: 'rgba(160,110,70,0.16)',
+  glass: 'rgba(255,255,255,0.72)',
+  rim: 'rgba(255,255,255,0.95)',
+  shine: '#FFFFFF',
+  neck: '#F3E7DB',
+  lid: '#D9B48C',
+  lidBand: '#E9CCA9',
+  coin: '#F7C15E',
+  coinRing: '#E2A243',
+  coinMark: '#FFF1C9',
+  sparks: ['#F5C86A', '#F6B8A0', '#8FC4A6'],
+  /** The small "%" next to the number on the jar. */
+  percentSign: '#6F5A44',
+} as const;
+
+/** Savings screens around the jar (Savings, SavingsAdd, SavingsDone). */
+export const savingsColor = {
+  /** The pace pill ("₾300 a month · ready by February"). */
+  paceBg: 'rgba(255,240,199,0.9)',
+  paceText: '#8A6418',
+  /** "After this" card on the add sheet. */
+  afterBg: 'rgba(255,240,199,0.55)',
+  afterLabel: '#6F5A44',
+  afterTrack: 'rgba(255,255,255,0.8)',
+  afterFill: '#FFD98A',
+  nowFill: '#F6BC55',
+  chipOn: '#FFE39A',
+  chipNote: '#A0761C',
+  toastCoin: '#FFF0C7',
+  /** The dashed "New jar" tile. */
+  newTileBorder: 'rgba(43,37,34,0.14)',
+  doneOrb: '#FFE3A3',
+  confetti: [
+    '#F6BC55',
+    '#F2845C',
+    '#8FC4A6',
+    '#94BDE6',
+    '#F0A2B4',
+    '#F6BC55',
+    '#B7A3DA',
+    '#F2845C',
+  ],
+} as const;
 
 /** ProfilePhotoSheet's colors for the initial when there's no photo. */
 export const avatarColor = {

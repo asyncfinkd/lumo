@@ -27,7 +27,7 @@ describe('GlassTabBar', () => {
     await renderBar('insights');
     // Budgets is off in phase 1 (features/flags.ts).
     expect(screen.queryByRole('tab', { name: 'Budgets' })).toBeNull();
-    for (const name of ['Home', 'Insights', 'History', 'Profile']) {
+    for (const name of ['Home', 'Insights', 'Savings', 'Profile']) {
       expect(screen.getByRole('tab', { name })).toBeOnTheScreen();
     }
     expect(screen.getByRole('tab', { name: 'Insights' })).toBeSelected();
@@ -36,8 +36,8 @@ describe('GlassTabBar', () => {
 
   it('switches tabs', async () => {
     const { onChange } = await renderBar();
-    await fireEvent.press(screen.getByRole('tab', { name: 'History' }));
-    expect(onChange).toHaveBeenCalledWith('history');
+    await fireEvent.press(screen.getByRole('tab', { name: 'Savings' }));
+    expect(onChange).toHaveBeenCalledWith('savings');
   });
 
   it('opens the add sheet with a light haptic', async () => {

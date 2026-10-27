@@ -111,7 +111,10 @@ function AppStack({ onLoaded }: { onLoaded: () => void }) {
               name="transaction-scope"
               options={{ ...sheetOptions, animation: 'fade' }}
             />
+            <Stack.Screen name="history" />
             <Stack.Screen name="history-search" options={{ animation: 'fade' }} />
+            <Stack.Screen name="savings-add" options={sheetOptions} />
+            <Stack.Screen name="savings-done" options={{ animation: 'fade' }} />
             <Stack.Screen name="edit-budget" options={sheetOptions} />
             <Stack.Screen name="profile-photo" options={sheetOptions} />
             <Stack.Screen name="profile-name" />
