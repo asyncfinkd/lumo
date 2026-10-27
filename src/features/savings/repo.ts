@@ -1,5 +1,6 @@
 // Savings jars (Savings, SavingsAdd, SavingsNew, SavingsDone). Money in a jar
-// is a jar entry, not a transaction: it leaves the balance and nothing else.
+// is a jar entry, not a transaction: it leaves the balance and shows in History
+// (HistoryJars), but never counts as spending or income.
 
 import { and, asc, eq, isNull, sql } from 'drizzle-orm';
 import { newId as defaultNewId } from '@/db/id';
@@ -10,6 +11,11 @@ import type { Cadence, JarTone } from './savings';
 
 export function openJarsQuery(db: Db) {
   return db.select().from(jars).where(isNull(jars.closedAt)).orderBy(asc(jars.createdAt));
+}
+
+/** Every jar, closed ones too: History still names them. */
+export function allJarsQuery(db: Db) {
+  return db.select().from(jars);
 }
 
 export function jarEntriesQuery(db: Db) {

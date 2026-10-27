@@ -72,6 +72,14 @@
     "auto": "Auto",
     "autoBill": "Auto · bill",
     "autoSalary": "Auto · salary",
+    "jar": {
+      "title": "{{name}} jar",
+      "in": "Put in · {{time}}",
+      "out": "Taken out · {{time}}",
+      "done": "All back · {{time}}",
+      "doneTag": "Done",
+      "open": "Opens Savings"
+    },
     "searchScreen": {
       "label": "Search transactions",
       "placeholder": "Shop, category or amount",

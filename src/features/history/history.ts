@@ -3,6 +3,8 @@
 
 import { addDays, type CalendarDate } from '@/domain/dates';
 import type { TransactionKind, TransactionSource } from '@/domain/leftToSpend';
+import type { CurrencyCode } from '@/domain/money';
+import type { JarTone } from '@/features/savings/savings';
 
 type Listed = {
   id: string;
@@ -46,6 +48,96 @@ export function dayGroups<T extends Listed>(transactions: readonly T[]): DayGrou
       ),
       rows: rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     }));
+}
+
+/**
+ * A jar row in History (HistoryJars): money put in, taken out, or all of it
+ * back when the jar closed ("Done").
+ */
+export type JarMove = {
+  id: string;
+  jarId: string;
+  name: string;
+  tone: JarTone;
+  /** Positive into the jar, negative back to the balance. */
+  amountMinor: number;
+  currency: CurrencyCode;
+  date: CalendarDate;
+  createdAt: string;
+  move: 'in' | 'out' | 'done';
+};
+
+/**
+ * Every jar entry as a History row. A closed jar's last move out is the one
+ * "Time to treat yourself" made: everything back, so it reads "Done".
+ */
+export function jarMoves(
+  entries: readonly {
+    id: string;
+    jarId: string;
+    amountMinor: number;
+    date: CalendarDate;
+    createdAt: string;
+  }[],
+  jars: readonly {
+    id: string;
+    name: string;
+    tone: JarTone;
+    currency: CurrencyCode;
+    closedAt: string | null;
+  }[],
+): JarMove[] {
+  const byId = new Map(jars.map((j) => [j.id, j]));
+  const lastOut = new Map<string, { id: string; createdAt: string }>();
+  for (const e of entries) {
+    if (e.amountMinor >= 0) continue;
+    const prev = lastOut.get(e.jarId);
+    if (!prev || e.createdAt >= prev.createdAt) lastOut.set(e.jarId, e);
+  }
+  const moves: JarMove[] = [];
+  for (const e of entries) {
+    const jar = byId.get(e.jarId);
+    if (!jar || e.amountMinor === 0) continue;
+    moves.push({
+      id: e.id,
+      jarId: jar.id,
+      name: jar.name,
+      tone: jar.tone,
+      amountMinor: e.amountMinor,
+      currency: jar.currency,
+      date: e.date,
+      createdAt: e.createdAt,
+      move:
+        e.amountMinor > 0
+          ? 'in'
+          : jar.closedAt && lastOut.get(jar.id)?.id === e.id
+            ? 'done'
+            : 'out',
+    });
+  }
+  return moves;
+}
+
+/**
+ * History's days with the jar moves in among the transactions, the one added
+ * last first. A day's total stays what came in minus what went out: moving
+ * money into a jar isn't spending, and taking it out isn't income.
+ */
+export function withJarMoves<T extends { createdAt: string }>(
+  groups: readonly DayGroup<T>[],
+  moves: readonly JarMove[],
+): DayGroup<T | JarMove>[] {
+  const byDate = new Map<CalendarDate, DayGroup<T | JarMove>>(
+    groups.map((g) => [g.date, { ...g, rows: [...g.rows] }]),
+  );
+  for (const m of moves) {
+    const day = byDate.get(m.date);
+    if (day) day.rows.push(m);
+    else byDate.set(m.date, { date: m.date, totalMinor: 0, rows: [m] });
+  }
+  return [...byDate.values()]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .map((g) => ({ ...g, rows: g.rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt)) }));
 }
 
 /** "today", "yesterday", or the date to show as "Sat, Oct 24". */

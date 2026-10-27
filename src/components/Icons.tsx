@@ -410,6 +410,39 @@ export function RepeatIcon({ color, size = 20, width = 1.9 }: IconProps & { widt
   );
 }
 
+/** A jar a third full: the tile on History's jar rows (HistoryJars). */
+export function JarIcon({ color }: { color: string }) {
+  const s = line(color);
+  return (
+    <Svg width={24} height={24} viewBox="0 0 24 24" accessible={false}>
+      <Path
+        fill={color}
+        fillOpacity={0.3}
+        d="M5.1 13.4h13.8V17a3.5 3.5 0 0 1-3.5 3.5H8.6A3.5 3.5 0 0 1 5.1 17z"
+      />
+      <Rect {...s} fill={color} fillOpacity={0.22} x={8} y={3.3} width={8} height={3} rx={1.2} />
+      <Path
+        {...s}
+        d="M8.6 6.3v1.1C6.5 8.3 5 10.3 5 12.7V17a3.5 3.5 0 0 0 3.5 3.5h7A3.5 3.5 0 0 0 19 17v-4.3c0-2.4-1.5-4.4-3.6-5.3V6.3"
+      />
+    </Svg>
+  );
+}
+
+/** The badge on a jar row: down into the jar, up out of it, or a tick when it's done. */
+export function JarMoveIcon({ move, color }: { move: 'in' | 'out' | 'done'; color: string }) {
+  const d = {
+    in: 'M12 5v12M7 12.5l5 5 5-5',
+    out: 'M12 19V7M7 11.5l5-5 5 5',
+    done: 'm6 12.5 4 4 8-9',
+  }[move];
+  return (
+    <Svg width={12} height={12} viewBox="0 0 24 24" accessible={false}>
+      <Path {...line(color, 3)} d={d} />
+    </Svg>
+  );
+}
+
 export function ChevronLeftIcon({ color, size = 20 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>

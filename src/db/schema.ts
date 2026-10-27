@@ -200,7 +200,8 @@ export const jars = sqliteTable(
 
 /**
  * Money moved into a jar (+) or back out (−). It leaves the balance on Home
- * but isn't a transaction: History, Went out and Insights never see it.
+ * but isn't a transaction: History lists it (HistoryJars), but Went out,
+ * budgets and Insights' spending never count it.
  */
 export const jarEntries = sqliteTable(
   'jar_entries',

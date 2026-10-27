@@ -1,5 +1,12 @@
 import type { TransactionKind, TransactionSource } from '@/domain/leftToSpend';
-import { dayGroups, dayName, monthSpent, searchTransactions } from '../history';
+import {
+  dayGroups,
+  dayName,
+  jarMoves,
+  monthSpent,
+  searchTransactions,
+  withJarMoves,
+} from '../history';
 
 type Row = {
   id: string;
@@ -125,5 +132,68 @@ describe('searchTransactions', () => {
     expect(ids('', 'auto')).toEqual(['salary', 'spotify']);
     expect(ids('', 'spending')).not.toContain('adjust');
     expect(ids('')).toContain('adjust');
+  });
+});
+
+describe('jar moves (HistoryJars)', () => {
+  const jars = [
+    {
+      id: 'trip',
+      name: 'Summer trip',
+      tone: 'blush' as const,
+      currency: 'GEL' as const,
+      closedAt: null,
+    },
+    {
+      id: 'concert',
+      name: 'Concert',
+      tone: 'sage' as const,
+      currency: 'GEL' as const,
+      closedAt: '2026-09-24T11:00:00.000Z',
+    },
+  ];
+  const entry = (id: string, jarId: string, amountMinor: number, date: string, at: string) => ({
+    id,
+    jarId,
+    amountMinor,
+    date,
+    createdAt: `${date}T${at}:00.000Z`,
+  });
+  const entries = [
+    entry('t1', 'trip', 10000, '2026-10-27', '12:30'),
+    entry('t2', 'trip', -5000, '2026-10-26', '19:10'),
+    entry('c1', 'concert', 18000, '2026-09-01', '09:00'),
+    entry('c2', 'concert', -3000, '2026-09-10', '09:00'),
+    entry('c3', 'concert', -15000, '2026-09-24', '11:00'),
+  ];
+
+  it('names each move: put in, taken out, and the closing one as done', () => {
+    const moves = jarMoves(entries, jars);
+    expect(Object.fromEntries(moves.map((m) => [m.id, m.move]))).toEqual({
+      t1: 'in',
+      t2: 'out',
+      c1: 'in',
+      c2: 'out',
+      c3: 'done',
+    });
+    expect(moves.find((m) => m.id === 't1')).toMatchObject({ name: 'Summer trip', tone: 'blush' });
+  });
+
+  it('a taken-out move on an open jar is never done', () => {
+    const moves = jarMoves([entry('x', 'trip', -100, '2026-10-27', '10:00')], jars);
+    expect(moves[0]!.move).toBe('out');
+  });
+
+  it('puts them among the days without changing the totals', () => {
+    const groups = withJarMoves(dayGroups(rows), jarMoves(entries, jars));
+    const today = groups.find((g) => g.date === '2026-10-27')!;
+    expect(today.totalMinor).toBe(dayGroups(rows).find((g) => g.date === '2026-10-27')!.totalMinor);
+    expect(today.rows.map((r) => r.id)).toContain('t1');
+    // A day with only a jar move still shows, at zero.
+    const closed = groups.find((g) => g.date === '2026-09-24')!;
+    expect(closed).toMatchObject({ totalMinor: 0 });
+    expect(closed.rows.map((r) => r.id)).toEqual(['c3']);
+    // Newest day first, newest row first.
+    expect(groups.map((g) => g.date)).toEqual([...groups.map((g) => g.date)].sort().reverse());
   });
 });
