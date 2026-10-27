@@ -15,6 +15,7 @@ import { LeftToSpendCard } from '@/features/home/LeftToSpendCard';
 import { useHour } from '@/features/home/useHour';
 import { Avatar } from '@/features/profile/Avatar';
 import { useAllTransactions, useMoneyMonth, useTransactionsBetween } from '@/features/live';
+import { usePullToRefresh } from '@/features/money/usePullToRefresh';
 import { TransactionRow } from '@/features/transactions/TransactionRow';
 import { color, fontFamily, radius, shadow, size, space, text } from '@/theme';
 
@@ -24,6 +25,7 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const refreshControl = usePullToRefresh(insets.top);
   const hour = useHour();
   const { today, profile, summary } = useMoneyMonth();
   const recent = recentDays(useTransactionsBetween(addDays(today, -1), addDays(today, 1)), today);
@@ -37,6 +39,7 @@ export default function HomeScreen() {
     <ScrollView
       contentContainerStyle={[styles.content, { paddingTop: insets.top }]}
       showsVerticalScrollIndicator={false}
+      refreshControl={refreshControl}
     >
       <Rise style={styles.header}>
         {/* The same avatar as Profile: your photo, or your initial on its color. */}
