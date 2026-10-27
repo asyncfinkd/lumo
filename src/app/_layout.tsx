@@ -13,6 +13,7 @@ import { Placeholder } from '@/components/Placeholder';
 import { useDatabase } from '@/db/useDatabase';
 import { CategoriesProvider } from '@/features/categories/CategoriesProvider';
 import { LaunchScreen } from '@/features/launch/LaunchScreen';
+import { AppLock } from '@/features/lock/AppLock';
 import { AmountsHiddenContext } from '@/features/privacy/amounts';
 import { useProfileStatus } from '@/features/live';
 import { DueTransactionsSync } from '@/features/recurring/DueTransactionsSync';
@@ -144,6 +145,7 @@ function AppStack({ onLoaded }: { onLoaded: () => void }) {
           </Stack.Protected>
           <Stack.Screen name="dev-reset" />
         </Stack>
+        {onboarded ? <AppLock enabled={profile?.appLock ?? false} /> : null}
       </AmountsHiddenContext.Provider>
     </CategoriesProvider>
   );

@@ -3,6 +3,8 @@
 
 export const shadow = {
   card: '0px 6px 20px -10px rgba(200,145,106,0.16)',
+  /** The Lumo tile on the lock screen (LockScreen). */
+  lockTile: 'inset 0px 0px 0px 1px rgba(255,255,255,0.9), 0px 16px 32px -16px rgba(120,70,40,0.45)',
   hero: 'inset 0px 0px 0px 1px rgba(255,255,255,0.85), 0px 12px 40px 0px rgba(200,145,106,0.12)',
   nav: 'inset 0px 0px 0px 1px rgba(255,255,255,0.85), 0px 12px 32px -10px rgba(200,145,106,0.25)',
   fab: 'inset 0px 1.5px 0px 0px rgba(255,255,255,0.45), 0px 8px 20px -4px rgba(242,132,92,0.45)',

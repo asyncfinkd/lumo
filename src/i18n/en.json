@@ -331,6 +331,20 @@
     "languageName": "English",
     "export": "Export my data",
     "exportFormat": "CSV · PDF",
+    "lock": {
+      "title": {
+        "faceid": "Lock with Face ID",
+        "touchid": "Lock with Touch ID",
+        "fingerprint": "Lock with fingerprint"
+      },
+      "off": "Keep your money private",
+      "on": "Asked each time Lumo opens",
+      "setUp": {
+        "faceid": "Set up Face ID in Settings first",
+        "touchid": "Set up Touch ID in Settings first",
+        "fingerprint": "Set up a fingerprint in Settings first"
+      }
+    },
     "footer": "Lumo {{version}} · made with care",
     "deleteAll": {
       "row": "Delete all data",
@@ -599,5 +613,18 @@
     "failedTitle": "Couldn’t restore",
     "invalid": "This file isn’t a Lumo backup, or it’s damaged.",
     "newer": "This backup was made by a newer Lumo. Update Lumo, then try again."
+  },
+  "lock": {
+    "title": "Lumo is locked",
+    "body": "Your money stays private until you unlock.",
+    "failedTitle": "Didn’t recognize you",
+    "failedBody": "No worries, it happens. Try again whenever you’re ready.",
+    "unlock": {
+      "faceid": "Unlock with Face ID",
+      "touchid": "Unlock with Touch ID",
+      "fingerprint": "Unlock with fingerprint"
+    },
+    "passcodeHint": "After a few tries, your phone will ask for its passcode instead.",
+    "prompt": "Unlock Lumo"
   }
 }

@@ -55,6 +55,11 @@ export function setHideAmounts(db: Db, hide: boolean): void {
   db.update(profile).set({ hideAmounts: hide }).run();
 }
 
+/** App lock (ProfileLockFaceID): ask for Face ID / Touch ID / fingerprint on open. */
+export function setAppLock(db: Db, on: boolean): void {
+  db.update(profile).set({ appLock: on }).run();
+}
+
 /** `null` follows the phone's language again. */
 export function setLanguage(db: Db, language: 'en' | 'ka' | null): void {
   db.update(profile).set({ language }).run();

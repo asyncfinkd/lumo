@@ -51,6 +51,8 @@ export const profile = sqliteTable('profile', {
   remindEvening: integer('remind_evening', { mode: 'boolean' }).notNull().default(false),
   /** The eye on Home's balance card: amounts blurred until shown again (Main). */
   hideAmounts: integer('hide_amounts', { mode: 'boolean' }).notNull().default(false),
+  /** Face ID / Touch ID / fingerprint each time Lumo opens (ProfileLockFaceID, #24). */
+  appLock: integer('app_lock', { mode: 'boolean' }).notNull().default(false),
   /** The app's language (ProfileLanguage); `null` follows the phone's. */
   language: text('language', { enum: ['en', 'ka'] }),
 });
