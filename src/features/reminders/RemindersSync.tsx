@@ -18,10 +18,11 @@ import {
   useIncomes,
   useMoneyMonth,
 } from '@/features/live';
+import { JAR_REMINDER_PREFIX } from '@/features/savings/reminders';
 import { Notifications } from './notifications';
 import { newlyLow, outsideQuietHours, planReminders } from './plan';
 
-const CHANNEL = 'reminders';
+export const CHANNEL = 'reminders';
 
 // Shown as a banner even while Lumo is open, without a sound: gentle.
 Notifications?.setNotificationHandler({
@@ -54,7 +55,10 @@ export async function askForNotifications(): Promise<boolean> {
   return result.granted || result.ios?.status === IosAuthorizationStatus.AUTHORIZED;
 }
 
-/** Cancels the planned reminders, but not a "budget running low" waiting for 8:00. */
+/**
+ * Cancels the planned reminders, but not a "budget running low" waiting for
+ * 8:00 or a jar's own reminder (JarRemindersSync).
+ */
 async function clearPlanned() {
   const N = Notifications;
   if (!N) return;
@@ -62,11 +66,12 @@ async function clearPlanned() {
   await Promise.all(
     pending
       .filter((n) => !n.identifier.startsWith('low-'))
+      .filter((n) => !n.identifier.startsWith(JAR_REMINDER_PREFIX))
       .map((n) => N.cancelScheduledNotificationAsync(n.identifier)),
   );
 }
 
-async function ensureChannel(name: string) {
+export async function ensureChannel(name: string) {
   if (Platform.OS !== 'android') return;
   if (!Notifications) return;
   await Notifications.setNotificationChannelAsync(CHANNEL, {

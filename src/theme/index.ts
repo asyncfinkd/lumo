@@ -6,7 +6,9 @@ export {
   color,
   currencyColor,
   gradient,
+  jarColor,
   noCategoryColors,
+  savingsColor,
 } from './color';
 export { fontFamily, tabularNums, text } from './font';
 export { curve, duration, pressScale } from './motion';

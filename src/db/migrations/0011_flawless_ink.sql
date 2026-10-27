@@ -1,0 +1,1 @@
+ALTER TABLE `jars` ADD `remind_at` text;

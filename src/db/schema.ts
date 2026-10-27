@@ -167,6 +167,55 @@ export const skippedOccurrences = sqliteTable(
   (t) => [uniqueIndex('skipped_occurrences_idx').on(t.recurringId, t.date)],
 );
 
+/** A savings jar (Savings, SavingsNew). Its money is in `jarEntries`. */
+export const jars = sqliteTable(
+  'jars',
+  {
+    ...base,
+    name: text('name').notNull(),
+    /** The jar's color (SavingsNew): Honey, Sky, Blush or Sage. */
+    tone: text('tone', { enum: ['gold', 'sky', 'blush', 'sage'] }).notNull(),
+    goalMinor: integer('goal_minor').notNull(),
+    /**
+     * "Each day" or "Each month": the plan the pace line is measured against.
+     * The column kept its first name from when every jar was monthly.
+     */
+    planMinor: integer('monthly_minor').notNull(),
+    cadence: text('cadence', { enum: ['day', 'month'] })
+      .notNull()
+      .default('month'),
+    currency: text('currency', { enum: currencyCodes }).notNull(),
+    /** Local date it was made: month 0 of the plan. */
+    startDate: text('start_date').notNull(),
+    /** "Remind me" at this local time, "22:00"; `null` when off. */
+    remindAt: text('remind_at'),
+    /** Set by "Time to treat yourself" (SavingsDone); the money went back. */
+    closedAt: text('closed_at'),
+  },
+  (t) => [
+    check('jars_goal_positive', sql`${t.goalMinor} > 0`),
+    check('jars_monthly_positive', sql`${t.planMinor} > 0`),
+  ],
+);
+
+/**
+ * Money moved into a jar (+) or back out (−). It leaves the balance on Home
+ * but isn't a transaction: History, Went out and Insights never see it.
+ */
+export const jarEntries = sqliteTable(
+  'jar_entries',
+  {
+    ...base,
+    jarId: text('jar_id')
+      .notNull()
+      .references(() => jars.id),
+    /** Positive into the jar, negative out of it. */
+    amountMinor: integer('amount_minor').notNull(),
+    date: text('date').notNull(),
+  },
+  (t) => [index('jar_entries_jar_idx').on(t.jarId)],
+);
+
 export type Profile = typeof profile.$inferSelect;
 export type Category = typeof categories.$inferSelect;
 export type Transaction = typeof transactions.$inferSelect;
@@ -174,3 +223,5 @@ export type NewTransaction = typeof transactions.$inferInsert;
 export type Budget = typeof budgets.$inferSelect;
 export type RecurringBill = typeof recurringBills.$inferSelect;
 export type Income = typeof incomes.$inferSelect;
+export type Jar = typeof jars.$inferSelect;
+export type JarEntry = typeof jarEntries.$inferSelect;

@@ -5,15 +5,20 @@ import type { MoneyTransaction, TransactionKind } from './leftToSpend';
 
 /**
  * All the money you have: every transaction ever, income + and expense −,
- * adjustments included. `null` until the user sets a starting balance, which
+ * adjustments included, less what sits in savings jars ("Moves from your
+ * balance", SavingsAdd). `null` until the user sets a starting balance, which
  * is stored as the first adjustment; the Home card then shows "Add your balance".
  */
-export function totalBalance(transactions: readonly MoneyTransaction[]): number | null {
+export function totalBalance(
+  transactions: readonly MoneyTransaction[],
+  jarEntries: readonly { amountMinor: number }[] = [],
+): number | null {
   if (!transactions.some((t) => t.source === 'adjustment')) return null;
-  return transactions.reduce(
+  const free = transactions.reduce(
     (sum, t) => sum + (t.kind === 'income' ? t.amountMinor : -t.amountMinor),
     0,
   );
+  return jarEntries.reduce((sum, e) => sum - e.amountMinor, free);
 }
 
 /**

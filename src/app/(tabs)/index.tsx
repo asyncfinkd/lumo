@@ -16,7 +16,12 @@ import { greetingKey, monthChange, recentDays } from '@/features/home/home';
 import { LeftToSpendCard } from '@/features/home/LeftToSpendCard';
 import { useHour } from '@/features/home/useHour';
 import { Avatar } from '@/features/profile/Avatar';
-import { useAllTransactions, useMoneyMonth, useTransactionsBetween } from '@/features/live';
+import {
+  useAllTransactions,
+  useJarEntries,
+  useMoneyMonth,
+  useTransactionsBetween,
+} from '@/features/live';
 import { usePullToRefresh } from '@/features/money/usePullToRefresh';
 import { TransactionRow } from '@/features/transactions/TransactionRow';
 import { color, fontFamily, radius, shadow, size, space, text } from '@/theme';
@@ -32,7 +37,11 @@ export default function HomeScreen() {
   const { today, profile, summary } = useMoneyMonth();
   const recent = recentDays(useTransactionsBetween(addDays(today, -1), addDays(today, 1)), today);
   const transactions = useAllTransactions();
-  const change = useMemo(() => monthChange(transactions, today), [transactions, today]);
+  const jarEntries = useJarEntries();
+  const change = useMemo(
+    () => monthChange(transactions, today, jarEntries),
+    [transactions, today, jarEntries],
+  );
 
   if (!profile || !summary) return null;
   const name = profile.name.trim();
@@ -96,7 +105,7 @@ export default function HomeScreen() {
           <Text accessibilityRole="header" style={styles.section}>
             {t('home.today')}
           </Text>
-          <Press accessibilityRole="link" onPress={() => router.navigate('/history')} hitSlop={12}>
+          <Press accessibilityRole="link" onPress={() => router.push('/history')} hitSlop={12}>
             <Text style={styles.seeAll}>{t('home.seeAll')}</Text>
           </Press>
         </View>

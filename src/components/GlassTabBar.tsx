@@ -12,9 +12,10 @@ import { Press } from './Press';
 export type Tab = TabIconName;
 export type BlurTarget = RefObject<ComponentRef<typeof View> | null>;
 
-// Budgets is off in phase 1 (features/flags.ts): Home, Insights, +, History, Profile.
+// Budgets is off in phase 1 (features/flags.ts): Home, Insights, +, Savings, Profile.
+// History opens from Home's "See all".
 const SLOTS: (Tab | 'add')[] = (
-  ['home', 'insights', 'add', 'history', 'budgets', 'profile'] as const
+  ['home', 'insights', 'add', 'savings', 'budgets', 'profile'] as const
 ).filter((slot) => BUDGETING || slot !== 'budgets');
 const PAD = 6;
 

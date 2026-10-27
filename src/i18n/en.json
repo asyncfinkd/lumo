@@ -14,6 +14,7 @@
     "insights": "Insights",
     "budgets": "Budgets",
     "history": "History",
+    "savings": "Savings",
     "profile": "Profile",
     "add": "Add transaction"
   },
@@ -239,6 +240,99 @@
     },
     "rowLabel": "{{category}}, {{amount}}, {{percent}}%",
     "percent": "{{percent}}%"
+  },
+  "savings": {
+    "title": "Savings",
+    "summary_one": "{{count}} jar · {{amount}} put away",
+    "summary_other": "{{count}} jars · {{amount}} put away",
+    "newJar": "New jar",
+    "of": " of {{goal}}",
+    "ofBoth": "{{saved}} of {{goal}}",
+    "paceReady": {
+      "day": "{{amount}} a day · ready by {{month}}",
+      "month": "{{amount}} a month · ready by {{month}}"
+    },
+    "paceAhead": {
+      "week": "✨ A week ahead of plan",
+      "month": "✨ A month ahead of plan"
+    },
+    "add": "Add to jar",
+    "otherJars": "Other jars",
+    "tile": "{{amount}} · {{percent}}%",
+    "tileLabel": "{{name}}, {{amount}}, {{percent}}%",
+    "jarLabel": "{{name}} jar, {{percent}} percent full",
+    "toast": "{{amount}} in the jar. {{percent}}% there!",
+    "addSheet": {
+      "title": "Add to {{name}}",
+      "usual": "USUAL",
+      "after": "After this",
+      "afterValue": "{{percent}}% · {{left}} to go",
+      "onTrack": "Still on track for {{month}}",
+      "fills": "That fills the jar!",
+      "fromBalance": "Moves from your balance · {{amount}} now",
+      "drop": "Drop {{amount}} in the jar"
+    },
+    "done": {
+      "title": "You did it, {{name}}!",
+      "body_one": "saved for {{jar}}, one little drop at a time. Took you {{count}} month.",
+      "body_other": "saved for {{jar}}, one little drop at a time. Took you {{count}} months.",
+      "treat": "Time to treat yourself",
+      "keep": "Keep saving in this jar"
+    },
+    "takeOut": "Take money out",
+    "empty": {
+      "title": "No jars yet",
+      "body": "Pick something to save for, and drop a little in whenever you can."
+    },
+    "outSheet": {
+      "title": "Take from {{name}}",
+      "all": "ALL",
+      "readyBy": "Now ready by {{month}}",
+      "toBalance": "Goes back to your balance · {{amount}} now",
+      "take": "Take {{amount}} out"
+    },
+    "new": {
+      "namePlaceholder": "What are you saving for?",
+      "goal": "Goal",
+      "monthly": "Each month",
+      "less": {
+        "day": "{{amount}} less each day",
+        "month": "{{amount}} less each month"
+      },
+      "more": {
+        "day": "{{amount}} more each day",
+        "month": "{{amount}} more each month"
+      },
+      "fullBy": "Full by {{month}}",
+      "create": "Create jar",
+      "tones": {
+        "gold": "Honey jar",
+        "sky": "Sky jar",
+        "blush": "Blush jar",
+        "sage": "Sage jar"
+      },
+      "cadence": "How often",
+      "day": "Day",
+      "month": "Month",
+      "daily": "Each day",
+      "remind": "Remind me",
+      "remindersOff": "Reminders are off in Profile",
+      "remindHint": {
+        "day": "Every day, to drop a little in",
+        "month": "Once a month, on the day you made it"
+      },
+      "at": "At",
+      "changeTime": "Reminder at {{time}}. Change time"
+    },
+    "editJar": "Jar settings",
+    "notify": {
+      "title": "{{name}} 🫙",
+      "body": {
+        "day": "Drop {{amount}} in the jar today?",
+        "month": "Time for this month's {{amount}} in the jar?"
+      }
+    },
+    "settingsLabel": "{{name}}. Jar settings"
   },
   "onboarding": {
     "step": "Step {{step}} of {{total}}",
