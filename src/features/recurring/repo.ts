@@ -57,6 +57,17 @@ export function saveBill(db: Db, input: BillInput & { id?: string }, newId = def
     .get();
 }
 
+/**
+ * Deletes a bill (ProfileBillEdit). Its past transactions stay in History as
+ * they were; nothing new is added for it.
+ */
+export function deleteBill(db: Db, id: string): void {
+  db.transaction((tx) => {
+    tx.delete(skippedOccurrences).where(eq(skippedOccurrences.recurringId, id)).run();
+    tx.delete(recurringBills).where(eq(recurringBills.id, id)).run();
+  });
+}
+
 /** Stops a bill from now on; its past transactions stay. */
 export function setBillActive(db: Db, id: string, active: boolean): void {
   db.update(recurringBills).set({ active }).where(eq(recurringBills.id, id)).run();

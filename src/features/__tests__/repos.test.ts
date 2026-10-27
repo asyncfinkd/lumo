@@ -19,7 +19,13 @@ import {
   setPhoto,
   setReminders,
 } from '../profile/repo';
-import { saveBill, saveIncome, setBillActive, syncDueTransactions } from '../recurring/repo';
+import {
+  deleteBill,
+  saveBill,
+  saveIncome,
+  setBillActive,
+  syncDueTransactions,
+} from '../recurring/repo';
 import {
   addTransaction,
   deleteTransaction,
@@ -209,6 +215,29 @@ describe('syncDueTransactions', () => {
         .map((r) => r.title)
         .sort(),
     ).toEqual(['Gym', 'Salary']);
+  });
+
+  it('stops adding a deleted bill and keeps its past payments', () => {
+    const db = withRecurring();
+    syncDueTransactions(db, '2026-10-12', id);
+    const rent = db.query.recurringBills
+      .findMany()
+      .sync()
+      .find((b) => b.name === 'Rent')!;
+    deleteBill(db, rent.id);
+    syncDueTransactions(db, '2026-11-12', id);
+    const titles = db
+      .select()
+      .from(transactions)
+      .all()
+      .map((r) => r.title);
+    expect(titles.filter((t) => t === 'Rent')).toHaveLength(1);
+    expect(
+      db.query.recurringBills
+        .findMany()
+        .sync()
+        .map((b) => b.name),
+    ).not.toContain('Rent');
   });
 
   it('does nothing before onboarding is finished', () => {

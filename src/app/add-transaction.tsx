@@ -6,7 +6,7 @@ import { AmountDisplay, groupTyped } from '@/components/AmountDisplay';
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
 import { CalendarIcon, ClockIcon, CloseIcon, NoteIcon, TrashIcon } from '@/components/Icons';
-import { Numpad } from '@/components/Numpad';
+import { Numpad, typedAmount } from '@/components/Numpad';
 import { Press } from '@/components/Press';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Sheet } from '@/components/Sheet';
@@ -30,16 +30,6 @@ import {
 import { clockTime } from '@/features/home/home';
 import { addTransaction, type Scope, updateTransaction } from '@/features/transactions/repo';
 import { color, fontFamily, radius, shadow, size, text } from '@/theme';
-
-/** Minor units back to what the keypad would have typed: 6420 → "64.20", 500 → "5". */
-function typedOf(minor: number, currency: CurrencyCode): string {
-  const scale = 10 ** currencies[currency].minorUnits;
-  const fraction = minor % scale;
-  const whole = Math.floor(minor / scale);
-  return fraction
-    ? `${whole}.${String(fraction).padStart(currencies[currency].minorUnits, '0')}`
-    : String(whole);
-}
 
 // AddTransaction: type, amount, a line on how it lands, category, date, note.
 // Saves a `manual` transaction; Home and budgets update through live queries.
@@ -78,7 +68,7 @@ function TransactionForm({
 
   const currency: CurrencyCode = profile?.currency ?? existing?.currency ?? 'GEL';
   const [kind, setKind] = useState<TransactionKind>(existing?.kind ?? 'expense');
-  const [typed, setTyped] = useState(existing ? typedOf(existing.amountMinor, currency) : '0');
+  const [typed, setTyped] = useState(existing ? typedAmount(existing.amountMinor, currency) : '0');
   const [picked, setPicked] = useState<CategoryId | null>(existing?.categoryId ?? null);
   const [date, setDate] = useState<CalendarDate | null>(existing?.date ?? null);
   const [note, setNote] = useState(existing?.note ?? '');

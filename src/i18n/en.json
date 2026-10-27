@@ -446,5 +446,33 @@
     "deleteAndMove": "Delete and move",
     "deleteOnly": "Delete category",
     "keep": "Keep it"
+  },
+  "billsManage": {
+    "title": "Monthly bills",
+    "add": "Add a bill",
+    "everyMonth": "Every month",
+    "count_one": "{{count}} bill",
+    "count_other": "{{count}} bills",
+    "intro": "Bills marked Auto are added to History on their day. Tap one to change it.",
+    "due": "Every {{day}}",
+    "auto": "Auto",
+    "reminderOnly": "Reminder only",
+    "rowLabel": "{{name}}, {{amount}}, {{due}}, {{mode}}",
+    "autoA11y": "added automatically",
+    "reminderA11y": "reminder only",
+    "edit": "Edit bill",
+    "new": "New bill",
+    "name": "Name",
+    "amount": "Amount",
+    "dueLabel": "Due",
+    "dueButton": "Due every {{day}}. Change",
+    "pickDay": "Due on",
+    "category": "Category",
+    "addAutomatically": "Add it automatically",
+    "autoOn": "On the {{day}}, it lands in History by itself",
+    "autoOff": "You’ll add it yourself when you pay",
+    "delete": "Delete bill",
+    "save": "Save",
+    "addButton": "Add bill"
   }
 }

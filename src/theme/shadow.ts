@@ -36,6 +36,9 @@ export const shadow = {
   rowBadge: '0px 2px 6px 0px rgba(43,37,34,0.16)',
   /** The focused search field (HistorySearch): an ink ring plus a soft glow. */
   searchField: 'inset 0px 0px 0px 2px #2B2522, 0px 8px 24px -14px rgba(200,145,106,0.5)',
+  /** The "Every month" total on Monthly bills. */
+  billsTotal:
+    'inset 0px 0px 0px 1px rgba(255,255,255,0.85), 0px 10px 30px -14px rgba(200,145,106,0.3)',
   /** A History row while it's swiped open: its right edge lifts. */
   rowOpen: '6px 0px 18px -8px rgba(43,37,34,0.18)',
   /** Budget and "no budget" cards on the details sheet. */
