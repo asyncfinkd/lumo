@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useScreenTop } from '@/components/useScreenTop';
 import { Donut } from '@/components/Donut';
 import { CategoryIcon, SparkleIcon } from '@/components/Icons';
 import { Fill, Rise } from '@/components/motion';
@@ -27,8 +27,8 @@ type Range = 'week' | 'month';
 // gentle sentence and the categories side by side.
 export default function InsightsScreen() {
   const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
-  const refreshControl = usePullToRefresh(insets.top);
+  const screenTop = useScreenTop();
+  const refreshControl = usePullToRefresh(screenTop);
   const [view, setView] = useState<Range>('month');
   const { today, profile, summary } = useMoneyMonth();
   const transactions = useAllTransactions();
@@ -54,7 +54,7 @@ export default function InsightsScreen() {
 
   return (
     <ScrollView
-      contentContainerStyle={[styles.content, { paddingTop: insets.top }]}
+      contentContainerStyle={[styles.content, { paddingTop: screenTop }]}
       showsVerticalScrollIndicator={false}
       refreshControl={refreshControl}
     >

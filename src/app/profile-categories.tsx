@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useScreenTop } from '@/components/useScreenTop';
 import { BottomFade, Orbs } from '@/components/Backdrop';
 import { CategoryIcon, ChevronRightIcon, PlusIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
@@ -22,6 +23,7 @@ export default function ProfileCategoriesScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const screenTop = useScreenTop();
   const categories = useCategories();
   const { profile, summary } = useMoneyMonth();
   const transactions = useAllTransactions();
@@ -63,7 +65,7 @@ export default function ProfileCategoriesScreen() {
   ];
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
+    <View style={[styles.root, { paddingTop: screenTop }]}>
       <Orbs />
       <SettingsHeader
         title={t('categoryManage.title')}

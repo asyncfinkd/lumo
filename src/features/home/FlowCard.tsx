@@ -49,7 +49,9 @@ export function FlowCard({
           <Text style={styles.symbol}>{symbol}</Text>
           <Text style={styles.amount}>{hidden ? MASK : amount.slice(symbol.length)}</Text>
         </View>
-        <Sparkline kind={kind} />
+        <View style={styles.spark}>
+          <Sparkline kind={kind} />
+        </View>
       </View>
     </View>
   );
@@ -76,7 +78,10 @@ const styles = StyleSheet.create({
   },
   label: { ...text.label, fontSize: 14, color: color.muted },
   bottom: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 6 },
-  amountRow: { flexDirection: 'row', alignItems: 'baseline' },
+  amountRow: { flexShrink: 0, flexDirection: 'row', alignItems: 'baseline' },
+  // The amount keeps its size; the line takes what's left, up to the design's
+  // 60×30 (narrow screens like a Galaxy Fold's cover screen).
+  spark: { flexShrink: 1, minWidth: 0, width: 60, maxWidth: 60, aspectRatio: 2 },
   amount: { ...text.stat, color: color.ink },
   symbol: { ...text.stat, fontSize: 15, color: color.subtle, marginRight: 2 },
 });

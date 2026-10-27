@@ -4,7 +4,7 @@ import { /* Image, */ ScrollView, StyleSheet, Text, View } from 'react-native';
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useScreenTop } from '@/components/useScreenTop';
 import {
   BellIcon,
   CameraIcon,
@@ -42,7 +42,7 @@ import {
 export default function ProfileScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const screenTop = useScreenTop();
   const profile = useProfile();
   const incomes = useIncomes();
   const bills = useBills();
@@ -62,7 +62,7 @@ export default function ProfileScreen() {
   return (
     <>
       <ScrollView
-        contentContainerStyle={[styles.content, { paddingTop: insets.top }]}
+        contentContainerStyle={[styles.content, { paddingTop: screenTop }]}
         showsVerticalScrollIndicator={false}
       >
         <Rise>

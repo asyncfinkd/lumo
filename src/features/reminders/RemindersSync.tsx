@@ -5,8 +5,6 @@
 
 import { useEffect, useMemo, useRef } from 'react';
 import { Platform } from 'react-native';
-import * as Notifications from 'expo-notifications';
-import { AndroidImportance, IosAuthorizationStatus } from 'expo-notifications';
 import { useTranslation } from 'react-i18next';
 import { formatMoney } from '@/domain/money';
 import { budgetRows } from '@/features/budgets/budgetRows';
@@ -20,12 +18,13 @@ import {
   useIncomes,
   useMoneyMonth,
 } from '@/features/live';
+import { Notifications } from './notifications';
 import { newlyLow, outsideQuietHours, planReminders } from './plan';
 
 const CHANNEL = 'reminders';
 
 // Shown as a banner even while Lumo is open, without a sound: gentle.
-Notifications.setNotificationHandler({
+Notifications?.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,
     shouldShowList: true,
@@ -36,6 +35,8 @@ Notifications.setNotificationHandler({
 
 /** Whether Lumo may show notifications; never asks. */
 export async function notificationsAllowed(): Promise<boolean> {
+  if (!Notifications) return false;
+  const { IosAuthorizationStatus } = Notifications;
   const settings = await Notifications.getPermissionsAsync();
   return (
     settings.granted ||
@@ -47,25 +48,30 @@ export async function notificationsAllowed(): Promise<boolean> {
 /** Asks once (the system shows its own prompt); `false` when declined. */
 export async function askForNotifications(): Promise<boolean> {
   if (await notificationsAllowed()) return true;
+  if (!Notifications) return false;
+  const { IosAuthorizationStatus } = Notifications;
   const result = await Notifications.requestPermissionsAsync();
   return result.granted || result.ios?.status === IosAuthorizationStatus.AUTHORIZED;
 }
 
 /** Cancels the planned reminders, but not a "budget running low" waiting for 8:00. */
 async function clearPlanned() {
-  const pending = await Notifications.getAllScheduledNotificationsAsync();
+  const N = Notifications;
+  if (!N) return;
+  const pending = await N.getAllScheduledNotificationsAsync();
   await Promise.all(
     pending
       .filter((n) => !n.identifier.startsWith('low-'))
-      .map((n) => Notifications.cancelScheduledNotificationAsync(n.identifier)),
+      .map((n) => N.cancelScheduledNotificationAsync(n.identifier)),
   );
 }
 
 async function ensureChannel(name: string) {
   if (Platform.OS !== 'android') return;
+  if (!Notifications) return;
   await Notifications.setNotificationChannelAsync(CHANNEL, {
     name,
-    importance: AndroidImportance.DEFAULT,
+    importance: Notifications.AndroidImportance.DEFAULT,
   });
 }
 
@@ -121,6 +127,8 @@ export function RemindersSync() {
 
   const scheduled = useRef('');
   useEffect(() => {
+    const N = Notifications;
+    if (!N) return;
     const key = JSON.stringify(plan.map((r) => [r.id, r.at.getTime(), r.title, r.body]));
     if (key === scheduled.current) return;
     let cancelled = false;
@@ -135,11 +143,11 @@ export function RemindersSync() {
       await clearPlanned();
       for (const r of plan) {
         if (cancelled) return;
-        await Notifications.scheduleNotificationAsync({
+        await N.scheduleNotificationAsync({
           identifier: r.id,
           content: { title: r.title, body: r.body },
           trigger: {
-            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            type: N.SchedulableTriggerInputTypes.DATE,
             date: r.at,
             channelId: CHANNEL,
           },
@@ -167,13 +175,15 @@ export function RemindersSync() {
     if (!BUDGETING || !profile?.reminders || !profile.remindLowBudget || dropped.length === 0) {
       return;
     }
+    const N = Notifications;
+    if (!N) return;
     (async () => {
       if (!(await notificationsAllowed())) return;
       await ensureChannel(t('remindersScreen.title'));
       for (const id of dropped) {
         const row = rows.find((r) => r.category === id)!;
         const later = outsideQuietHours(new Date());
-        await Notifications.scheduleNotificationAsync({
+        await N.scheduleNotificationAsync({
           identifier: `low-${id}-${summary.period.start}`,
           content: {
             title: t('remindersScreen.notify.lowTitle', { category: categories.get(id).label }),
@@ -183,7 +193,7 @@ export function RemindersSync() {
           },
           trigger: later
             ? {
-                type: Notifications.SchedulableTriggerInputTypes.DATE,
+                type: N.SchedulableTriggerInputTypes.DATE,
                 date: later,
                 channelId: CHANNEL,
               }

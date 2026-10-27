@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useScreenTop } from '@/components/useScreenTop';
 import { PlusIcon, SearchIcon } from '@/components/Icons';
 import { EmptyClipboard } from '@/components/illustrations/EmptyClipboard';
 import { Rise } from '@/components/motion';
@@ -23,7 +23,7 @@ import { color, fontFamily, radius, shadow, space, text } from '@/theme';
 export default function HistoryScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const screenTop = useScreenTop();
   const refreshControl = usePullToRefresh();
   const today = useToday();
   const profile = useProfile();
@@ -52,7 +52,7 @@ export default function HistoryScreen() {
   );
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
+    <View style={[styles.root, { paddingTop: screenTop }]}>
       <View style={styles.bar}>
         <HeaderButton label={t('history.search')} onPress={() => router.push('/history-search')}>
           <SearchIcon color={color.ink} />
