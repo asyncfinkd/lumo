@@ -149,6 +149,21 @@ export function CloseIcon({ size = 18, color }: IconProps) {
   );
 }
 
+/** Up (or, turned, down): the balance chip on Home (Main). */
+export function ArrowUpIcon({ color, down = false }: { color: string; down?: boolean }) {
+  return (
+    <Svg
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      accessible={false}
+      style={down ? { transform: [{ rotate: '180deg' }] } : undefined}
+    >
+      <Path {...line(color, 2.4)} d="M12 18.5v-13M6.5 11 12 5.5 17.5 11" />
+    </Svg>
+  );
+}
+
 export function CameInIcon({ color }: { color: string }) {
   const s = line(color, 1.9);
   return (

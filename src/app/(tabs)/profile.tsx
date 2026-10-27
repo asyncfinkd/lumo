@@ -21,6 +21,7 @@ import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
 import { currencies, formatMoney } from '@/domain/money';
 import { useBills, useCategories, useIncomes, useProfile } from '@/features/live';
+import { BUDGETING } from '@/features/flags';
 import { Avatar } from '@/features/profile/Avatar';
 import { PhotoToast } from '@/features/profile/photoToast';
 import {
@@ -155,7 +156,7 @@ export default function ProfileScreen() {
               tile={categoryPalette.butter}
               icon={<BellIcon color={categoryPalette.butter.fg} />}
               label={t('profile.reminders')}
-              sub={t('profile.remindersSub')}
+              sub={BUDGETING ? t('profile.remindersSub') : t('profile.remindersSubNoBudgets')}
               value={profile.reminders ? t('profile.on') : t('profile.off')}
               onPress={() => router.push('/profile-reminders')}
             />

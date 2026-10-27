@@ -25,7 +25,9 @@ const renderBar = async (active: 'home' | 'insights' = 'home') => {
 describe('GlassTabBar', () => {
   it('names every tab for screen readers and marks the current one', async () => {
     await renderBar('insights');
-    for (const name of ['Home', 'Insights', 'Budgets', 'Profile']) {
+    // Budgets is off in phase 1 (features/flags.ts).
+    expect(screen.queryByRole('tab', { name: 'Budgets' })).toBeNull();
+    for (const name of ['Home', 'Insights', 'Profile']) {
       expect(screen.getByRole('tab', { name })).toBeOnTheScreen();
     }
     expect(screen.getByRole('tab', { name: 'Insights' })).toBeSelected();
@@ -34,8 +36,8 @@ describe('GlassTabBar', () => {
 
   it('switches tabs', async () => {
     const { onChange } = await renderBar();
-    await fireEvent.press(screen.getByRole('tab', { name: 'Budgets' }));
-    expect(onChange).toHaveBeenCalledWith('budgets');
+    await fireEvent.press(screen.getByRole('tab', { name: 'Insights' }));
+    expect(onChange).toHaveBeenCalledWith('insights');
   });
 
   it('opens the add sheet with a light haptic', async () => {

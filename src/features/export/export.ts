@@ -144,13 +144,16 @@ export function buildCsv(data: ExportData, w: ExportWords): string {
     );
   }
 
-  lines.push('');
-  lines.push(csvCell(w.budgets));
-  lines.push(row([c.category, c.limit, c.currency].map((x) => csvCell(x))));
-  for (const b of data.budgets) {
-    lines.push(
-      row([csvCell(w.category(b.categoryId)), plainAmount(b.limitMinor, b.currency), b.currency]),
-    );
+  // No budgets, no section (they're off in phase 1).
+  if (data.budgets.length > 0) {
+    lines.push('');
+    lines.push(csvCell(w.budgets));
+    lines.push(row([c.category, c.limit, c.currency].map((x) => csvCell(x))));
+    for (const b of data.budgets) {
+      lines.push(
+        row([csvCell(w.category(b.categoryId)), plainAmount(b.limitMinor, b.currency), b.currency]),
+      );
+    }
   }
 
   lines.push('');
@@ -248,7 +251,7 @@ export function buildHtml(data: ExportData, currency: CurrencyCode, w: PdfWords)
   <h2>${escapeHtml(w.transactions)}</h2><table><tr><th>${escapeHtml(c.date)}</th><th>${escapeHtml(
     c.title,
   )}</th><th>${escapeHtml(c.category)}</th><th class="n">${escapeHtml(c.amount)}</th></tr>${txRows}</table>
-  <h2>${escapeHtml(w.budgets)}</h2><table>${data.budgets
+  ${data.budgets.length === 0 ? '' : `<h2>${escapeHtml(w.budgets)}</h2>`}<table>${data.budgets
     .map(
       (b) =>
         `<tr><td>${escapeHtml(w.category(b.categoryId))}</td><td class="n">${money(b.limitMinor)}</td></tr>`,
