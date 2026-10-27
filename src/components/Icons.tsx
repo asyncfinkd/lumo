@@ -15,7 +15,7 @@ const line = (color: string, width = 1.8) => ({
 });
 
 // The twelve category icons (ProfileCategoryEdit): a filled shape and its lines.
-const CATEGORY_PATHS: Record<CategoryIconKey | 'none', [string, string]> = {
+const CATEGORY_PATHS: Record<CategoryIconKey | 'none' | 'adjust', [string, string]> = {
   basket: ['M4 9.5h16l-1.5 8.8a2 2 0 0 1-2 1.7h-9a2 2 0 0 1-2-1.7z', 'm8 9.5 3-5.5M16 9.5l-3-5.5'],
   coffee: [
     'M4.5 9h12v4.5a5.5 5.5 0 0 1-5.5 5.5h-1a5.5 5.5 0 0 1-5.5-5.5z',
@@ -57,13 +57,18 @@ const CATEGORY_PATHS: Record<CategoryIconKey | 'none', [string, string]> = {
   ],
   // "No category" (ProfileCategoryDelete).
   none: ['M12 4a8 8 0 1 0 0 16a8 8 0 1 0 0-16z', 'M8.5 12h7'],
+  // "Balance adjusted" rows (RowTypes): two sliders.
+  adjust: [
+    'M13.4 7.5a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0M6.4 16.5a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0',
+    'M4 7.5h9M19 7.5h1M4 16.5h3M11 16.5h9',
+  ],
 };
 
 export function CategoryIcon({
   icon,
   size = 24,
   color,
-}: IconProps & { icon: CategoryIconKey | 'none' }) {
+}: IconProps & { icon: CategoryIconKey | 'none' | 'adjust' }) {
   const s = line(color);
   const [shape, lines] = CATEGORY_PATHS[icon] ?? CATEGORY_PATHS.none;
   return (
@@ -211,10 +216,11 @@ export function BellIcon({ color }: { color: string }) {
   );
 }
 
-export function NoteIcon({ color }: { color: string }) {
+/** A pencil: the note field, and Edit. */
+export function NoteIcon({ color, size = 18 }: IconProps) {
   const s = line(color, 1.9);
   return (
-    <Svg width={18} height={18} viewBox="0 0 24 24" accessible={false}>
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
       <Path {...s} fill={color} fillOpacity={0.2} d="M14.5 5.5l4 4L9 19H5v-4z" />
       <Path {...s} d="M13 7l4 4" />
     </Svg>
@@ -337,6 +343,46 @@ export function RepeatIcon({ color, size = 20, width = 1.9 }: IconProps & { widt
       <Path {...s} d="M4 11.5v-1a5 5 0 0 1 5-5h11" />
       <Path {...s} d="m7 21.5-3-3 3-3" />
       <Path {...s} d="M20 12.5v1a5 5 0 0 1-5 5H4" />
+    </Svg>
+  );
+}
+
+export function ChevronLeftIcon({ color, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
+      <Path {...line(color, 2.2)} d="M14.5 6 8.5 12l6 6" />
+    </Svg>
+  );
+}
+
+export function SearchIcon({ color, size = 20 }: IconProps) {
+  const s = line(color, 2);
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
+      <Circle {...s} fill={color} fillOpacity={0.15} cx={11} cy={11} r={6.5} />
+      <Path {...s} d="m16 16 4.5 4.5" />
+    </Svg>
+  );
+}
+
+/** "added today, 13:15" on the edit sheet. */
+export function ClockIcon({ color }: { color: string }) {
+  const s = line(color, 2.2);
+  return (
+    <Svg width={14} height={14} viewBox="0 0 24 24" accessible={false}>
+      <Circle {...s} cx={12} cy={12} r={8.5} />
+      <Path {...s} d="M12 7.5V12l3 2" />
+    </Svg>
+  );
+}
+
+/** An "i" in a circle: the notes on the details sheet. */
+export function InfoIcon({ color }: { color: string }) {
+  const s = line(color, 2.2);
+  return (
+    <Svg width={18} height={18} viewBox="0 0 24 24" accessible={false}>
+      <Circle {...s} cx={12} cy={12} r={8.5} />
+      <Path {...s} d="M12 11v5M12 7.8v.2" />
     </Svg>
   );
 }

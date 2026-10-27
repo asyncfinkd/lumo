@@ -73,6 +73,14 @@ function AppStack() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="add-transaction" options={sheetOptions} />
           <Stack.Screen name="balance" options={sheetOptions} />
+          <Stack.Screen name="history" />
+          <Stack.Screen name="transaction" options={sheetOptions} />
+          <Stack.Screen
+            name="transaction-delete"
+            options={{ ...sheetOptions, animation: 'fade' }}
+          />
+          <Stack.Screen name="transaction-scope" options={{ ...sheetOptions, animation: 'fade' }} />
+          <Stack.Screen name="history-search" options={{ animation: 'fade' }} />
           <Stack.Screen name="edit-budget" options={sheetOptions} />
           <Stack.Screen name="profile-photo" options={sheetOptions} />
           <Stack.Screen name="profile-name" />
