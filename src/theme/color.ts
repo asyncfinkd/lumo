@@ -76,6 +76,8 @@ export const color = {
   dialog: 'rgba(255,252,248,0.97)',
   /** Secondary text one step darker than muted (labels in dialogs). */
   softInk: '#5E554F',
+  /** "Balance adjusted" rows: a neutral grey tile (RowTypes). */
+  adjustTile: '#EFEAE4',
   /** A disabled solid button (Save without a name). */
   disabled: '#BDB3AC',
   /** A disabled destructive button and similar quiet fills. */

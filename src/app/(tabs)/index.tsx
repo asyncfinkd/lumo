@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Rise } from '@/components/motion';
+import { Press } from '@/components/Press';
 import type { Transaction } from '@/db/schema';
 import { addDays } from '@/domain/dates';
 import { FlowCard } from '@/features/home/FlowCard';
@@ -59,9 +60,14 @@ export default function HomeScreen() {
       </Rise>
 
       <Rise delay={240} style={styles.recent}>
-        <Text accessibilityRole="header" style={styles.section}>
-          {t('home.today')}
-        </Text>
+        <View style={styles.sectionRow}>
+          <Text accessibilityRole="header" style={styles.section}>
+            {t('home.today')}
+          </Text>
+          <Press accessibilityRole="link" onPress={() => router.push('/history')} hitSlop={12}>
+            <Text style={styles.seeAll}>{t('home.seeAll')}</Text>
+          </Press>
+        </View>
         <DayList rows={recent.today} empty={t('home.nothingToday')} shadowed />
 
         {recent.yesterday.length > 0 ? (
@@ -115,7 +121,14 @@ const styles = StyleSheet.create({
   subtitle: { ...text.subtitle, color: color.muted },
   flows: { marginTop: space.cardGap, flexDirection: 'row', gap: space.cardGap },
   recent: { marginTop: space.sectionGap, gap: 8 },
+  sectionRow: {
+    paddingRight: 4,
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+  },
   section: { ...text.section, color: color.ink, paddingHorizontal: 4 },
+  seeAll: { fontFamily: fontFamily.bold, fontSize: 15, color: color.ink },
   yesterday: { marginTop: 12 },
   list: {
     paddingVertical: 2,
