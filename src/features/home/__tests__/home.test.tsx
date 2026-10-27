@@ -64,17 +64,18 @@ describe('clockTime', () => {
 });
 
 describe('recentDays', () => {
-  it('splits today and yesterday, earliest first, without balance adjustments', () => {
+  it('splits today and yesterday, the last one added first, without balance adjustments', () => {
     const rows = [
-      row({ title: 'Bolt', occurredAt: at(18, 20) }),
-      row({ title: 'Fresh Market', occurredAt: at(13, 15) }),
-      row({ title: 'Coffee Lab', occurredAt: at(8, 40) }),
-      row({ title: 'Balance adjusted', source: 'adjustment', occurredAt: at(9, 0) }),
-      row({ title: 'Gym', date: '2026-10-30', source: 'bill', occurredAt: at(0, 0, 30) }),
-      row({ title: 'Older', date: '2026-10-29', occurredAt: at(12, 0, 29) }),
+      row({ title: 'Bolt', occurredAt: at(18, 20), createdAt: at(18, 21) }),
+      // Added after Bolt, for earlier in the day: still on top.
+      row({ title: 'Fresh Market', occurredAt: at(13, 15), createdAt: at(19, 0) }),
+      row({ title: 'Coffee Lab', occurredAt: at(8, 40), createdAt: at(8, 41) }),
+      row({ title: 'Balance adjusted', source: 'adjustment', createdAt: at(9, 0) }),
+      row({ title: 'Gym', date: '2026-10-30', source: 'bill', createdAt: at(0, 0, 30) }),
+      row({ title: 'Older', date: '2026-10-29', createdAt: at(12, 0, 29) }),
     ];
     const { today, yesterday } = recentDays(rows, '2026-10-31');
-    expect(today.map((r) => r.title)).toEqual(['Coffee Lab', 'Fresh Market', 'Bolt']);
+    expect(today.map((r) => r.title)).toEqual(['Fresh Market', 'Bolt', 'Coffee Lab']);
     expect(yesterday.map((r) => r.title)).toEqual(['Gym']);
   });
 });
