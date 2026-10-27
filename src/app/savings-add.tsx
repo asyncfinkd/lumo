@@ -11,30 +11,43 @@ import { db } from '@/db/client';
 import { currencies, formatMoney } from '@/domain/money';
 import { useJarEntries, useJars, useMoneyMonth } from '@/features/live';
 import { useJarDrop } from '@/features/savings/dropStore';
-import { addToJar } from '@/features/savings/repo';
-import { jarPace, jarPercent, quickAmounts, savedByJar } from '@/features/savings/savings';
+import { addToJar, takeFromJar } from '@/features/savings/repo';
+import {
+  jarPace,
+  jarPercent,
+  quickAmounts,
+  savedByJar,
+  takeOutAmounts,
+} from '@/features/savings/savings';
 import { useMonthName } from '@/features/savings/useMonthName';
 import { color, fontFamily, radius, savingsColor, shadow, size, text } from '@/theme';
 
 // "Add to New laptop" (SavingsAdd): pick an amount, see where the jar lands,
 // drop it in. A drop that fills the jar opens "You did it" (SavingsDone).
+// With `mode=out` the same sheet takes money out, back to the balance.
 export default function SavingsAddScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { jar: jarId } = useLocalSearchParams<{ jar: string }>();
+  const { jar: jarId, mode } = useLocalSearchParams<{ jar: string; mode?: 'out' }>();
+  const out = mode === 'out';
   const { today, summary } = useMoneyMonth();
   const jar = useJars().find((j) => j.id === jarId);
   const savedMinor = savedByJar(useJarEntries()).get(jarId) ?? 0;
   const monthName = useMonthName(today);
   const showDrop = useJarDrop((s) => s.show);
-  const [amountMinor, setAmountMinor] = useState(10000);
+  const [chosen, setAmountMinor] = useState<number | null>(null);
   // Where to go once the sheet has slid away.
   const filled = useRef(false);
 
   if (!jar) return null;
   const money = (minor: number) => formatMoney(minor, jar.currency, { decimals: 'auto' });
+  const chips = out
+    ? takeOutAmounts(jar.monthlyMinor, savedMinor)
+    : quickAmounts(jar.monthlyMinor).map((c) => ({ ...c, all: false }));
+  // ₾100 to start with, or the first amount the jar can give back.
+  const amountMinor = chosen ?? chips.find((c) => c.minor === 10000)?.minor ?? chips[0]?.minor ?? 0;
   const pct = jarPercent(savedMinor, jar.goalMinor);
-  const after = savedMinor + amountMinor;
+  const after = out ? savedMinor - amountMinor : savedMinor + amountMinor;
   const afterPct = jarPercent(after, jar.goalMinor);
   const left = Math.max(0, jar.goalMinor - after);
   const pace = jarPace(jar, after, today);
@@ -44,6 +57,13 @@ export default function SavingsAddScreen() {
   );
 
   const dropIn = (close: () => void) => {
+    if (amountMinor <= 0) return;
+    if (out) {
+      takeFromJar(db, jar.id, amountMinor, today);
+      showDrop({ jarId: jar.id, amountMinor, from: pct, to: afterPct, out: true });
+      close();
+      return;
+    }
     addToJar(db, jar.id, amountMinor, today);
     if (after >= jar.goalMinor) {
       filled.current = true;
@@ -55,7 +75,9 @@ export default function SavingsAddScreen() {
 
   return (
     <Sheet
-      accessibilityLabel={t('savings.addSheet.title', { name: jar.name })}
+      accessibilityLabel={t(out ? 'savings.outSheet.title' : 'savings.addSheet.title', {
+        name: jar.name,
+      })}
       onDismissed={() =>
         filled.current
           ? router.replace({
@@ -78,7 +100,7 @@ export default function SavingsAddScreen() {
             <Jar pct={pct} size={40} tone={jar.tone} label={false} />
             <View style={styles.headerText}>
               <Text accessibilityRole="header" style={styles.title}>
-                {t('savings.addSheet.title', { name: jar.name })}
+                {t(out ? 'savings.outSheet.title' : 'savings.addSheet.title', { name: jar.name })}
               </Text>
               <Text style={styles.sub}>
                 {t('savings.ofBoth', { saved: money(savedMinor), goal: money(jar.goalMinor) })}
@@ -95,7 +117,7 @@ export default function SavingsAddScreen() {
           </View>
 
           <View accessibilityRole="radiogroup" style={styles.chips}>
-            {quickAmounts(jar.monthlyMinor).map((chip) => {
+            {chips.map((chip) => {
               const on = chip.minor === amountMinor;
               return (
                 <Press
@@ -103,8 +125,8 @@ export default function SavingsAddScreen() {
                   accessibilityRole="radio"
                   accessibilityState={{ checked: on }}
                   accessibilityLabel={
-                    chip.usual
-                      ? `${money(chip.minor)}, ${t('savings.addSheet.usual')}`
+                    chip.usual || chip.all
+                      ? `${money(chip.minor)}, ${t(chip.all ? 'savings.outSheet.all' : 'savings.addSheet.usual')}`
                       : money(chip.minor)
                   }
                   onPress={() => setAmountMinor(chip.minor)}
@@ -112,7 +134,11 @@ export default function SavingsAddScreen() {
                 >
                   <Text style={styles.chipLabel}>{money(chip.minor)}</Text>
                   <Text style={styles.chipNote}>
-                    {chip.usual ? t('savings.addSheet.usual') : ''}
+                    {chip.all
+                      ? t('savings.outSheet.all')
+                      : chip.usual
+                        ? t('savings.addSheet.usual')
+                        : ''}
                   </Text>
                 </Press>
               );
@@ -127,26 +153,38 @@ export default function SavingsAddScreen() {
               </Text>
             </View>
             <View style={styles.track}>
-              <View style={[styles.fill, styles.afterFill, { width: `${afterPct}%` }]} />
-              <View style={[styles.fill, styles.nowFill, { width: `${pct}%` }]} />
+              {/* The lighter part is what this adds, or what it takes out. */}
+              <View
+                style={[styles.fill, styles.afterFill, { width: `${Math.max(pct, afterPct)}%` }]}
+              />
+              <View
+                style={[styles.fill, styles.nowFill, { width: `${Math.min(pct, afterPct)}%` }]}
+              />
             </View>
             <Text style={styles.pace}>
               {pace.type === 'full'
                 ? t('savings.addSheet.fills')
                 : pace.type === 'ahead'
                   ? t('savings.paceAhead')
-                  : t('savings.addSheet.onTrack', { month: monthName(pace.year, pace.month) })}
+                  : t(out ? 'savings.outSheet.readyBy' : 'savings.addSheet.onTrack', {
+                      month: monthName(pace.year, pace.month),
+                    })}
             </Text>
           </View>
 
           {summary?.balanceMinor != null ? (
             <Text style={styles.balance}>
-              {t('savings.addSheet.fromBalance', { amount: money(summary.balanceMinor) })}
+              {t(out ? 'savings.outSheet.toBalance' : 'savings.addSheet.fromBalance', {
+                amount: money(summary.balanceMinor),
+              })}
             </Text>
           ) : null}
 
           <Button
-            label={t('savings.addSheet.drop', { amount: money(amountMinor) })}
+            label={t(out ? 'savings.outSheet.take' : 'savings.addSheet.drop', {
+              amount: money(amountMinor),
+            })}
+            disabled={amountMinor <= 0}
             onPress={() => dropIn(close)}
             style={styles.drop}
           />

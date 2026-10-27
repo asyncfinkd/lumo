@@ -37,6 +37,10 @@ export const shadow = {
   /** Savings: the round + and the other-jar tiles. */
   roundButton: '0px 6px 16px -10px rgba(200,145,106,0.4)',
   jarTile: '0px 6px 20px -10px rgba(200,145,106,0.2)',
+  takeOut: '0px 6px 16px -10px rgba(200,145,106,0.45)',
+  /** Jar colors on New jar: a white gap and an ink ring when picked. */
+  toneOn: '0px 0px 0px 3px #FFFFFF, 0px 0px 0px 5px #2B2522',
+  toneRing: 'inset 0px 0px 0px 2px rgba(255,255,255,0.6)',
   /** A picked amount on the add-to-jar sheet. */
   jarChip: 'inset 0px 0px 0px 1px rgba(255,255,255,0.7), 0px 6px 14px -8px rgba(160,118,28,0.5)',
   jarToast:

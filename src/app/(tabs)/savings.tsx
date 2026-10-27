@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useScreenTop } from '@/components/useScreenTop';
-import { PlusIcon } from '@/components/Icons';
+import { MinusIcon, PlusIcon } from '@/components/Icons';
 import { Jar } from '@/components/Jar';
 import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
@@ -11,7 +11,7 @@ import type { Jar as JarRow } from '@/db/schema';
 import { formatMoney } from '@/domain/money';
 import { useJarEntries, useJars, useToday } from '@/features/live';
 import { HeaderButton } from '@/features/profile/SettingsHeader';
-import { useJarDrop } from '@/features/savings/dropStore';
+import { useJarDrop, usePickedJar } from '@/features/savings/dropStore';
 import { JarToast } from '@/features/savings/JarToast';
 import { jarPace, jarPercent, savedByJar } from '@/features/savings/savings';
 import { useMonthName } from '@/features/savings/useMonthName';
@@ -38,7 +38,8 @@ export default function SavingsScreen() {
   const entries = useJarEntries();
   const drop = useJarDrop((s) => s.drop);
   const monthName = useMonthName(today);
-  const [picked, setPicked] = useState<string | null>(null);
+  const picked = usePickedJar((s) => s.id);
+  const setPicked = usePickedJar((s) => s.pick);
   const [gridWidth, setGridWidth] = useState(0);
   // Three tiles to a row, 10pt apart.
   const tileWidth = gridWidth ? (gridWidth - TILE_GAP * 2) / 3 : undefined;
@@ -82,6 +83,28 @@ export default function SavingsScreen() {
           </HeaderButton>
         </Rise>
 
+        {jars.length === 0 ? (
+          // Laid out like HistoryEmpty: a tile, one line and the way in.
+          <Rise delay={60} style={styles.empty}>
+            <View style={styles.emptyTile}>
+              <Jar pct={0} size={80} tone="gold" label={false} />
+            </View>
+            <Text accessibilityRole="header" style={styles.emptyTitle}>
+              {t('savings.empty.title')}
+            </Text>
+            <Text style={styles.emptyBody}>{t('savings.empty.body')}</Text>
+            <Press
+              haptic
+              accessibilityRole="button"
+              onPress={() => router.push('/savings-new')}
+              style={styles.emptyButton}
+            >
+              <PlusIcon color={color.white} size={18} />
+              <Text style={styles.emptyButtonText}>{t('savings.newJar')}</Text>
+            </Press>
+          </Rise>
+        ) : null}
+
         {featured ? (
           <Featured
             jar={featured}
@@ -98,6 +121,9 @@ export default function SavingsScreen() {
               });
             }}
             onAdd={() => router.push({ pathname: '/savings-add', params: { jar: featured.id } })}
+            onTakeOut={() =>
+              router.push({ pathname: '/savings-add', params: { jar: featured.id, mode: 'out' } })
+            }
           />
         ) : null}
 
@@ -149,7 +175,7 @@ export default function SavingsScreen() {
           </Rise>
         ) : null}
       </ScrollView>
-      {drop && featured?.id === drop.jarId ? (
+      {drop && !drop.out && featured?.id === drop.jarId ? (
         <JarToast
           key={drop.key}
           amount={money(drop.amountMinor)}
@@ -168,13 +194,15 @@ function Featured({
   money,
   paceText,
   onAdd,
+  onTakeOut,
 }: {
   jar: JarRow;
   savedMinor: number;
-  drop: { from: number; key: number } | null;
+  drop: { from: number; key: number; out?: boolean } | null;
   money: (minor: number) => string;
   paceText: (jar: JarRow, savedMinor: number) => string | null;
   onAdd: () => void;
+  onTakeOut: () => void;
 }) {
   const { t } = useTranslation();
   const pct = jarPercent(savedMinor, jar.goalMinor);
@@ -186,7 +214,7 @@ function Featured({
         <Jar
           pct={pct}
           from={drop?.from}
-          drop={!!drop}
+          drop={!!drop && !drop.out}
           dropKey={drop?.key}
           size={186}
           tone={jar.tone}
@@ -211,7 +239,16 @@ function Featured({
           <PlusIcon color={color.white} size={20} />
           <Text style={styles.addText}>{t('savings.add')}</Text>
         </Press>
-        {/* "Take money out" waits for its sheet's design. */}
+        <Press
+          accessibilityRole="button"
+          accessibilityLabel={t('savings.takeOut')}
+          accessibilityState={{ disabled: savedMinor <= 0 }}
+          disabled={savedMinor <= 0}
+          onPress={onTakeOut}
+          style={[styles.takeOut, savedMinor <= 0 && styles.disabled]}
+        >
+          <MinusIcon color={color.ink} size={20} />
+        </Press>
       </Rise>
     </>
   );
@@ -279,6 +316,56 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   addText: { ...text.section, color: color.white },
+  takeOut: {
+    width: size.button,
+    height: size.button,
+    borderRadius: size.button / 2,
+    backgroundColor: color.listCard,
+    boxShadow: shadow.takeOut,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  disabled: { opacity: 0.4 },
+  empty: { paddingTop: 72, paddingHorizontal: 16, alignItems: 'center' },
+  emptyTile: {
+    width: 132,
+    height: 132,
+    borderRadius: 40,
+    borderCurve: 'continuous',
+    backgroundColor: color.card,
+    boxShadow: shadow.emptyTile,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyTitle: {
+    marginTop: 28,
+    fontFamily: fontFamily.extrabold,
+    fontSize: 22,
+    lineHeight: 28,
+    letterSpacing: -0.3,
+    color: color.ink,
+  },
+  emptyBody: {
+    marginTop: 8,
+    maxWidth: 280,
+    fontFamily: fontFamily.semibold,
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
+    color: color.muted,
+  },
+  emptyButton: {
+    marginTop: 28,
+    height: 52,
+    paddingHorizontal: 24,
+    borderRadius: radius.pill,
+    backgroundColor: color.ink,
+    boxShadow: shadow.cta,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  emptyButtonText: { fontFamily: fontFamily.bold, fontSize: 16, color: color.white },
   others: { marginTop: 22, gap: 10 },
   section: { ...text.section, color: color.ink, paddingHorizontal: 4 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: TILE_GAP },

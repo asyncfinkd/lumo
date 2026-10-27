@@ -114,6 +114,7 @@ function AppStack({ onLoaded }: { onLoaded: () => void }) {
             <Stack.Screen name="history" />
             <Stack.Screen name="history-search" options={{ animation: 'fade' }} />
             <Stack.Screen name="savings-add" options={sheetOptions} />
+            <Stack.Screen name="savings-new" options={sheetOptions} />
             <Stack.Screen name="savings-done" options={{ animation: 'fade' }} />
             <Stack.Screen name="edit-budget" options={sheetOptions} />
             <Stack.Screen name="profile-photo" options={sheetOptions} />

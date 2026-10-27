@@ -79,6 +79,19 @@ export function addToJar(
   db.insert(jarEntries).values({ id: newId(), jarId, amountMinor, date }).run();
 }
 
+/** "Take money out": back from the jar to the balance, never more than is in it. */
+export function takeFromJar(
+  db: Db,
+  jarId: string,
+  amountMinor: number,
+  date: CalendarDate,
+  newId = defaultNewId,
+): void {
+  assertPositive('amountMinor', amountMinor);
+  if (amountMinor > jarSaved(db, jarId)) throw new RangeError('More than is in the jar');
+  db.insert(jarEntries).values({ id: newId(), jarId, amountMinor: -amountMinor, date }).run();
+}
+
 /**
  * "Time to treat yourself" (SavingsDone): the jar closes and everything in it
  * goes back to the balance, to spend.

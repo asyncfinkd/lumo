@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { jarEntries } from '@/db/schema';
 import { openTestDb } from '@/db/testing';
 import { adjustBalance, currentBalance, saveProfile } from '@/features/profile/repo';
-import { addToJar, closeJar, createJar, jarSaved, openJarsQuery } from '../repo';
+import { addToJar, closeJar, createJar, jarSaved, openJarsQuery, takeFromJar } from '../repo';
 import {
   jarPace,
   jarPercent,
@@ -13,6 +13,7 @@ import {
   monthsTaken,
   quickAmounts,
   savedByJar,
+  takeOutAmounts,
 } from '../savings';
 
 const id = randomUUID;
@@ -127,5 +128,34 @@ describe('jars in the database', () => {
     expect(() => createJar(db, input, '2026-10-27', id)).toThrow();
     const jar = createJar(db, { ...input, name: 'New bike' }, '2026-10-27', id);
     expect(() => addToJar(db, jar, 0, '2026-10-27', id)).toThrow(RangeError);
+  });
+});
+
+describe('takeOutAmounts', () => {
+  it('offers amounts below what is in the jar, then all of it', () => {
+    expect(takeOutAmounts(30000, 64000).map((c) => [c.minor, c.all])).toEqual([
+      [5000, false],
+      [10000, false],
+      [20000, false],
+      [64000, true],
+    ]);
+    expect(takeOutAmounts(30000, 3000)).toEqual([{ minor: 3000, usual: false, all: true }]);
+    expect(takeOutAmounts(30000, 0)).toEqual([]);
+  });
+
+  it('never takes more than is in the jar', () => {
+    const db = openTestDb();
+    saveProfile(db, { name: 'Nika', currency: 'GEL', payday: 5 }, id);
+    const input = {
+      name: 'Rainy day',
+      tone: 'sky' as const,
+      goalMinor: 200000,
+      monthlyMinor: 20000,
+    };
+    const jar = createJar(db, input, '2026-10-27', id);
+    addToJar(db, jar, 10000, '2026-10-27', id);
+    takeFromJar(db, jar, 4000, '2026-10-28', id);
+    expect(jarSaved(db, jar)).toBe(6000);
+    expect(() => takeFromJar(db, jar, 6001, '2026-10-28', id)).toThrow(RangeError);
   });
 });

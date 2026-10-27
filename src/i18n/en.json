@@ -272,6 +272,33 @@
       "body_other": "saved for {{jar}}, one little drop at a time. Took you {{count}} months.",
       "treat": "Time to treat yourself",
       "keep": "Keep saving in this jar"
+    },
+    "takeOut": "Take money out",
+    "empty": {
+      "title": "No jars yet",
+      "body": "Pick something to save for, and drop a little in whenever you can."
+    },
+    "outSheet": {
+      "title": "Take from {{name}}",
+      "all": "ALL",
+      "readyBy": "Now ready by {{month}}",
+      "toBalance": "Goes back to your balance · {{amount}} now",
+      "take": "Take {{amount}} out"
+    },
+    "new": {
+      "namePlaceholder": "What are you saving for?",
+      "goal": "Goal",
+      "monthly": "Each month",
+      "less": "{{amount}} less each month",
+      "more": "{{amount}} more each month",
+      "fullBy": "Full by {{month}}",
+      "create": "Create jar",
+      "tones": {
+        "gold": "Honey jar",
+        "sky": "Sky jar",
+        "blush": "Blush jar",
+        "sage": "Sage jar"
+      }
     }
   },
   "onboarding": {

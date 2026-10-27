@@ -4,6 +4,8 @@ import { create } from 'zustand';
 export type JarDrop = {
   jarId: string;
   amountMinor: number;
+  /** Money taken out: the level falls, no coin and no toast. */
+  out?: boolean;
   /** The jar's percent before and after. */
   from: number;
   to: number;
@@ -19,4 +21,10 @@ export const useJarDrop = create<{
   drop: null,
   show: (drop) => set({ drop: { ...drop, key: Date.now() } }),
   clear: () => set({ drop: null }),
+}));
+
+/** The jar up front on Savings: the one tapped, or a jar just made. */
+export const usePickedJar = create<{ id: string | null; pick: (id: string) => void }>()((set) => ({
+  id: null,
+  pick: (id) => set({ id }),
 }));

@@ -75,6 +75,22 @@ export function quickAmounts(monthlyMinor: number): { minor: number; usual: bool
     .map((minor) => ({ minor, usual: minor === monthlyMinor }));
 }
 
+/**
+ * Chips for taking money out: the same amounts, but never more than is in the
+ * jar; a jar with less than the smallest one offers all of it.
+ */
+export function takeOutAmounts(
+  monthlyMinor: number,
+  savedMinor: number,
+): { minor: number; usual: boolean; all: boolean }[] {
+  const chips = quickAmounts(monthlyMinor)
+    .filter((c) => c.minor < savedMinor)
+    .map((c) => ({ ...c, all: false }));
+  if (savedMinor <= 0) return [];
+  // Three amounts and "All", like the add sheet's four.
+  return [...chips.slice(0, 3), { minor: savedMinor, usual: false, all: true }];
+}
+
 /** "Took you 9 months" (SavingsDone): at least one. */
 export function monthsTaken(startDate: CalendarDate, today: CalendarDate): number {
   return Math.max(1, monthsBetween(startDate, today));
