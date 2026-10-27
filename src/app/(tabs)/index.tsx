@@ -13,6 +13,7 @@ import { FlowCard } from '@/features/home/FlowCard';
 import { greetingKey, monthChange, recentDays } from '@/features/home/home';
 import { LeftToSpendCard } from '@/features/home/LeftToSpendCard';
 import { useHour } from '@/features/home/useHour';
+import { Avatar } from '@/features/profile/Avatar';
 import { useAllTransactions, useMoneyMonth, useTransactionsBetween } from '@/features/live';
 import { TransactionRow } from '@/features/transactions/TransactionRow';
 import { color, fontFamily, radius, shadow, size, space, text } from '@/theme';
@@ -38,8 +39,14 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Rise style={styles.header}>
+        {/* The same avatar as Profile: your photo, or your initial on its color. */}
         <View style={styles.avatar}>
-          <Text style={styles.initial}>{name.charAt(0).toUpperCase()}</Text>
+          <Avatar
+            name={name}
+            tint={profile.avatarColor}
+            photoUri={profile.photoUri}
+            size={size.avatar}
+          />
         </View>
         <View style={styles.headerText}>
           <Text accessibilityRole="header" style={styles.greeting}>
@@ -127,16 +134,7 @@ function DayList({
 const styles = StyleSheet.create({
   content: { paddingHorizontal: space.screen, paddingBottom: space.screenBottom },
   header: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  avatar: {
-    width: size.avatar,
-    height: size.avatar,
-    borderRadius: size.avatar / 2,
-    backgroundColor: color.avatar,
-    boxShadow: shadow.avatar,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  initial: { fontFamily: fontFamily.extrabold, fontSize: 18, color: color.ink },
+  avatar: { borderRadius: size.avatar / 2, boxShadow: shadow.avatar },
   headerText: { flex: 1 },
   greeting: { ...text.greeting, color: color.ink },
   subtitle: { ...text.subtitle, color: color.muted },
