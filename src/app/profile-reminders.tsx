@@ -11,6 +11,7 @@ import { db } from '@/db/client';
 import { formatMoney } from '@/domain/money';
 import { useBills, useProfile } from '@/features/live';
 import { type ReminderKind, setReminderKind, setReminders } from '@/features/profile/repo';
+import { BUDGETING } from '@/features/flags';
 import { SettingsHeader } from '@/features/profile/SettingsHeader';
 import { askForNotifications, notificationsAllowed } from '@/features/reminders/RemindersSync';
 import { categoryPalette, color, fontFamily, radius, shadow, space, text } from '@/theme';
@@ -157,7 +158,7 @@ export default function ProfileRemindersScreen() {
         ) : null}
 
         <View style={[styles.list, !on && styles.listOff]}>
-          {KINDS.map((k) => {
+          {KINDS.filter((k) => BUDGETING || k.kind !== 'remindLowBudget').map((k) => {
             const value = on && profile[k.kind];
             const title = t(`remindersScreen.${k.title}`);
             return (

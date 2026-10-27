@@ -29,6 +29,7 @@ import {
 } from '@/features/transactions/addForm';
 import { clockTime } from '@/features/home/home';
 import { addTransaction, type Scope, updateTransaction } from '@/features/transactions/repo';
+import { BUDGETING } from '@/features/flags';
 import { color, fontFamily, radius, shadow, size, text } from '@/theme';
 
 // AddTransaction: type, amount, a line on how it lands, category, date, note.
@@ -90,18 +91,23 @@ function TransactionForm({
   const amountMinor = parseAmount(typed, currency) ?? 0;
   const categoryName = (id: CategoryId | null) => categories.get(id).label;
 
-  const live = summary
-    ? addMessage({
-        kind,
-        category,
-        amountMinor,
-        budgets,
-        bills,
-        transactions,
-        period: summary.period,
-        left: summary.left,
-      })
-    : null;
+  // Without budgeting there's nothing to measure an expense against.
+  const live: AddMessage | null = !BUDGETING
+    ? kind === 'income'
+      ? { type: 'income' }
+      : null
+    : summary
+      ? addMessage({
+          kind,
+          category,
+          amountMinor,
+          budgets,
+          bills,
+          transactions,
+          period: summary.period,
+          left: summary.left,
+        })
+      : null;
   const message = savedMessage ?? live;
 
   const dayLabel =

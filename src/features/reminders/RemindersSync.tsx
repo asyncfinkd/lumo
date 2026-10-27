@@ -10,6 +10,7 @@ import { AndroidImportance, IosAuthorizationStatus } from 'expo-notifications';
 import { useTranslation } from 'react-i18next';
 import { formatMoney } from '@/domain/money';
 import { budgetRows } from '@/features/budgets/budgetRows';
+import { BUDGETING } from '@/features/flags';
 import { useCategories } from '@/features/categories/categories';
 import {
   useActiveBills,
@@ -163,7 +164,9 @@ export function RemindersSync() {
     const now = new Map(rows.map((r) => [r.category, r.leftPercent]));
     const dropped = newlyLow(lowBefore.current, now);
     lowBefore.current = now;
-    if (!profile?.reminders || !profile.remindLowBudget || dropped.length === 0) return;
+    if (!BUDGETING || !profile?.reminders || !profile.remindLowBudget || dropped.length === 0) {
+      return;
+    }
     (async () => {
       if (!(await notificationsAllowed())) return;
       await ensureChannel(t('remindersScreen.title'));

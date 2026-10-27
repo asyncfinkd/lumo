@@ -13,6 +13,7 @@
     "home": "Home",
     "insights": "Insights",
     "budgets": "Budgets",
+    "history": "History",
     "profile": "Profile",
     "add": "Add transaction"
   },
@@ -45,7 +46,11 @@
     "seeAll": "See all",
     "monthlyBill": "monthly bill",
     "monthlyIncome": "monthly income",
-    "welcomeToast": "All set. You've got this 🌞"
+    "welcomeToast": "All set. You've got this 🌞",
+    "yourBalance": "Your balance",
+    "moreThan": "more than on {{date}}",
+    "lessThan": "less than on {{date}}",
+    "sameAs": "the same as on {{date}}"
   },
   "history": {
     "title": "History",
@@ -365,7 +370,8 @@
     "nameHint": "This is how Lumo greets you on Home.",
     "nameCount": "{{count}} / {{max}}",
     "preview": "Preview",
-    "friend": "friend"
+    "friend": "friend",
+    "remindersSubNoBudgets": "Bills and payday"
   },
   "categories": {
     "coffee": "Coffee",

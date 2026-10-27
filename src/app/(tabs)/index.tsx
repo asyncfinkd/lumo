@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -6,16 +7,19 @@ import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
 import type { Transaction } from '@/db/schema';
 import { addDays } from '@/domain/dates';
+import { BUDGETING } from '@/features/flags';
+import { BalanceCard } from '@/features/home/BalanceCard';
 import { FlowCard } from '@/features/home/FlowCard';
-import { greetingKey, recentDays } from '@/features/home/home';
+import { greetingKey, monthChange, recentDays } from '@/features/home/home';
 import { LeftToSpendCard } from '@/features/home/LeftToSpendCard';
 import { useHour } from '@/features/home/useHour';
-import { useMoneyMonth, useTransactionsBetween } from '@/features/live';
+import { Avatar } from '@/features/profile/Avatar';
+import { useAllTransactions, useMoneyMonth, useTransactionsBetween } from '@/features/live';
 import { TransactionRow } from '@/features/transactions/TransactionRow';
 import { color, fontFamily, radius, shadow, size, space, text } from '@/theme';
 
-// Main: greeting, Left to spend, Came in / Went out, and today's and
-// yesterday's transactions.
+// Main: greeting, your balance (or Left to spend, with budgeting on), Came in /
+// Went out, and today's and yesterday's transactions.
 export default function HomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -23,6 +27,8 @@ export default function HomeScreen() {
   const hour = useHour();
   const { today, profile, summary } = useMoneyMonth();
   const recent = recentDays(useTransactionsBetween(addDays(today, -1), addDays(today, 1)), today);
+  const transactions = useAllTransactions();
+  const change = useMemo(() => monthChange(transactions, today), [transactions, today]);
 
   if (!profile || !summary) return null;
   const name = profile.name.trim();
@@ -33,25 +39,40 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Rise style={styles.header}>
+        {/* The same avatar as Profile: your photo, or your initial on its color. */}
         <View style={styles.avatar}>
-          <Text style={styles.initial}>{name.charAt(0).toUpperCase()}</Text>
+          <Avatar
+            name={name}
+            tint={profile.avatarColor}
+            photoUri={profile.photoUri}
+            size={size.avatar}
+          />
         </View>
         <View style={styles.headerText}>
           <Text accessibilityRole="header" style={styles.greeting}>
             {t(`home.greeting.${greetingKey(hour)}`, { name })}
           </Text>
-          {summary.left.overMinor === 0 ? (
+          {(BUDGETING ? summary.left.overMinor === 0 : (change?.deltaMinor ?? 0) >= 0) ? (
             <Text style={styles.subtitle}>{t('home.doingGreat')}</Text>
           ) : null}
         </View>
       </Rise>
 
       <Rise delay={60}>
-        <LeftToSpendCard
-          summary={summary}
-          currency={profile.currency}
-          onBalance={() => router.push('/balance')}
-        />
+        {BUDGETING ? (
+          <LeftToSpendCard
+            summary={summary}
+            currency={profile.currency}
+            onBalance={() => router.push('/balance')}
+          />
+        ) : (
+          <BalanceCard
+            balanceMinor={summary.balanceMinor}
+            change={change}
+            currency={profile.currency}
+            onBalance={() => router.push('/balance')}
+          />
+        )}
       </Rise>
 
       <Rise delay={120} style={styles.flows}>
@@ -64,7 +85,7 @@ export default function HomeScreen() {
           <Text accessibilityRole="header" style={styles.section}>
             {t('home.today')}
           </Text>
-          <Press accessibilityRole="link" onPress={() => router.push('/history')} hitSlop={12}>
+          <Press accessibilityRole="link" onPress={() => router.navigate('/history')} hitSlop={12}>
             <Text style={styles.seeAll}>{t('home.seeAll')}</Text>
           </Press>
         </View>
@@ -113,16 +134,7 @@ function DayList({
 const styles = StyleSheet.create({
   content: { paddingHorizontal: space.screen, paddingBottom: space.screenBottom },
   header: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  avatar: {
-    width: size.avatar,
-    height: size.avatar,
-    borderRadius: size.avatar / 2,
-    backgroundColor: color.avatar,
-    boxShadow: shadow.avatar,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  initial: { fontFamily: fontFamily.extrabold, fontSize: 18, color: color.ink },
+  avatar: { borderRadius: size.avatar / 2, boxShadow: shadow.avatar },
   headerText: { flex: 1 },
   greeting: { ...text.greeting, color: color.ink },
   subtitle: { ...text.subtitle, color: color.muted },

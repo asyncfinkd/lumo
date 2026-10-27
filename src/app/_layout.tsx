@@ -81,7 +81,6 @@ function AppStack() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="add-transaction" options={sheetOptions} />
           <Stack.Screen name="balance" options={sheetOptions} />
-          <Stack.Screen name="history" />
           <Stack.Screen name="transaction" options={sheetOptions} />
           <Stack.Screen
             name="transaction-delete"

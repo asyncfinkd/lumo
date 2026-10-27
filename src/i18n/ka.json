@@ -13,6 +13,7 @@
     "home": "მთავარი",
     "insights": "ანალიზი",
     "budgets": "ბიუჯეტები",
+    "history": "ისტორია",
     "profile": "პროფილი",
     "add": "ტრანზაქციის დამატება"
   },
@@ -45,7 +46,11 @@
     "seeAll": "ყველა",
     "monthlyBill": "ყოველთვიური გადასახადი",
     "monthlyIncome": "ყოველთვიური შემოსავალი",
-    "welcomeToast": "ყველაფერი მზადაა. შენ შეძლებ 🌞"
+    "welcomeToast": "ყველაფერი მზადაა. შენ შეძლებ 🌞",
+    "yourBalance": "შენი ბალანსი",
+    "moreThan": "მეტი, ვიდრე {{date}}",
+    "lessThan": "ნაკლები, ვიდრე {{date}}",
+    "sameAs": "იგივე, რაც {{date}}"
   },
   "history": {
     "title": "ისტორია",
@@ -364,7 +369,8 @@
     "nameHint": "ასე მოგესალმება Lumo მთავარ გვერდზე.",
     "nameCount": "{{count}} / {{max}}",
     "preview": "წინასწარი ხედი",
-    "friend": "მეგობარო"
+    "friend": "მეგობარო",
+    "remindersSubNoBudgets": "გადასახადები და ხელფასი"
   },
   "categories": {
     "coffee": "ყავა",

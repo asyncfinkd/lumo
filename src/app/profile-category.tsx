@@ -16,6 +16,7 @@ import {
 } from '@/db/categories';
 import { db } from '@/db/client';
 import { formatMoney } from '@/domain/money';
+import { BUDGETING } from '@/features/flags';
 import { useCategories } from '@/features/categories/categories';
 import { saveCategory } from '@/features/categories/repo';
 import { useBudgets, useProfile } from '@/features/live';
@@ -170,7 +171,7 @@ export default function ProfileCategoryScreen() {
             })}
           </View>
 
-          {kind === 'expense' ? (
+          {BUDGETING && kind === 'expense' ? (
             <Press accessibilityRole="button" onPress={openBudget} style={styles.budget}>
               <Text style={styles.budgetLabel}>{t('categoryManage.budget')}</Text>
               <Text style={styles.budgetValue}>

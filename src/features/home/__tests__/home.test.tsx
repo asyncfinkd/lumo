@@ -10,7 +10,8 @@ import {
 import type { Transaction } from '@/db/schema';
 import { summarizeMonth } from '@/features/money/summary';
 import { TransactionRow } from '@/features/transactions/TransactionRow';
-import { clockTime, greetingKey, recentDays } from '../home';
+import { BalanceCard } from '../BalanceCard';
+import { clockTime, greetingKey, monthChange, recentDays } from '../home';
 import { LeftToSpendCard } from '../LeftToSpendCard';
 
 jest.mock('expo-haptics', () => ({
@@ -75,6 +76,54 @@ describe('recentDays', () => {
     const { today, yesterday } = recentDays(rows, '2026-10-31');
     expect(today.map((r) => r.title)).toEqual(['Coffee Lab', 'Fresh Market', 'Bolt']);
     expect(yesterday.map((r) => r.title)).toEqual(['Gym']);
+  });
+});
+
+describe('monthChange', () => {
+  const tx = (
+    date: string,
+    kind: 'income' | 'expense',
+    amountMinor: number,
+    source: 'manual' | 'adjustment' = 'manual',
+  ) => ({ date, kind, amountMinor, source });
+
+  it('compares the balance now with the balance on the 1st', () => {
+    const rows = [
+      tx('2026-09-20', 'income', 1000000, 'adjustment'),
+      tx('2026-09-25', 'expense', 50000),
+      tx('2026-10-05', 'income', 380000),
+      tx('2026-10-27', 'expense', 300000),
+    ];
+    expect(monthChange(rows, '2026-10-27')).toEqual({ since: '2026-10-01', deltaMinor: 80000 });
+  });
+
+  it('has nothing to compare with when the balance was set this month', () => {
+    expect(
+      monthChange([tx('2026-10-03', 'income', 1000000, 'adjustment')], '2026-10-27'),
+    ).toBeNull();
+  });
+});
+
+describe('BalanceCard', () => {
+  it('shows the balance and how it moved since the 1st', async () => {
+    await render(
+      <BalanceCard
+        balanceMinor={1248050}
+        change={{ since: '2026-10-01', deltaMinor: 80000 }}
+        currency="GEL"
+        onBalance={() => {}}
+      />,
+    );
+    expect(screen.getByText('Your balance')).toBeOnTheScreen();
+    expect(screen.getByText('₾800')).toBeOnTheScreen();
+    expect(screen.getByText('more than on Oct 1')).toBeOnTheScreen();
+  });
+
+  it('asks for the balance when there is none yet', async () => {
+    await render(
+      <BalanceCard balanceMinor={null} change={null} currency="GEL" onBalance={() => {}} />,
+    );
+    expect(screen.getByText('Add your balance')).toBeOnTheScreen();
   });
 });
 

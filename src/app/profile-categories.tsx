@@ -10,6 +10,7 @@ import type { CategoryKind } from '@/db/categories';
 import { categorySpent } from '@/domain/budgets';
 import { isInPeriod } from '@/domain/dates';
 import { formatMoney } from '@/domain/money';
+import { BUDGETING } from '@/features/flags';
 import { type CategoryView, useCategories } from '@/features/categories/categories';
 import { useAllTransactions, useBudgets, useMoneyMonth } from '@/features/live';
 import { HeaderButton, SettingsHeader } from '@/features/profile/SettingsHeader';
@@ -44,6 +45,8 @@ export default function ProfileCategoriesScreen() {
         return t('categoryManage.earned', { amount: money(earned) });
       }
       const spent = money(categorySpent(transactions, c.id, summary.period));
+      // Without budgeting, just what went out this month.
+      if (!BUDGETING) return t('categoryManage.earned', { amount: spent });
       const budget = budgets.find((b) => b.categoryId === c.id);
       return budget
         ? t('categoryManage.spentWithBudget', { amount: spent, budget: money(budget.limitMinor) })
