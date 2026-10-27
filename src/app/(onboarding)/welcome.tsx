@@ -5,12 +5,14 @@ import { Orbs } from '@/components/Backdrop';
 import { Button } from '@/components/Button';
 import { SunriseJar } from '@/components/illustrations/SunriseJar';
 import { Rise } from '@/components/motion';
+import { useRestoreBackup } from '@/features/backup/useRestoreBackup';
 import { color, space, text } from '@/theme';
 
 // OBWelcome: the sun rises behind the jar, then "Money, but calmer."
 export default function WelcomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const restoreBackup = useRestoreBackup();
 
   return (
     <View style={styles.root}>
@@ -28,6 +30,12 @@ export default function WelcomeScreen() {
       </View>
       <View style={styles.actions}>
         <Button label={t('onboarding.welcome.start')} onPress={() => router.push('/name')} />
+        {/* A new phone: pick up from a Lumo backup instead of starting over. */}
+        <Button
+          variant="quiet"
+          label={t('onboarding.welcome.restore')}
+          onPress={() => restoreBackup({ ask: false })}
+        />
       </View>
     </View>
   );
@@ -54,5 +62,5 @@ const styles = StyleSheet.create({
     maxWidth: 290,
     textAlign: 'center',
   },
-  actions: { paddingHorizontal: space.screen, paddingBottom: 34 },
+  actions: { paddingHorizontal: space.screen, paddingBottom: 34, gap: 4 },
 });

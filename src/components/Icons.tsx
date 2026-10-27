@@ -495,6 +495,22 @@ export function GlobeIcon({ color }: { color: string }) {
   );
 }
 
+/** Restore from backup: the Download arrow pointing up, out of the tray. */
+export function UploadIcon({ color }: { color: string }) {
+  const s = rowLine(color);
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" accessible={false}>
+      <Path {...s} d="M12 14.5v-11M7.5 8l4.5-4.5 4.5 4.5" />
+      <Path
+        {...s}
+        fill={color}
+        fillOpacity={0.15}
+        d="M4.5 15.5v2a3 3 0 0 0 3 3h9a3 3 0 0 0 3-3v-2"
+      />
+    </Svg>
+  );
+}
+
 export function DownloadIcon({ color }: { color: string }) {
   const s = rowLine(color);
   return (

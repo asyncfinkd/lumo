@@ -244,7 +244,8 @@
       "title": "Money, but calmer.",
       "body": "Let's set things up together. It takes 2 minutes.",
       "start": "Let's start",
-      "illustration": "A little savings jar with the sun rising behind it"
+      "illustration": "A little savings jar with the sun rising behind it",
+      "restore": "Restore from backup"
     },
     "name": {
       "label": "Your name",
@@ -375,7 +376,8 @@
     "nameCount": "{{count}} / {{max}}",
     "preview": "Preview",
     "friend": "friend",
-    "remindersSubNoBudgets": "Bills and payday"
+    "remindersSubNoBudgets": "Bills and payday",
+    "restore": "Restore from backup"
   },
   "categories": {
     "coffee": "Coffee",
@@ -546,7 +548,10 @@
     "yes": "Yes",
     "no": "No",
     "everything": "Everything",
-    "footer": "Made with Lumo on {{date}}. Everything stays on your phone."
+    "footer": "Made with Lumo on {{date}}. Everything stays on your phone.",
+    "backup": "Lumo backup",
+    "backupHint": "Everything, to pick up where you left off",
+    "categories": "Categories"
   },
   "remindersScreen": {
     "title": "Reminders",
@@ -581,5 +586,16 @@
   "launch": {
     "opening": "Lumo is opening",
     "private": "Everything stays on this phone"
+  },
+  "backup": {
+    "confirmTitle": "Restore this backup?",
+    "confirmBody_one": "{{name}}’s backup from {{date}}, with {{count}} transaction. Everything on this phone now will be replaced.",
+    "confirmBody_other": "{{name}}’s backup from {{date}}, with {{count}} transactions. Everything on this phone now will be replaced.",
+    "restore": "Restore",
+    "doneTitle": "Restored",
+    "doneBody": "Lumo is back where the backup left off.",
+    "failedTitle": "Couldn’t restore",
+    "invalid": "This file isn’t a Lumo backup, or it’s damaged.",
+    "newer": "This backup was made by a newer Lumo. Update Lumo, then try again."
   }
 }

@@ -16,11 +16,13 @@ import {
   PersonIcon,
   RepeatIcon,
   TrashIcon,
+  UploadIcon,
 } from '@/components/Icons';
 import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
 import { currencies, formatMoney } from '@/domain/money';
 import { useBills, useCategories, useIncomes, useProfile } from '@/features/live';
+import { useRestoreBackup } from '@/features/backup/useRestoreBackup';
 import { BUDGETING } from '@/features/flags';
 import { Avatar } from '@/features/profile/Avatar';
 import { PhotoToast } from '@/features/profile/photoToast';
@@ -47,6 +49,7 @@ export default function ProfileScreen() {
   const incomes = useIncomes();
   const bills = useBills();
   const categories = useCategories();
+  const restoreBackup = useRestoreBackup();
   if (!profile) return null;
 
   const { currency } = profile;
@@ -190,6 +193,12 @@ export default function ProfileScreen() {
               label={t('profile.export')}
               value={t('profile.exportFormat')}
               onPress={() => router.push('/profile-export')}
+            />
+            <Row
+              tile={categoryPalette.sky}
+              icon={<UploadIcon color={categoryPalette.sky.fg} />}
+              label={t('profile.restore')}
+              onPress={() => restoreBackup({ ask: true })}
             />
             <Row
               tile={{ bg: color.dangerSoft, fg: color.danger }}
