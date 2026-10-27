@@ -51,7 +51,13 @@ const rows: Row[] = [
     source: 'adjustment',
   }),
   row({ id: 'pharmacy', title: 'Pharmacy', amountMinor: 1860, date: '2026-10-24' }),
-  row({ id: 'september', title: 'Bakery', amountMinor: 640, date: '2026-09-30', category: 'Coffee' }),
+  row({
+    id: 'september',
+    title: 'Bakery',
+    amountMinor: 640,
+    date: '2026-09-30',
+    category: 'Coffee',
+  }),
 ];
 
 describe('dayGroups', () => {
@@ -91,7 +97,10 @@ describe('monthSpent', () => {
 });
 
 describe('searchTransactions', () => {
-  const describeRow = (r: Row) => ({ category: r.category, amount: (r.amountMinor / 100).toFixed(2) });
+  const describeRow = (r: Row) => ({
+    category: r.category,
+    amount: (r.amountMinor / 100).toFixed(2),
+  });
   const ids = (q: string, f: Parameters<typeof searchTransactions>[2] = 'all') =>
     searchTransactions(rows, q, f, describeRow).map((r) => r.id);
 
