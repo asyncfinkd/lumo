@@ -179,6 +179,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   input: {
+    padding: 0,
     flex: 1,
     height: 48,
     fontFamily: fontFamily.bold,

@@ -46,17 +46,19 @@ export default function ProfileNameScreen() {
           {t('onboarding.name.title')}
         </Text>
         <Text style={styles.hint}>{t('profile.nameHint')}</Text>
-        <TextInput
-          accessibilityLabel={t('onboarding.name.title')}
-          value={value}
-          onChangeText={(next) => setName(next.slice(0, MAX))}
-          maxLength={MAX}
-          autoComplete="given-name"
-          autoCapitalize="words"
-          returnKeyType="done"
-          onSubmitEditing={save}
-          style={styles.input}
-        />
+        <View style={styles.field}>
+          <TextInput
+            accessibilityLabel={t('onboarding.name.title')}
+            value={value}
+            onChangeText={(next) => setName(next.slice(0, MAX))}
+            maxLength={MAX}
+            autoComplete="given-name"
+            autoCapitalize="words"
+            returnKeyType="done"
+            onSubmitEditing={save}
+            style={styles.input}
+          />
+        </View>
         <Text style={styles.count}>
           {t('profile.nameCount', { count: value.length, max: MAX })}
         </Text>
@@ -106,7 +108,9 @@ const styles = StyleSheet.create({
     color: color.muted,
     marginTop: 8,
   },
-  input: {
+  field: {
+    // The box is a View around the field: Android drops a TextInput's own
+    // horizontal padding, which left the text against the edge.
     marginTop: 24,
     height: 68,
     paddingHorizontal: 22,
@@ -114,6 +118,11 @@ const styles = StyleSheet.create({
     borderCurve: 'continuous',
     backgroundColor: color.field,
     boxShadow: shadow.fieldFocus,
+    justifyContent: 'center',
+  },
+  input: {
+    height: '100%',
+    padding: 0,
     fontFamily: fontFamily.bold,
     fontSize: 24,
     color: color.ink,
