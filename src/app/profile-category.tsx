@@ -89,17 +89,19 @@ export default function ProfileCategoryScreen() {
             <View style={[styles.preview, { backgroundColor: palette.bg }]}>
               <CategoryIcon icon={icon} size={28} color={palette.fg} />
             </View>
-            <TextInput
-              accessibilityLabel={t('categoryManage.nameLabel')}
-              value={name}
-              onChangeText={setName}
-              placeholder={t('categoryManage.namePlaceholder')}
-              placeholderTextColor={color.placeholder}
-              maxLength={MAX_NAME}
-              autoFocus={isNew}
-              returnKeyType="done"
-              style={styles.name}
-            />
+            <View style={styles.nameField}>
+              <TextInput
+                accessibilityLabel={t('categoryManage.nameLabel')}
+                value={name}
+                onChangeText={setName}
+                placeholder={t('categoryManage.namePlaceholder')}
+                placeholderTextColor={color.placeholder}
+                maxLength={MAX_NAME}
+                autoFocus={isNew}
+                returnKeyType="done"
+                style={styles.name}
+              />
+            </View>
           </View>
 
           <View style={styles.type}>
@@ -258,13 +260,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  name: {
+  nameField: {
+    // The box is a View around the field: Android drops a TextInput's own
+    // horizontal padding, which left the text against the edge.
     flex: 1,
     height: 56,
     paddingHorizontal: 16,
     borderRadius: 20,
     borderCurve: 'continuous',
     backgroundColor: color.washSoft,
+    justifyContent: 'center',
+  },
+  name: {
+    height: '100%',
+    padding: 0,
     fontFamily: fontFamily.extrabold,
     fontSize: 18,
     color: color.ink,

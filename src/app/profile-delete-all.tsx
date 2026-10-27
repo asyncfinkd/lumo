@@ -33,17 +33,19 @@ export default function ProfileDeleteAllScreen() {
         <Text style={styles.word}>{WORD}</Text>
         {t('profile.deleteAll.typeAfter')}
       </Text>
-      <TextInput
-        accessibilityLabel={t('profile.deleteAll.typeLabel', { word: WORD })}
-        value={typed}
-        onChangeText={setTyped}
-        placeholder={WORD}
-        placeholderTextColor={color.placeholder}
-        autoCapitalize="characters"
-        autoCorrect={false}
-        autoComplete="off"
-        style={styles.input}
-      />
+      <View style={styles.field}>
+        <TextInput
+          accessibilityLabel={t('profile.deleteAll.typeLabel', { word: WORD })}
+          value={typed}
+          onChangeText={setTyped}
+          placeholder={WORD}
+          placeholderTextColor={color.placeholder}
+          autoCapitalize="characters"
+          autoCorrect={false}
+          autoComplete="off"
+          style={styles.input}
+        />
+      </View>
 
       <View style={styles.actions}>
         <Press
@@ -96,7 +98,9 @@ const styles = StyleSheet.create({
     color: color.softInk,
   },
   word: { fontFamily: fontFamily.extrabold, color: color.danger },
-  input: {
+  field: {
+    // The box is a View around the field: Android drops a TextInput's own
+    // horizontal padding, which left the text against the edge.
     marginTop: 6,
     alignSelf: 'stretch',
     height: 48,
@@ -104,6 +108,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderCurve: 'continuous',
     backgroundColor: color.wash,
+    justifyContent: 'center',
+  },
+  input: {
+    height: '100%',
+    padding: 0,
     fontFamily: fontFamily.extrabold,
     fontSize: 16,
     letterSpacing: 1,

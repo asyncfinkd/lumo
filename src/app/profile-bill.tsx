@@ -273,6 +273,7 @@ const styles = StyleSheet.create({
   },
   label: { width: 110, fontFamily: fontFamily.bold, fontSize: 15, color: color.muted },
   input: {
+    padding: 0,
     flex: 1,
     height: 56,
     textAlign: 'right',

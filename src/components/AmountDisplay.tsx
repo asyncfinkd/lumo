@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useReducedMotion,
@@ -63,22 +63,37 @@ export function AmountDisplay({
   );
 }
 
+/**
+ * Android clips the top of a line shorter than the font's own height (Nunito
+ * is about 1.37× its size), which cut off the digits and the ₾. There the line
+ * is that tall and the pieces sit on the text baseline; iOS keeps the design's
+ * tight lines.
+ */
+const ANDROID = Platform.OS === 'android';
+const fullLine = (fontSize: number) => Math.ceil(fontSize * 1.37);
+
 const styles = StyleSheet.create({
-  row: { height: 64, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center' },
+  row: ANDROID
+    ? { minHeight: 64, flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center' }
+    : { height: 64, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center' },
   symbol: {
     fontFamily: text.subtitle.fontFamily,
     fontSize: 30,
-    lineHeight: 30,
+    lineHeight: ANDROID ? fullLine(30) : 30,
     color: color.subtle,
     marginRight: 4,
-    marginBottom: 9,
+    marginBottom: ANDROID ? 0 : 9,
   },
-  amount: { ...text.amount, color: color.ink },
+  amount: {
+    ...text.amount,
+    ...(ANDROID ? { lineHeight: fullLine(text.amount.fontSize) } : null),
+    color: color.ink,
+  },
   caret: {
     width: 3,
     height: 46,
     marginLeft: 4,
-    marginBottom: 6,
+    marginBottom: ANDROID ? -4 : 6,
     borderRadius: 999,
     backgroundColor: color.ink,
   },

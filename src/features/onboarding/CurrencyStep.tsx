@@ -160,6 +160,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   searchInput: {
+    padding: 0,
     flex: 1,
     height: '100%',
     ...text.rowTitle,

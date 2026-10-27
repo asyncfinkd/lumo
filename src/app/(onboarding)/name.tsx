@@ -28,23 +28,25 @@ export default function NameScreen() {
       hint={t('onboarding.name.hint')}
       primary={{ label: t('common.continue'), onPress: next, disabled: !trimmed }}
     >
-      <TextInput
-        accessibilityLabel={t('onboarding.name.label')}
-        placeholder={t('onboarding.name.label')}
-        placeholderTextColor={color.placeholder}
-        value={name}
-        onChangeText={setName}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        onSubmitEditing={next}
-        autoFocus
-        autoComplete="given-name"
-        textContentType="givenName"
-        autoCapitalize="words"
-        returnKeyType="next"
-        maxLength={40}
-        style={[styles.input, { boxShadow: focused ? shadow.fieldFocus : shadow.field }]}
-      />
+      <View style={[styles.field, { boxShadow: focused ? shadow.fieldFocus : shadow.field }]}>
+        <TextInput
+          accessibilityLabel={t('onboarding.name.label')}
+          placeholder={t('onboarding.name.label')}
+          placeholderTextColor={color.placeholder}
+          value={name}
+          onChangeText={setName}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          onSubmitEditing={next}
+          autoFocus
+          autoComplete="given-name"
+          textContentType="givenName"
+          autoCapitalize="words"
+          returnKeyType="next"
+          maxLength={40}
+          style={styles.input}
+        />
+      </View>
       {trimmed ? (
         <Rise style={styles.greeting}>
           <View style={styles.avatar}>
@@ -58,16 +60,23 @@ export default function NameScreen() {
 }
 
 const styles = StyleSheet.create({
-  input: {
+  field: {
+    // The box is a View around the field: Android drops a TextInput's own
+    // horizontal padding, which left the text against the edge.
     marginTop: 28,
     height: 68,
     paddingHorizontal: 22,
     borderRadius: 20,
     borderCurve: 'continuous',
     backgroundColor: color.field,
+    justifyContent: 'center',
+  },
+  input: {
     ...text.stat,
     fontSize: 24,
     lineHeight: undefined,
+    height: '100%',
+    padding: 0,
     color: color.ink,
   },
   greeting: { marginTop: 20, flexDirection: 'row', alignItems: 'center', gap: 12 },
