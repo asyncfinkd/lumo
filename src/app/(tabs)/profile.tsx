@@ -10,6 +10,8 @@ import {
   CameraIcon,
   ChevronRightIcon,
   DownloadIcon,
+  FaceIdIcon,
+  FingerprintIcon,
   GlobeIcon,
   GridIcon,
   MoneyIcon,
@@ -20,12 +22,16 @@ import {
 } from '@/components/Icons';
 import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
+import { Switch } from '@/components/Switch';
+import { db } from '@/db/client';
 import { currencies, formatMoney } from '@/domain/money';
 import { useBills, useCategories, useIncomes, useProfile } from '@/features/live';
 import { useRestoreBackup } from '@/features/backup/useRestoreBackup';
 import { BUDGETING } from '@/features/flags';
+import { authenticate, type Biometrics, useBiometrics } from '@/features/lock/biometrics';
 import { Avatar } from '@/features/profile/Avatar';
 import { PhotoToast } from '@/features/profile/photoToast';
+import { setAppLock } from '@/features/profile/repo';
 import {
   categoryPalette,
   color,
@@ -50,6 +56,7 @@ export default function ProfileScreen() {
   const bills = useBills();
   const categories = useCategories();
   const restoreBackup = useRestoreBackup();
+  const biometrics = useBiometrics();
   if (!profile) return null;
 
   const { currency } = profile;
@@ -187,6 +194,7 @@ export default function ProfileScreen() {
             {t('profile.yourData')}
           </Text>
           <View style={styles.list}>
+            {biometrics ? <LockRow biometrics={biometrics} on={profile.appLock} /> : null}
             <Row
               tile={categoryPalette.sage}
               icon={<DownloadIcon color={categoryPalette.sage.fg} />}
@@ -268,6 +276,51 @@ function Row({
   );
 }
 
+/**
+ * "Lock with Face ID" (ProfileLockFaceID / TouchID / Fingerprint), or greyed
+ * out with "Set up Face ID in Settings first" (ProfileLockUnavailable).
+ * Turning it on or off asks for Face ID first, so it's really you.
+ */
+function LockRow({ biometrics, on }: { biometrics: Biometrics; on: boolean }) {
+  const { t } = useTranslation();
+  const { kind, available } = biometrics;
+  const value = available && on;
+  const label = t(`profile.lock.title.${kind}`);
+  const hint = !available
+    ? t(`profile.lock.setUp.${kind}`)
+    : value
+      ? t('profile.lock.on')
+      : t('profile.lock.off');
+  const tint = available ? color.lockIcon : color.lockIconOff;
+  const Icon = kind === 'faceid' ? FaceIdIcon : FingerprintIcon;
+
+  const toggle = async (next: boolean) => {
+    if (await authenticate().catch(() => false)) setAppLock(db, next);
+  };
+
+  return (
+    <View style={styles.lockRow}>
+      <View
+        style={[styles.tile, { backgroundColor: available ? color.lockTile : color.lockTileOff }]}
+      >
+        <Icon color={tint} />
+      </View>
+      <View style={styles.rowText}>
+        <Text style={[styles.rowLabel, !available && { color: color.placeholder }]}>{label}</Text>
+        <Text style={[styles.rowSub, !available && { color: color.warning }]}>{hint}</Text>
+      </View>
+      <View style={!available && styles.switchOff}>
+        <Switch
+          value={value}
+          onChange={toggle}
+          disabled={!available}
+          accessibilityLabel={`${label}, ${hint}`}
+        />
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   content: { paddingHorizontal: space.screen, paddingBottom: space.screenBottom },
   title: { ...text.h1, color: color.ink },
@@ -324,6 +377,14 @@ const styles = StyleSheet.create({
   symbol: { fontFamily: fontFamily.bold, fontSize: 18 },
   appIcon: { width: 36, height: 36, borderRadius: 10, boxShadow: shadow.appIconRing },
   rowTall: { height: 64 },
+  lockRow: {
+    minHeight: 72,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  switchOff: { opacity: 0.45 },
   rowText: { flex: 1, minWidth: 0, gap: 1 },
   rowLabel: { ...text.rowTitle, color: color.ink },
   rowSub: { ...text.small, fontFamily: fontFamily.semibold, color: color.muted },

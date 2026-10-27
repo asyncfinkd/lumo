@@ -57,6 +57,13 @@
       "when": 1793094100122,
       "tag": "0007_chubby_skrulls",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1793113341297,
+      "tag": "0008_clumsy_lord_tyger",
+      "breakpoints": true
     }
   ]
 }

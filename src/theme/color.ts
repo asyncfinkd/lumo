@@ -95,6 +95,15 @@ export const color = {
   disabled: '#BDB3AC',
   /** A disabled destructive button and similar quiet fills. */
   washStrong: 'rgba(43,37,34,0.06)',
+  // App lock (ProfileLockFaceID, LockScreen)
+  lockTile: '#E3ECF8',
+  lockIcon: '#3F6E9E',
+  /** The tile when the phone has no Face ID / fingerprint set up. */
+  lockTileOff: '#F2EDE8',
+  lockIconOff: '#B8ADA5',
+  /** The badge on the Lumo tile after a failed try (LockScreenFailed). */
+  lockFailed: '#C4553C',
+
   // Switch
   switchOn: '#6BAF8D',
   switchOff: '#E2D8CF',

@@ -53,6 +53,12 @@
       ],
       "expo-sharing",
       [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Lumo uses Face ID to keep your money private."
+        }
+      ],
+      [
         "expo-notifications",
         {
           "enableRemoteNotifications": false
