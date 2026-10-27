@@ -30,7 +30,7 @@ export default function InsightsScreen() {
   const { t } = useTranslation();
   const screenTop = useScreenTop();
   const refreshControl = usePullToRefresh(screenTop);
-  const [view, setView] = useState<Range>('month');
+  const [view, setView] = useState<Range>('day');
   const { today, profile, summary } = useMoneyMonth();
   const transactions = useAllTransactions();
   const categories = useCategories();
