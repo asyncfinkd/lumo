@@ -8,6 +8,7 @@ type Row = {
   amountMinor: number;
   date: string;
   occurredAt: string;
+  createdAt: string;
   source: TransactionSource;
   category: string;
 };
@@ -18,18 +19,27 @@ const row = (o: Partial<Row> & { id: string }): Row => ({
   amountMinor: 1000,
   date: '2026-10-27',
   occurredAt: '2026-10-27T10:00:00.000Z',
+  createdAt: '2026-10-27T10:00:00.000Z',
   source: 'manual',
   category: 'Getting around',
   ...o,
 });
 
 const rows: Row[] = [
-  row({ id: 'bolt', title: 'Bolt', amountMinor: 1240, occurredAt: '2026-10-27T18:20:00.000Z' }),
+  row({
+    id: 'bolt',
+    title: 'Bolt',
+    amountMinor: 1240,
+    occurredAt: '2026-10-27T18:20:00.000Z',
+    createdAt: '2026-10-27T18:21:00.000Z',
+  }),
   row({
     id: 'coffee',
     title: 'Coffee Lab',
     amountMinor: 1150,
     occurredAt: '2026-10-27T08:40:00.000Z',
+    // Added after Bolt, for earlier in the day.
+    createdAt: '2026-10-27T19:00:00.000Z',
     category: 'Coffee',
   }),
   row({
@@ -63,7 +73,7 @@ const rows: Row[] = [
 describe('dayGroups', () => {
   const groups = dayGroups(rows);
 
-  it('puts the newest day first and each day earliest first', () => {
+  it('puts the newest day first and, in each day, the one added last first', () => {
     expect(groups.map((g) => g.date)).toEqual([
       '2026-10-27',
       '2026-10-26',

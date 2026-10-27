@@ -163,18 +163,18 @@ export function deleteTransaction(
   });
 }
 
-/** Transactions with `start <= date < end`, newest first. */
+/** Transactions with `start <= date < end`, newest day first, then the one added last. */
 export function transactionsBetween(db: Db, start: CalendarDate, end: CalendarDate) {
   return db
     .select()
     .from(transactions)
     .where(and(gte(transactions.date, start), lt(transactions.date, end)))
-    .orderBy(desc(transactions.date), desc(transactions.occurredAt));
+    .orderBy(desc(transactions.date), desc(transactions.createdAt));
 }
 
 export function allTransactions(db: Db) {
   return db
     .select()
     .from(transactions)
-    .orderBy(desc(transactions.date), desc(transactions.occurredAt));
+    .orderBy(desc(transactions.date), desc(transactions.createdAt));
 }
