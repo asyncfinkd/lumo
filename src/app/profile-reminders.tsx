@@ -3,6 +3,7 @@ import { AppState, Image, Linking, ScrollView, StyleSheet, Text, View } from 're
 import Constants from 'expo-constants';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useScreenTop } from '@/components/useScreenTop';
 import { Orbs } from '@/components/Backdrop';
 import { CategoryIcon, MoonIcon, PurseIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
@@ -55,6 +56,7 @@ const KINDS: {
 export default function ProfileRemindersScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const screenTop = useScreenTop();
   const profile = useProfile();
   const bills = useBills();
   // Whether the phone lets Lumo notify; checked again when you come back from Settings.
@@ -109,7 +111,7 @@ export default function ProfileRemindersScreen() {
       };
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
+    <View style={[styles.root, { paddingTop: screenTop }]}>
       <Orbs />
       <SettingsHeader title={t('remindersScreen.title')} />
       <ScrollView

@@ -3,6 +3,7 @@ import { FlatList, ScrollView, StyleSheet, Text, TextInput, View } from 'react-n
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useScreenTop } from '@/components/useScreenTop';
 import { Orbs } from '@/components/Backdrop';
 import { CloseIcon, SearchIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
@@ -29,6 +30,7 @@ export default function HistorySearchScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const screenTop = useScreenTop();
   const transactions = useAllTransactions();
   const categories = useCategories();
   const dayLabel = useDayLabel();
@@ -52,7 +54,7 @@ export default function HistorySearchScreen() {
   const searching = query.trim().length > 0;
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
+    <View style={[styles.root, { paddingTop: screenTop }]}>
       <Orbs />
       <View style={styles.bar}>
         <View style={styles.field}>

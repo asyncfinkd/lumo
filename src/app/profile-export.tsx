@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useScreenTop } from '@/components/useScreenTop';
 import { File, Paths } from 'expo-file-system';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -38,6 +39,7 @@ const FORMATS: ExportFormat[] = ['csv', 'pdf'];
 export default function ProfileExportScreen() {
   const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
+  const screenTop = useScreenTop();
   const today = useToday();
   const profile = useProfile();
   const transactions = useAllTransactions();
@@ -129,7 +131,7 @@ export default function ProfileExportScreen() {
   const formatName = format === 'csv' ? t('exportData.csv') : t('exportData.pdf');
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
+    <View style={[styles.root, { paddingTop: screenTop }]}>
       <Orbs />
       <SettingsHeader title={t('exportData.title')} />
       <ScrollView
