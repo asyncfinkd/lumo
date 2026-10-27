@@ -12,10 +12,10 @@ import { Press } from './Press';
 export type Tab = TabIconName;
 export type BlurTarget = RefObject<ComponentRef<typeof View> | null>;
 
-// Budgets is off in phase 1 (features/flags.ts): Home, Insights, +, Profile.
-const SLOTS: (Tab | 'add')[] = (['home', 'insights', 'add', 'budgets', 'profile'] as const).filter(
-  (slot) => BUDGETING || slot !== 'budgets',
-);
+// Budgets is off in phase 1 (features/flags.ts): Home, Insights, +, History, Profile.
+const SLOTS: (Tab | 'add')[] = (
+  ['home', 'insights', 'add', 'history', 'budgets', 'profile'] as const
+).filter((slot) => BUDGETING || slot !== 'budgets');
 const PAD = 6;
 
 type Props = {

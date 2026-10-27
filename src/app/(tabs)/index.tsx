@@ -78,7 +78,7 @@ export default function HomeScreen() {
           <Text accessibilityRole="header" style={styles.section}>
             {t('home.today')}
           </Text>
-          <Press accessibilityRole="link" onPress={() => router.push('/history')} hitSlop={12}>
+          <Press accessibilityRole="link" onPress={() => router.navigate('/history')} hitSlop={12}>
             <Text style={styles.seeAll}>{t('home.seeAll')}</Text>
           </Press>
         </View>

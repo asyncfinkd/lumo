@@ -79,7 +79,7 @@ export function CategoryIcon({
   );
 }
 
-export type TabIconName = 'home' | 'insights' | 'budgets' | 'profile';
+export type TabIconName = 'home' | 'insights' | 'budgets' | 'history' | 'profile';
 
 export function TabIcon({ name, color }: { name: TabIconName; color: string }) {
   const s = line(color);
@@ -113,6 +113,13 @@ export function TabIcon({ name, color }: { name: TabIconName; color: string }) {
           />
           <Path {...s} d="M16 13h1.5" />
           <Path {...s} d="M6.5 6.5 15 3.8a1.5 1.5 0 0 1 2 1.4v1.3" />
+        </>
+      )}
+      {name === 'history' && (
+        // A receipt: every transaction, day by day.
+        <>
+          <Path {...s} fill={color} fillOpacity={0.22} d="M6 3.5h12v17l-3-2-3 2-3-2-3 2z" />
+          <Path {...s} d="M9 8.5h6M9 12.5h4" />
         </>
       )}
       {name === 'profile' && (

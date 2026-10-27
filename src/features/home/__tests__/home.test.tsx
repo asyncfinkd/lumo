@@ -80,8 +80,12 @@ describe('recentDays', () => {
 });
 
 describe('monthChange', () => {
-  const tx = (date: string, kind: 'income' | 'expense', amountMinor: number, source = 'manual') =>
-    ({ date, kind, amountMinor, source }) as const;
+  const tx = (
+    date: string,
+    kind: 'income' | 'expense',
+    amountMinor: number,
+    source: 'manual' | 'adjustment' = 'manual',
+  ) => ({ date, kind, amountMinor, source });
 
   it('compares the balance now with the balance on the 1st', () => {
     const rows = [
