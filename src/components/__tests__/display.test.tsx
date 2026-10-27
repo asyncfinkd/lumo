@@ -1,6 +1,7 @@
 import { Text } from 'react-native';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '@/i18n';
 import { DigitRoll } from '../DigitRoll';
 import { Donut } from '../Donut';
@@ -57,6 +58,12 @@ describe('Sparkline', () => {
   });
 });
 
+/** A phone's safe areas, as the app's root provides them. */
+const metrics = {
+  frame: { x: 0, y: 0, width: 402, height: 874 },
+  insets: { top: 62, left: 0, right: 0, bottom: 34 },
+};
+
 describe('Sheet', () => {
   beforeEach(() => jest.useFakeTimers());
   afterEach(() => jest.useRealTimers());
@@ -64,11 +71,13 @@ describe('Sheet', () => {
   it('shows its content and is dismissed after sliding away', async () => {
     const onDismissed = jest.fn();
     await render(
-      <GestureHandlerRootView>
-        <Sheet accessibilityLabel="New expense" top={96} onDismissed={onDismissed}>
-          {(close) => <Text onPress={close}>Done</Text>}
-        </Sheet>
-      </GestureHandlerRootView>,
+      <SafeAreaProvider initialMetrics={metrics}>
+        <GestureHandlerRootView>
+          <Sheet accessibilityLabel="New expense" top={96} onDismissed={onDismissed}>
+            {(close) => <Text onPress={close}>Done</Text>}
+          </Sheet>
+        </GestureHandlerRootView>
+      </SafeAreaProvider>,
     );
     expect(screen.getByText('Done')).toBeOnTheScreen();
 
@@ -83,11 +92,13 @@ describe('Sheet', () => {
   it('closes when tapping outside', async () => {
     const onDismissed = jest.fn();
     await render(
-      <GestureHandlerRootView>
-        <Sheet accessibilityLabel="Edit budget" onDismissed={onDismissed}>
-          {() => <Text>Groceries</Text>}
-        </Sheet>
-      </GestureHandlerRootView>,
+      <SafeAreaProvider initialMetrics={metrics}>
+        <GestureHandlerRootView>
+          <Sheet accessibilityLabel="Edit budget" onDismissed={onDismissed}>
+            {() => <Text>Groceries</Text>}
+          </Sheet>
+        </GestureHandlerRootView>
+      </SafeAreaProvider>,
     );
     await fireEvent.press(screen.getByRole('button', { name: 'Close' }));
     await act(async () => {
