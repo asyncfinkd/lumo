@@ -365,6 +365,33 @@ export function SearchIcon({ color, size = 20 }: IconProps) {
   );
 }
 
+/** "Evening check-in" (ProfileReminders). */
+export function MoonIcon({ color }: { color: string }) {
+  const s = line(color, 1.9);
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" accessible={false}>
+      <Path
+        {...s}
+        fill={color}
+        fillOpacity={0.22}
+        d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z"
+      />
+    </Svg>
+  );
+}
+
+/** "A budget is running low" (ProfileReminders): a purse. */
+export function PurseIcon({ color }: { color: string }) {
+  const s = line(color, 1.9);
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" accessible={false}>
+      <Rect {...s} fill={color} fillOpacity={0.22} x={3.5} y={6.5} width={17} height={13} rx={4} />
+      <Path {...s} d="M16 13h1.5" />
+      <Path {...s} d="M6.5 6.5 15 3.8a1.5 1.5 0 0 1 2 1.4v1.3" />
+    </Svg>
+  );
+}
+
 /** "added today, 13:15" on the edit sheet. */
 export function ClockIcon({ color }: { color: string }) {
   const s = line(color, 2.2);

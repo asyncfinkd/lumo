@@ -15,10 +15,12 @@ type Props = {
   value: boolean;
   onChange: (next: boolean) => void;
   accessibilityLabel: string;
+  /** Shown as it is but can't be flipped (a reminder while Reminders is off). */
+  disabled?: boolean;
 };
 
 /** The design's switch (EditBudget's nudge): green when on, the knob springs across. */
-export function Switch({ value, onChange, accessibilityLabel }: Props) {
+export function Switch({ value, onChange, accessibilityLabel, disabled = false }: Props) {
   const reduceMotion = useReducedMotion();
   const on = useSharedValue(value ? 1 : 0);
   const track = useSharedValue(value ? 1 : 0);
@@ -42,8 +44,9 @@ export function Switch({ value, onChange, accessibilityLabel }: Props) {
   return (
     <Press
       accessibilityRole="switch"
-      accessibilityState={{ checked: value }}
+      accessibilityState={{ checked: value, disabled }}
       accessibilityLabel={accessibilityLabel}
+      disabled={disabled}
       onPress={() => onChange(!value)}
       hitSlop={{ top: 7, bottom: 7 }}
     >
