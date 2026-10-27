@@ -18,7 +18,10 @@ import {
   spendingByCategory,
   weekRange,
 } from '@/features/insights/insights';
-import { useAllTransactions, useMoneyMonth } from '@/features/live';
+import { useRouter } from 'expo-router';
+import { useAllTransactions, useJarEntries, useJars, useMoneyMonth } from '@/features/live';
+import { InsightsSavingsCard } from '@/features/savings/InsightsSavingsCard';
+import { savedByJar } from '@/features/savings/savings';
 import { usePullToRefresh } from '@/features/money/usePullToRefresh';
 import { color, radius, shadow, space, text } from '@/theme';
 
@@ -34,6 +37,18 @@ export default function InsightsScreen() {
   const { today, profile, summary } = useMoneyMonth();
   const transactions = useAllTransactions();
   const categories = useCategories();
+  const router = useRouter();
+  const jars = useJars();
+  const jarEntries = useJarEntries();
+  const saved = useMemo(() => savedByJar(jarEntries), [jarEntries]);
+  // "8% of what came in": this calendar month, as the bars count it.
+  const cameInThisMonth = useMemo(() => {
+    const month = today.slice(0, 7);
+    return transactions
+      .filter((tx) => tx.kind === 'income' && tx.source !== 'adjustment')
+      .filter((tx) => tx.date.startsWith(month))
+      .reduce((sum, tx) => sum + tx.amountMinor, 0);
+  }, [transactions, today]);
 
   const data = useMemo(() => {
     if (!profile || !summary) return null;
@@ -104,6 +119,20 @@ export default function InsightsScreen() {
       {data.insight ? (
         <Rise delay={120}>
           <InsightCard insight={data.insight} />
+        </Rise>
+      ) : null}
+
+      {jars.length > 0 ? (
+        <Rise delay={140}>
+          <InsightsSavingsCard
+            jars={jars}
+            entries={jarEntries}
+            saved={saved}
+            cameInMinor={cameInThisMonth}
+            currency={profile.currency}
+            today={today}
+            onSeeJars={() => router.navigate('/savings')}
+          />
         </Rise>
       ) : null}
 

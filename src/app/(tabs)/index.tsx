@@ -19,10 +19,14 @@ import { Avatar } from '@/features/profile/Avatar';
 import {
   useAllTransactions,
   useJarEntries,
+  useJars,
   useMoneyMonth,
   useTransactionsBetween,
 } from '@/features/live';
 import { usePullToRefresh } from '@/features/money/usePullToRefresh';
+import { usePickedJar } from '@/features/savings/dropStore';
+import { SavingForCard } from '@/features/savings/SavingForCard';
+import { savedByJar } from '@/features/savings/savings';
 import { TransactionRow } from '@/features/transactions/TransactionRow';
 import { color, fontFamily, radius, shadow, size, space, text } from '@/theme';
 
@@ -38,6 +42,10 @@ export default function HomeScreen() {
   const recent = recentDays(useTransactionsBetween(addDays(today, -1), addDays(today, 1)), today);
   const transactions = useAllTransactions();
   const jarEntries = useJarEntries();
+  const jars = useJars();
+  const picked = usePickedJar((s) => s.id);
+  // The jar up front on Savings.
+  const jar = jars.find((j) => j.id === picked) ?? jars[0];
   const change = useMemo(
     () => monthChange(transactions, today, jarEntries),
     [transactions, today, jarEntries],
@@ -100,6 +108,17 @@ export default function HomeScreen() {
         <FlowCard kind="out" minor={summary.wentOutMinor} currency={profile.currency} />
       </Rise>
 
+      {jar ? (
+        <Rise delay={180} style={styles.saving}>
+          <SavingForCard
+            jar={jar}
+            savedMinor={savedByJar(jarEntries).get(jar.id) ?? 0}
+            today={today}
+            onPress={() => router.navigate('/savings')}
+          />
+        </Rise>
+      ) : null}
+
       <Rise delay={240} style={styles.recent}>
         <View style={styles.sectionRow}>
           <Text accessibilityRole="header" style={styles.section}>
@@ -159,6 +178,7 @@ const styles = StyleSheet.create({
   greeting: { ...text.greeting, color: color.ink },
   subtitle: { ...text.subtitle, color: color.muted },
   flows: { marginTop: space.cardGap, flexDirection: 'row', gap: space.cardGap },
+  saving: { marginTop: space.cardGap },
   recent: { marginTop: space.sectionGap, gap: 8 },
   sectionRow: {
     paddingRight: 4,

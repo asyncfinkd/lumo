@@ -8,9 +8,11 @@ import { openTestDb } from '@/db/testing';
 import { adjustBalance, currentBalance, saveProfile } from '@/features/profile/repo';
 import { addToJar, closeJar, createJar, jarSaved, openJarsQuery, takeFromJar } from '../repo';
 import {
+  bestPaceStreak,
   jarPace,
   jarPercent,
   monthsBetween,
+  monthlyPutAway,
   monthsTaken,
   quickAmounts,
   savedByJar,
@@ -263,5 +265,35 @@ describe('planJarReminders', () => {
     expect(parseTime('7:05')).toEqual({ hour: 7, minute: 5 });
     expect(parseTime('25:00')).toBeNull();
     expect(formatTime(7, 5)).toBe('07:05');
+  });
+});
+
+describe('monthlyPutAway', () => {
+  // The InsightsSavings board: May to October, 150 · 200 · 120 · 250 · 300 · 300.
+  const amounts = [15000, 20000, 12000, 25000, 30000, 30000];
+  const entries = amounts.map((amountMinor, i) => ({
+    amountMinor,
+    date: `2026-${String(5 + i).padStart(2, '0')}-10`,
+  }));
+
+  it('adds up what went in each month, this one last', () => {
+    const months = monthlyPutAway(
+      [...entries, { amountMinor: -5000, date: '2026-10-12' }],
+      '2026-10-27',
+    );
+    expect(months.map((m) => [m.month, m.minor])).toEqual([
+      [5, 15000],
+      [6, 20000],
+      [7, 12000],
+      [8, 25000],
+      [9, 30000],
+      [10, 30000],
+    ]);
+  });
+
+  it('counts the months in a row at the best pace', () => {
+    expect(bestPaceStreak(monthlyPutAway(entries, '2026-10-27'))).toBe(2);
+    expect(bestPaceStreak(monthlyPutAway(entries.slice(0, 5), '2026-10-27'))).toBe(0);
+    expect(bestPaceStreak(monthlyPutAway([], '2026-10-27'))).toBe(0);
   });
 });

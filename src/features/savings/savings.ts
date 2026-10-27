@@ -128,3 +128,40 @@ export function takeOutAmounts(
 export function monthsTaken(startDate: CalendarDate, today: CalendarDate): number {
   return Math.max(1, monthsBetween(startDate, today));
 }
+
+export type MonthPutAway = { year: number; month: number; minor: number };
+
+/**
+ * What went into jars in each of the last `count` calendar months, oldest
+ * first, this month last (InsightsSavings' bars). Only money put in counts:
+ * taking some out or closing a jar doesn't make a month smaller.
+ */
+export function monthlyPutAway(
+  entries: readonly { amountMinor: number; date: CalendarDate }[],
+  today: CalendarDate,
+  count = 6,
+): MonthPutAway[] {
+  const months = Array.from({ length: count }, (_, i) => ({
+    ...monthAfter(today, i - count + 1),
+    minor: 0,
+  }));
+  for (const e of entries) {
+    if (e.amountMinor <= 0) continue;
+    const [y, m] = parts(e.date);
+    const slot = months.find((x) => x.year === y && x.month === m);
+    if (slot) slot.minor += e.amountMinor;
+  }
+  return months;
+}
+
+/**
+ * Months in a row, ending with this one, at the best amount of the stretch
+ * ("Two months in a row at your best pace"). 0 when this month isn't it.
+ */
+export function bestPaceStreak(months: readonly MonthPutAway[]): number {
+  const best = Math.max(0, ...months.map((m) => m.minor));
+  if (best === 0) return 0;
+  let streak = 0;
+  for (let i = months.length - 1; i >= 0 && months[i]!.minor === best; i--) streak++;
+  return streak;
+}

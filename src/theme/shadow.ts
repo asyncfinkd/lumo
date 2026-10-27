@@ -38,6 +38,11 @@ export const shadow = {
   roundButton: '0px 6px 16px -10px rgba(200,145,106,0.4)',
   jarTile: '0px 6px 20px -10px rgba(200,145,106,0.2)',
   takeOut: '0px 6px 16px -10px rgba(200,145,106,0.45)',
+  /** "Saving for" on Home and the Savings card on Insights. */
+  savingFor:
+    'inset 0px 0px 0px 1px rgba(255,255,255,0.9), 0px 10px 26px -14px rgba(214,160,70,0.45)',
+  savingsCard:
+    'inset 0px 0px 0px 1px rgba(255,255,255,0.9), 0px 10px 26px -14px rgba(214,160,70,0.4)',
   /** Jar colors on New jar: a white gap and an ink ring when picked. */
   toneOn: '0px 0px 0px 3px #FFFFFF, 0px 0px 0px 5px #2B2522',
   toneRing: 'inset 0px 0px 0px 2px rgba(255,255,255,0.6)',

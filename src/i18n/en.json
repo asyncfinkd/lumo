@@ -332,7 +332,25 @@
         "month": "Time for this month's {{amount}} in the jar?"
       }
     },
-    "settingsLabel": "{{name}}. Jar settings"
+    "settingsLabel": "{{name}}. Jar settings",
+    "home": {
+      "savingFor": "Saving for",
+      "amounts": "{{saved}} / {{goal}}",
+      "by": "by {{month}}",
+      "full": "Full",
+      "label": "Savings: {{name}} jar, {{percent}} percent full. Open savings",
+      "percentSign": "%"
+    },
+    "insights": {
+      "seeJars": "See jars",
+      "putAway": "Put away in {{month}}",
+      "ofCameIn": "{{percent}}% of what came in",
+      "barsLabel": "Put away per month: {{list}}",
+      "streak_one": "{{count}} month in a row at your best pace.",
+      "streak_other": "{{count}} months in a row at your best pace.",
+      "best": "Your best month so far.",
+      "fullIn": "At this rate, the {{name}} jar is full in {{month}}."
+    }
   },
   "onboarding": {
     "step": "Step {{step}} of {{total}}",
