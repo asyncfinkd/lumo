@@ -24,3 +24,19 @@ export function occurredAt(date: CalendarDate, now: Date): Date {
 export function transactionTitle(note: string, categoryName: string): string {
   return note.trim() || categoryName;
 }
+
+/**
+ * The title after an edit: a note you typed wins; without one, a title that was
+ * just the old category's name follows the new category, and any other title
+ * (a bill's name, a shop) stays.
+ */
+export function editedTitle(
+  before: { title: string; note: string | null },
+  oldCategoryName: string,
+  note: string,
+  categoryName: string,
+): string {
+  if (note.trim()) return note.trim();
+  if (before.note?.trim() || before.title === oldCategoryName) return categoryName;
+  return before.title;
+}

@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { CategoryIcon, RepeatIcon } from '@/components/Icons';
+import { Press } from '@/components/Press';
 import type { Transaction } from '@/db/schema';
 import { formatMoney } from '@/domain/money';
 import { useCategories } from '@/features/categories/categories';
@@ -25,11 +26,14 @@ export function TransactionRow({
   transaction,
   variant = 'home',
   day,
+  onPress,
 }: {
   transaction: Transaction;
   variant?: RowVariant;
   /** For `search`: "Today", "Sat, Oct 24". */
   day?: string;
+  /** Opens the details sheet. */
+  onPress?: () => void;
 }) {
   const { t } = useTranslation();
   const { kind, source } = transaction;
@@ -72,12 +76,9 @@ export function TransactionRow({
   });
   const tile = adjust ? { bg: color.adjustTile, fg: color.muted } : category.tint;
 
-  return (
-    <View
-      accessible
-      accessibilityLabel={[title, meta, amount, tag].filter(Boolean).join(', ')}
-      style={styles.row}
-    >
+  const label = [title, meta, amount, tag].filter(Boolean).join(', ');
+  const body = (
+    <>
       <View style={[styles.tile, { backgroundColor: tile.bg }]}>
         <CategoryIcon icon={adjust ? 'adjust' : category.icon} color={tile.fg} />
         {auto ? (
@@ -106,6 +107,21 @@ export function TransactionRow({
       >
         {amount}
       </Text>
+    </>
+  );
+  return onPress ? (
+    <Press
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityHint={t('history.showDetails')}
+      onPress={onPress}
+      style={styles.row}
+    >
+      {body}
+    </Press>
+  ) : (
+    <View accessible accessibilityLabel={label} style={styles.row}>
+      {body}
     </View>
   );
 }

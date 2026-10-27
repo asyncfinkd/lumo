@@ -8,7 +8,7 @@ import {
 import { categorySpent } from '@/domain/budgets';
 import { payPeriod } from '@/domain/dates';
 import { summarizeMonth } from '../../money/summary';
-import { occurredAt, pickableDays, shortDate, transactionTitle } from '../addForm';
+import { editedTitle, occurredAt, pickableDays, shortDate, transactionTitle } from '../addForm';
 import { addMessage, messageTone } from '../addMessage';
 
 // docs/sample-data.md on Oct 31.
@@ -131,5 +131,27 @@ describe('add form', () => {
 
   it('writes short dates', () => {
     expect(shortDate('2026-10-31', 'en')).toBe('Oct 31');
+  });
+});
+
+describe('editedTitle', () => {
+  it('uses a typed note', () => {
+    expect(editedTitle({ title: 'Groceries', note: null }, 'Groceries', ' Market ', 'Coffee')).toBe(
+      'Market',
+    );
+  });
+
+  it('follows the new category when the title was the old category', () => {
+    expect(editedTitle({ title: 'Groceries', note: null }, 'Groceries', '', 'Coffee')).toBe(
+      'Coffee',
+    );
+    // The note was the title and got cleared.
+    expect(editedTitle({ title: 'Lunch', note: 'Lunch' }, 'Treats', '', 'Treats')).toBe('Treats');
+  });
+
+  it('keeps any other title', () => {
+    expect(editedTitle({ title: 'Fresh Market', note: null }, 'Groceries', '', 'Coffee')).toBe(
+      'Fresh Market',
+    );
   });
 });

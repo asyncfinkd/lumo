@@ -92,10 +92,17 @@ function DayList({
   empty?: string;
   shadowed?: boolean;
 }) {
+  const router = useRouter();
   return (
     <View style={[styles.list, shadowed && styles.listShadow]}>
       {rows.length > 0 ? (
-        rows.map((row) => <TransactionRow key={row.id} transaction={row} />)
+        rows.map((row) => (
+          <TransactionRow
+            key={row.id}
+            transaction={row}
+            onPress={() => router.push({ pathname: '/transaction', params: { id: row.id } })}
+          />
+        ))
       ) : (
         <Text style={styles.empty}>{empty}</Text>
       )}
