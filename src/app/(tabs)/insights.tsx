@@ -6,6 +6,7 @@ import { Donut } from '@/components/Donut';
 import { CategoryIcon, SparkleIcon } from '@/components/Icons';
 import { Fill, Rise } from '@/components/motion';
 import { SegmentedControl } from '@/components/SegmentedControl';
+import { addDays } from '@/domain/dates';
 import { type CurrencyCode, formatMoney, percent } from '@/domain/money';
 import { useCategories } from '@/features/categories/categories';
 import { CATEGORY_EMOJI } from '@/features/categoryEmoji';
@@ -21,10 +22,10 @@ import { useAllTransactions, useMoneyMonth } from '@/features/live';
 import { usePullToRefresh } from '@/features/money/usePullToRefresh';
 import { color, radius, shadow, space, text } from '@/theme';
 
-type Range = 'week' | 'month';
+type Range = 'day' | 'week' | 'month';
 
-// Insights: where the money went this week or this pay period, a donut, one
-// gentle sentence and the categories side by side.
+// Insights: where the money went today, this week or this pay period, a donut,
+// one gentle sentence and the categories side by side.
 export default function InsightsScreen() {
   const { t } = useTranslation();
   const screenTop = useScreenTop();
@@ -36,6 +37,10 @@ export default function InsightsScreen() {
 
   const data = useMemo(() => {
     if (!profile || !summary) return null;
+    if (view === 'day') {
+      // No sentence for a single day: the design only words week and month.
+      return { items: spendingByCategory(transactions, today, addDays(today, 1)), insight: null };
+    }
     if (view === 'week') {
       const { start, end } = weekRange(today);
       const items = spendingByCategory(transactions, start, end);
@@ -70,6 +75,7 @@ export default function InsightsScreen() {
           tone="card"
           accessibilityLabel={t('insights.period')}
           options={[
+            { value: 'day', label: t('insights.day') },
             { value: 'week', label: t('insights.week') },
             { value: 'month', label: t('insights.month') },
           ]}
@@ -85,7 +91,13 @@ export default function InsightsScreen() {
             return { key: item.category, label: c.label, chart: c.tint.chart, minor: item.minor };
           })}
           currency={profile.currency}
-          label={view === 'week' ? t('insights.spentThisWeek') : t('insights.spentThisMonth')}
+          label={
+            view === 'day'
+              ? t('insights.spentToday')
+              : view === 'week'
+                ? t('insights.spentThisWeek')
+                : t('insights.spentThisMonth')
+          }
         />
       </Rise>
 
