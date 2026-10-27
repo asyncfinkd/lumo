@@ -18,6 +18,7 @@ import { AmountsHiddenContext } from '@/features/privacy/amounts';
 import { useProfileStatus } from '@/features/live';
 import { DueTransactionsSync } from '@/features/recurring/DueTransactionsSync';
 import { RemindersSync } from '@/features/reminders/RemindersSync';
+import { JarRemindersSync } from '@/features/savings/JarRemindersSync';
 import i18n, { applyLanguage } from '@/i18n';
 import { color } from '@/theme';
 
@@ -97,6 +98,7 @@ function AppStack({ onLoaded }: { onLoaded: () => void }) {
     <CategoriesProvider>
       <AmountsHiddenContext.Provider value={profile?.hideAmounts ?? false}>
         {onboarded ? <RemindersSync /> : null}
+        {onboarded ? <JarRemindersSync /> : null}
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
           <Stack.Protected guard={onboarded} redirectTo="/welcome">
             <Stack.Screen name="(tabs)" />

@@ -187,6 +187,8 @@ export const jars = sqliteTable(
     currency: text('currency', { enum: currencyCodes }).notNull(),
     /** Local date it was made: month 0 of the plan. */
     startDate: text('start_date').notNull(),
+    /** "Remind me" at this local time, "22:00"; `null` when off. */
+    remindAt: text('remind_at'),
     /** Set by "Time to treat yourself" (SavingsDone); the money went back. */
     closedAt: text('closed_at'),
   },

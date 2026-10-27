@@ -314,8 +314,25 @@
       "cadence": "How often",
       "day": "Day",
       "month": "Month",
-      "daily": "Each day"
-    }
+      "daily": "Each day",
+      "remind": "Remind me",
+      "remindersOff": "Reminders are off in Profile",
+      "remindHint": {
+        "day": "Every day, to drop a little in",
+        "month": "Once a month, on the day you made it"
+      },
+      "at": "At",
+      "changeTime": "Reminder at {{time}}. Change time"
+    },
+    "editJar": "Jar settings",
+    "notify": {
+      "title": "{{name}} 🫙",
+      "body": {
+        "day": "Drop {{amount}} in the jar today?",
+        "month": "Time for this month's {{amount}} in the jar?"
+      }
+    },
+    "settingsLabel": "{{name}}. Jar settings"
   },
   "onboarding": {
     "step": "Step {{step}} of {{total}}",

@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useScreenTop } from '@/components/useScreenTop';
-import { MinusIcon, PlusIcon } from '@/components/Icons';
+import { BellIcon, MinusIcon, PlusIcon } from '@/components/Icons';
 import { Jar } from '@/components/Jar';
 import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
@@ -121,6 +121,9 @@ export default function SavingsScreen() {
               });
             }}
             onAdd={() => router.push({ pathname: '/savings-add', params: { jar: featured.id } })}
+            onSettings={() =>
+              router.push({ pathname: '/savings-new', params: { jar: featured.id } })
+            }
             onTakeOut={() =>
               router.push({ pathname: '/savings-add', params: { jar: featured.id, mode: 'out' } })
             }
@@ -195,6 +198,7 @@ function Featured({
   paceText,
   onAdd,
   onTakeOut,
+  onSettings,
 }: {
   jar: JarRow;
   savedMinor: number;
@@ -203,6 +207,7 @@ function Featured({
   paceText: (jar: JarRow, savedMinor: number) => string | null;
   onAdd: () => void;
   onTakeOut: () => void;
+  onSettings: () => void;
 }) {
   const { t } = useTranslation();
   const pct = jarPercent(savedMinor, jar.goalMinor);
@@ -220,9 +225,19 @@ function Featured({
           tone={jar.tone}
           accessibilityLabel={t('savings.jarLabel', { name: jar.name, percent: pct })}
         />
-        <Text accessibilityRole="header" style={styles.name}>
-          {jar.name}
-        </Text>
+        {/* The name opens the jar's settings: color, goal, plan and its reminder. */}
+        <Press
+          accessibilityRole="button"
+          accessibilityLabel={t('savings.settingsLabel', { name: jar.name })}
+          onPress={onSettings}
+          hitSlop={8}
+          style={styles.nameRow}
+        >
+          <Text accessibilityRole="header" style={styles.name}>
+            {jar.name}
+          </Text>
+          {jar.remindAt ? <BellIcon color={color.muted} /> : null}
+        </Press>
         <Text style={styles.of}>
           <Text style={styles.ofSaved}>{money(savedMinor)}</Text>
           {t('savings.of', { goal: money(jar.goalMinor) })}
@@ -272,8 +287,8 @@ const styles = StyleSheet.create({
   title: { ...text.h1, color: color.ink },
   subtitle: { ...text.subtitle, color: color.muted, fontVariant: ['tabular-nums'] },
   featured: { marginTop: 14, alignItems: 'center' },
+  nameRow: { marginTop: 14, flexDirection: 'row', alignItems: 'center', gap: 6 },
   name: {
-    marginTop: 14,
     fontFamily: fontFamily.extrabold,
     fontSize: 24,
     lineHeight: 30,

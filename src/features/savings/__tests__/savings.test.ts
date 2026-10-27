@@ -3,6 +3,7 @@
  */
 import { randomUUID } from 'node:crypto';
 import { jarEntries } from '@/db/schema';
+import { formatTime, parseTime, planJarReminders } from '../reminders';
 import { openTestDb } from '@/db/testing';
 import { adjustBalance, currentBalance, saveProfile } from '@/features/profile/repo';
 import { addToJar, closeJar, createJar, jarSaved, openJarsQuery, takeFromJar } from '../repo';
@@ -133,6 +134,7 @@ describe('jars in the database', () => {
         goalMinor: 300000,
         planMinor: 30000,
         cadence: 'month' as const,
+        remindAt: null,
       },
       '2026-10-27',
       id,
@@ -160,6 +162,7 @@ describe('jars in the database', () => {
         goalMinor: 200000,
         planMinor: 20000,
         cadence: 'month' as const,
+        remindAt: null,
       },
       '2026-10-27',
       id,
@@ -177,6 +180,7 @@ describe('jars in the database', () => {
       goalMinor: 150000,
       planMinor: 25000,
       cadence: 'month' as const,
+      remindAt: null,
     };
     expect(() => createJar(db, input, '2026-10-27', id)).toThrow();
     const jar = createJar(db, { ...input, name: 'New bike' }, '2026-10-27', id);
@@ -205,11 +209,59 @@ describe('takeOutAmounts', () => {
       goalMinor: 200000,
       planMinor: 20000,
       cadence: 'month' as const,
+      remindAt: null,
     };
     const jar = createJar(db, input, '2026-10-27', id);
     addToJar(db, jar, 10000, '2026-10-27', id);
     takeFromJar(db, jar, 4000, '2026-10-28', id);
     expect(jarSaved(db, jar)).toBe(6000);
     expect(() => takeFromJar(db, jar, 6001, '2026-10-28', id)).toThrow(RangeError);
+  });
+});
+
+describe('planJarReminders', () => {
+  const words = {
+    title: (name: string) => `${name} 🫙`,
+    body: (amount: string, cadence: string) => `Drop ${amount} in the jar ${cadence}?`,
+  };
+  const money = (minor: number) => `₾${minor / 100}`;
+  const jar = {
+    id: 'bike',
+    name: 'New bike',
+    planMinor: 500,
+    cadence: 'day' as const,
+    startDate: '2026-10-31',
+    remindAt: '22:00',
+    closedAt: null,
+  };
+
+  it('reminds daily jars at their time, monthly ones on their day', () => {
+    const laptop = { ...jar, id: 'laptop', cadence: 'month' as const, planMinor: 30000 };
+    expect(planJarReminders([jar, laptop], true, money, words)).toEqual([
+      {
+        id: 'jar-bike',
+        jarId: 'bike',
+        hour: 22,
+        minute: 0,
+        day: null,
+        title: 'New bike 🫙',
+        body: 'Drop ₾5 in the jar day?',
+      },
+      // Made on the 31st: the 28th, so every month has it.
+      expect.objectContaining({ id: 'jar-laptop', day: 28, body: 'Drop ₾300 in the jar month?' }),
+    ]);
+  });
+
+  it('says nothing while Reminders is off, for jars without a time or closed ones', () => {
+    expect(planJarReminders([jar], false, money, words)).toEqual([]);
+    expect(planJarReminders([{ ...jar, remindAt: null }], true, money, words)).toEqual([]);
+    expect(planJarReminders([{ ...jar, closedAt: '2026-11-01' }], true, money, words)).toEqual([]);
+  });
+
+  it('reads and writes the time', () => {
+    expect(parseTime('22:00')).toEqual({ hour: 22, minute: 0 });
+    expect(parseTime('7:05')).toEqual({ hour: 7, minute: 5 });
+    expect(parseTime('25:00')).toBeNull();
+    expect(formatTime(7, 5)).toBe('07:05');
   });
 });

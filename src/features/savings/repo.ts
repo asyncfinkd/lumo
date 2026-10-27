@@ -38,6 +38,8 @@ export type JarInput = {
   goalMinor: number;
   planMinor: number;
   cadence: Cadence;
+  /** "Remind me" time, "22:00", or `null`. */
+  remindAt: string | null;
 };
 
 /** "Create jar" (SavingsNew). Returns the new jar's id. */
@@ -62,11 +64,34 @@ export function createJar(
       goalMinor: input.goalMinor,
       planMinor: input.planMinor,
       cadence: input.cadence,
+      remindAt: input.remindAt,
       currency: me.currency,
       startDate: today,
     })
     .run();
   return id;
+}
+
+/**
+ * The jar's sheet opened from its name: everything but the money in it and the
+ * day it was made.
+ */
+export function updateJar(db: Db, jarId: string, input: JarInput): void {
+  const name = input.name.trim();
+  if (!name) throw new Error('Name is required');
+  assertPositive('goalMinor', input.goalMinor);
+  assertPositive('planMinor', input.planMinor);
+  db.update(jars)
+    .set({
+      name,
+      tone: input.tone,
+      goalMinor: input.goalMinor,
+      planMinor: input.planMinor,
+      cadence: input.cadence,
+      remindAt: input.remindAt,
+    })
+    .where(eq(jars.id, jarId))
+    .run();
 }
 
 /** "Drop ₾100 in the jar" (SavingsAdd): moves money from the balance into the jar. */
