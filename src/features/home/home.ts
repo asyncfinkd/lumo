@@ -20,10 +20,10 @@ export function clockTime(iso: string): string {
   return `${at.getHours()}:${String(at.getMinutes()).padStart(2, '0')}`;
 }
 
-type Listed = { date: CalendarDate; occurredAt: string; source: TransactionSource };
+type Listed = { date: CalendarDate; createdAt: string; source: TransactionSource };
 
 /**
- * Today's and yesterday's transactions, earliest first as in the design.
+ * Today's and yesterday's transactions, the one you added last on top.
  * Balance adjustments stay out: they aren't money coming in or going out (#6).
  */
 export function recentDays<T extends Listed>(
@@ -31,11 +31,11 @@ export function recentDays<T extends Listed>(
   today: CalendarDate,
 ): { today: T[]; yesterday: T[] } {
   const yesterday = addDays(today, -1);
-  const byTime = (a: T, b: T) => a.occurredAt.localeCompare(b.occurredAt);
+  const newestFirst = (a: T, b: T) => b.createdAt.localeCompare(a.createdAt);
   const shown = transactions.filter((t) => t.source !== 'adjustment');
   return {
-    today: shown.filter((t) => t.date === today).sort(byTime),
-    yesterday: shown.filter((t) => t.date === yesterday).sort(byTime),
+    today: shown.filter((t) => t.date === today).sort(newestFirst),
+    yesterday: shown.filter((t) => t.date === yesterday).sort(newestFirst),
   };
 }
 
