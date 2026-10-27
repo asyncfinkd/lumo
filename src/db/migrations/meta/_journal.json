@@ -43,6 +43,13 @@
       "when": 1793088188063,
       "tag": "0005_damp_the_captain",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1793088890895,
+      "tag": "0006_loud_fixer",
+      "breakpoints": true
     }
   ]
 }

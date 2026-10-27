@@ -44,6 +44,11 @@ export const profile = sqliteTable('profile', {
   photoUri: text('photo_uri'),
   /** The Reminders switch in Profile. */
   reminders: integer('reminders', { mode: 'boolean' }).notNull().default(true),
+  /** Which reminders are on (ProfileReminders); `reminders` is the main switch. */
+  remindBills: integer('remind_bills', { mode: 'boolean' }).notNull().default(true),
+  remindPayday: integer('remind_payday', { mode: 'boolean' }).notNull().default(true),
+  remindLowBudget: integer('remind_low_budget', { mode: 'boolean' }).notNull().default(true),
+  remindEvening: integer('remind_evening', { mode: 'boolean' }).notNull().default(false),
   /** The app's language (ProfileLanguage); `null` follows the phone's. */
   language: text('language', { enum: ['en', 'ka'] }),
 });
@@ -120,6 +125,8 @@ export const recurringBills = sqliteTable(
     /** `null` once its category was deleted with "No category" (#18). */
     categoryId: text('category_id').references(() => categories.id),
     active: integer('active', { mode: 'boolean' }).notNull().default(true),
+    /** "Remind me a day before" (ProfileBillEdit). */
+    remind: integer('remind', { mode: 'boolean' }).notNull().default(true),
   },
   (t) => [
     check('recurring_bills_day', sql`${t.day} BETWEEN 1 AND 31`),

@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  // BellIcon, (Reminders, #15)
+  BellIcon,
   CameraIcon,
   ChevronRightIcon,
   DownloadIcon,
@@ -151,16 +151,17 @@ export default function ProfileScreen() {
             {t('profile.preferences')}
           </Text>
           <View style={styles.list}>
-            {/*
-              Hidden until their pages are built, so testers don't tap rows
-              that do nothing: Reminders (#15), App icon (#17).
             <Row
               tile={categoryPalette.butter}
               icon={<BellIcon color={categoryPalette.butter.fg} />}
               label={t('profile.reminders')}
               sub={t('profile.remindersSub')}
               value={profile.reminders ? t('profile.on') : t('profile.off')}
+              onPress={() => router.push('/profile-reminders')}
             />
+            {/*
+              Hidden until its page is built, so testers don't tap a row that
+              does nothing: App icon (#17).
             <Row
               icon={<Image source={appIcon} accessible={false} style={styles.appIcon} />}
               label={t('profile.appIcon')}

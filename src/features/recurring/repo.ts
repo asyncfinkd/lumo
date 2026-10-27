@@ -57,6 +57,11 @@ export function saveBill(db: Db, input: BillInput & { id?: string }, newId = def
     .get();
 }
 
+/** "Remind me a day before" (ProfileBillEdit). */
+export function setBillRemind(db: Db, id: string, remind: boolean): void {
+  db.update(recurringBills).set({ remind }).where(eq(recurringBills.id, id)).run();
+}
+
 /**
  * Deletes a bill (ProfileBillEdit). Its past transactions stay in History as
  * they were; nothing new is added for it.
