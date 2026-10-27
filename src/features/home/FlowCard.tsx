@@ -20,10 +20,13 @@ const KINDS = {
 export function FlowCard({
   kind,
   minor,
+  byDay,
   currency,
 }: {
   kind: keyof typeof KINDS;
   minor: number;
+  /** The running total for each day of the period so far. */
+  byDay: readonly number[];
   currency: CurrencyCode;
 }) {
   const { t } = useTranslation();
@@ -50,7 +53,7 @@ export function FlowCard({
           <Text style={styles.amount}>{hidden ? MASK : amount.slice(symbol.length)}</Text>
         </View>
         <View style={styles.spark}>
-          <Sparkline kind={kind} />
+          <Sparkline kind={kind} values={byDay} />
         </View>
       </View>
     </View>
