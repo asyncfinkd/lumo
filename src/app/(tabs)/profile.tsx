@@ -20,7 +20,7 @@ import {
 import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
 import { currencies, formatMoney } from '@/domain/money';
-import { useActiveBills, useCategories, useIncomes, useProfile } from '@/features/live';
+import { useBills, useCategories, useIncomes, useProfile } from '@/features/live';
 import { Avatar } from '@/features/profile/Avatar';
 import { PhotoToast } from '@/features/profile/photoToast';
 import {
@@ -44,7 +44,7 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const profile = useProfile();
   const incomes = useIncomes();
-  const bills = useActiveBills();
+  const bills = useBills();
   const categories = useCategories();
   if (!profile) return null;
 
@@ -134,6 +134,7 @@ export default function ProfileScreen() {
               icon={<RepeatIcon color={categoryPalette.sky.fg} />}
               label={t('profile.bills')}
               value={t('profile.billsCount', { count: bills.length })}
+              onPress={() => router.push('/profile-bills')}
             />
             <Row
               tile={categoryPalette.lilac}

@@ -1,8 +1,9 @@
 import { type ReactNode, useEffect, useState } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Keyboard, Platform, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { GestureDetector, usePanGesture } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -28,6 +29,9 @@ type Props = {
   children: (close: () => void) => ReactNode;
 };
 
+/** Keyboard height minus this: the sheet's bottom padding, less a small gap. */
+const KEYBOARD_GAP = 26;
+
 /**
  * A bottom sheet as in the design: slides up over a blurred, dimmed screen;
  * tap outside, drag down or call `close()` to dismiss.
@@ -39,6 +43,7 @@ type Props = {
 export function Sheet({ onDismissed, accessibilityLabel, top, children }: Props) {
   const { t } = useTranslation();
   const { height: screen } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
   const [height, setHeight] = useState(top !== undefined ? screen - top : 0);
 
@@ -47,6 +52,27 @@ export function Sheet({ onDismissed, accessibilityLabel, top, children }: Props)
   // A second tap or drag while it's already closing would call onDismissed
   // (router.back) twice.
   const closing = useSharedValue(false);
+  // How far the sheet rides up over the keyboard (name and amount fields).
+  const lift = useSharedValue(0);
+
+  useEffect(() => {
+    // A tall sheet (`top`) has no room to move; Android resizes the window itself.
+    if (top !== undefined || Platform.OS !== 'ios') return;
+    const show = Keyboard.addListener('keyboardWillShow', (e) => {
+      // The sheet's own bottom padding already clears the home indicator. A
+      // tall sheet stops below the status bar; tap it to put the keyboard away.
+      const room = Math.max(0, screen - height - insets.top - 8);
+      const to = Math.min(room, Math.max(0, e.endCoordinates.height - KEYBOARD_GAP));
+      lift.set(reduceMotion ? to : withTiming(to, { duration: e.duration || 250 }));
+    });
+    const hide = Keyboard.addListener('keyboardWillHide', (e) => {
+      lift.set(reduceMotion ? 0 : withTiming(0, { duration: e.duration || 250 }));
+    });
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, [top, reduceMotion, lift, screen, height, insets.top]);
 
   useEffect(() => {
     if (!height) return;
@@ -94,7 +120,9 @@ export function Sheet({ onDismissed, accessibilityLabel, top, children }: Props)
     },
   });
 
-  const sheetStyle = useAnimatedStyle(() => ({ transform: [{ translateY: y.get() }] }));
+  const sheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: y.get() - lift.get() }],
+  }));
   const scrimStyle = useAnimatedStyle(() => ({ opacity: scrim.get() }));
 
   return (
@@ -113,6 +141,11 @@ export function Sheet({ onDismissed, accessibilityLabel, top, children }: Props)
         <Animated.View
           accessibilityViewIsModal
           accessibilityLabel={accessibilityLabel}
+          // A tap on the sheet itself (not a field or button) puts the keyboard away.
+          onStartShouldSetResponder={() => {
+            Keyboard.dismiss();
+            return false;
+          }}
           onLayout={(e) => {
             if (top === undefined && !height) setHeight(e.nativeEvent.layout.height);
           }}
