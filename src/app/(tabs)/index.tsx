@@ -44,15 +44,20 @@ export default function HomeScreen() {
       refreshControl={refreshControl}
     >
       <Rise style={styles.header}>
-        {/* The same avatar as Profile: your photo, or your initial on its color. */}
-        <View style={styles.avatar}>
+        {/* The same avatar as Profile: your photo, or your initial on its color. Opens Profile. */}
+        <Press
+          accessibilityRole="link"
+          accessibilityLabel={t('tabs.profile')}
+          onPress={() => router.navigate('/profile')}
+          style={styles.avatar}
+        >
           <Avatar
             name={name}
             tint={profile.avatarColor}
             photoUri={profile.photoUri}
             size={size.avatar}
           />
-        </View>
+        </Press>
         <View style={styles.headerText}>
           <Text accessibilityRole="header" style={styles.greeting}>
             {t(`home.greeting.${greetingKey(hour)}`, { name })}
