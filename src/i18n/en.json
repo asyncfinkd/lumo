@@ -50,7 +50,11 @@
     "yourBalance": "Your balance",
     "moreThan": "more than on {{date}}",
     "lessThan": "less than on {{date}}",
-    "sameAs": "the same as on {{date}}"
+    "sameAs": "the same as on {{date}}",
+    "hideAmounts": "Hide amounts",
+    "showAmounts": "Show amounts",
+    "balanceHidden": "Balance hidden",
+    "amountHidden": "amount hidden"
   },
   "history": {
     "title": "History",

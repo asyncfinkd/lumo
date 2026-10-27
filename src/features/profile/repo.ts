@@ -50,6 +50,11 @@ export function setPhoto(db: Db, uri: string | null): void {
   db.update(profile).set({ photoUri: uri }).run();
 }
 
+/** The eye on Home's balance card (Main): hide or show every amount. */
+export function setHideAmounts(db: Db, hide: boolean): void {
+  db.update(profile).set({ hideAmounts: hide }).run();
+}
+
 /** `null` follows the phone's language again. */
 export function setLanguage(db: Db, language: 'en' | 'ka' | null): void {
   db.update(profile).set({ language }).run();

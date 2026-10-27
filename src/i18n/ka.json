@@ -50,7 +50,11 @@
     "yourBalance": "შენი ბალანსი",
     "moreThan": "მეტი, ვიდრე {{date}}",
     "lessThan": "ნაკლები, ვიდრე {{date}}",
-    "sameAs": "იგივე, რაც {{date}}"
+    "sameAs": "იგივე, რაც {{date}}",
+    "hideAmounts": "თანხების დამალვა",
+    "showAmounts": "თანხების ჩვენება",
+    "balanceHidden": "ბალანსი დამალულია",
+    "amountHidden": "თანხა დამალულია"
   },
   "history": {
     "title": "ისტორია",

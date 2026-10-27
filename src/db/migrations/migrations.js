@@ -8,6 +8,7 @@ import m0003 from './0003_pink_warbound.sql';
 import m0004 from './0004_complex_mariko_yashida.sql';
 import m0005 from './0005_damp_the_captain.sql';
 import m0006 from './0006_loud_fixer.sql';
+import m0007 from './0007_chubby_skrulls.sql';
 
   export default {
     journal,
@@ -18,7 +19,8 @@ m0002,
 m0003,
 m0004,
 m0005,
-m0006
+m0006,
+m0007
     }
   }
   

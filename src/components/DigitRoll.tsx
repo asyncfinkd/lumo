@@ -8,7 +8,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { type CurrencyCode, currencies, formatMoney } from '@/domain/money';
-import { color, duration, text } from '@/theme';
+import { MASK } from '@/features/privacy/amounts';
+import { color, duration, fontFamily, text } from '@/theme';
 import { easing } from './motion';
 
 // Nunito's digits reach above and below a 48pt line, so each column's window
@@ -61,13 +62,15 @@ type Props = {
   currency: CurrencyCode;
   /** Change it to roll the digits again. */
   replayKey?: number;
+  /** "Hide amounts" (Main): the symbol stays, the number becomes dots. */
+  hidden?: boolean;
 };
 
 /**
  * The Home hero number: whole units roll up digit by digit, the fraction and
  * the symbol stay still. Screen readers hear the formatted amount.
  */
-export function DigitRoll({ minor, currency, replayKey = 0 }: Props) {
+export function DigitRoll({ minor, currency, replayKey = 0, hidden = false }: Props) {
   const { symbol, minorUnits } = currencies[currency];
   const scale = 10 ** minorUnits;
   const abs = Math.abs(minor);
@@ -79,6 +82,15 @@ export function DigitRoll({ minor, currency, replayKey = 0 }: Props) {
   let digitIndex = 0;
   for (const ch of whole) parts.push({ ch, digitIndex: /\d/.test(ch) ? digitIndex++ : -1 });
   const fractionText = fraction ? `.${fraction}` : '';
+
+  if (hidden) {
+    return (
+      <View style={styles.row}>
+        <Text style={styles.symbol}>{symbol}</Text>
+        <Text style={styles.dots}>{MASK}</Text>
+      </View>
+    );
+  }
 
   return (
     <View
@@ -118,6 +130,15 @@ const styles = StyleSheet.create({
     lineHeight: SMALL_LINE,
     color: color.subtle,
     marginRight: 3,
+    marginBottom: SMALL_BOTTOM,
+  },
+  // Dots in place of the digits, sitting on the same line as the symbol.
+  dots: {
+    fontFamily: fontFamily.extrabold,
+    fontSize: 30,
+    lineHeight: SMALL_LINE,
+    letterSpacing: 3,
+    color: color.ink,
     marginBottom: SMALL_BOTTOM,
   },
   fraction: {

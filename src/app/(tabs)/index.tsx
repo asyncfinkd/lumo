@@ -8,7 +8,9 @@ import { Press } from '@/components/Press';
 import type { Transaction } from '@/db/schema';
 import { addDays } from '@/domain/dates';
 import { BUDGETING } from '@/features/flags';
+import { db } from '@/db/client';
 import { BalanceCard } from '@/features/home/BalanceCard';
+import { setHideAmounts } from '@/features/profile/repo';
 import { FlowCard } from '@/features/home/FlowCard';
 import { greetingKey, monthChange, recentDays } from '@/features/home/home';
 import { LeftToSpendCard } from '@/features/home/LeftToSpendCard';
@@ -74,6 +76,7 @@ export default function HomeScreen() {
             change={change}
             currency={profile.currency}
             onBalance={() => router.push('/balance')}
+            onToggleHidden={() => setHideAmounts(db, !profile.hideAmounts)}
           />
         )}
       </Rise>

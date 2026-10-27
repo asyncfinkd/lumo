@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CameInIcon, WentOutIcon } from '@/components/Icons';
 import { Sparkline } from '@/components/Sparkline';
 import { type CurrencyCode, currencies, formatMoney } from '@/domain/money';
+import { MASK, useAmountsHidden } from '@/features/privacy/amounts';
 import { color, radius, shadow, text } from '@/theme';
 
 const KINDS = {
@@ -26,12 +27,17 @@ export function FlowCard({
   currency: CurrencyCode;
 }) {
   const { t } = useTranslation();
+  const hidden = useAmountsHidden();
   const { label, tile, icon, Icon } = KINDS[kind];
   const { symbol } = currencies[currency];
   const amount = formatMoney(minor, currency, { decimals: 'none' });
 
   return (
-    <View accessible accessibilityLabel={`${t(label)} ${amount}`} style={styles.card}>
+    <View
+      accessible
+      accessibilityLabel={`${t(label)} ${hidden ? t('home.amountHidden') : amount}`}
+      style={styles.card}
+    >
       <View style={styles.header}>
         <View style={[styles.tile, { backgroundColor: tile }]}>
           <Icon color={icon} />
@@ -41,7 +47,7 @@ export function FlowCard({
       <View style={styles.bottom}>
         <View style={styles.amountRow}>
           <Text style={styles.symbol}>{symbol}</Text>
-          <Text style={styles.amount}>{amount.slice(symbol.length)}</Text>
+          <Text style={styles.amount}>{hidden ? MASK : amount.slice(symbol.length)}</Text>
         </View>
         <Sparkline kind={kind} />
       </View>
