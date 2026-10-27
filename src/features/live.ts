@@ -12,7 +12,7 @@ import { budgetsQuery } from './budgets/repo';
 import { summarizeMonth } from './money/summary';
 import { useToday } from './money/useToday';
 import { profileQuery } from './profile/repo';
-import { jarEntriesQuery, openJarsQuery } from './savings/repo';
+import { allJarsQuery, jarEntriesQuery, openJarsQuery } from './savings/repo';
 import { billsQuery, incomesQuery } from './recurring/repo';
 import { allTransactions, transactionsBetween } from './transactions/repo';
 
@@ -52,6 +52,11 @@ export function useIncomes() {
 /** Savings jars still open, oldest first (Savings). */
 export function useJars() {
   return useLiveQuery(openJarsQuery(db)).data;
+}
+
+/** Every jar, closed ones too (History). */
+export function useAllJars() {
+  return useLiveQuery(allJarsQuery(db)).data;
 }
 
 /** Every move into or out of a jar: the balance takes them off. */

@@ -10,18 +10,33 @@ import { EmptyClipboard } from '@/components/illustrations/EmptyClipboard';
 import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
 import { formatMoney } from '@/domain/money';
-import { dayGroups, isAutomatic, monthSpent } from '@/features/history/history';
+import {
+  dayGroups,
+  isAutomatic,
+  jarMoves,
+  monthSpent,
+  withJarMoves,
+} from '@/features/history/history';
 import { SwipeRow } from '@/features/history/SwipeRow';
 import { useDayLabel } from '@/features/history/useDayLabel';
 import { useMoneyText } from '@/features/privacy/amounts';
-import { useAllTransactions, useProfile, useToday } from '@/features/live';
+import {
+  useAllJars,
+  useAllTransactions,
+  useJarEntries,
+  useProfile,
+  useToday,
+} from '@/features/live';
 import { usePullToRefresh } from '@/features/money/usePullToRefresh';
 import { HeaderButton } from '@/features/profile/SettingsHeader';
+import { usePickedJar } from '@/features/savings/dropStore';
+import { JarMoveRow } from '@/features/savings/JarMoveRow';
 import { TransactionRow } from '@/features/transactions/TransactionRow';
 import { color, fontFamily, radius, shadow, space, text } from '@/theme';
 
 // History: every transaction by day, newest day first, with each day's total
-// (History, HistoryEmpty). Opens from Home's "See all"; Savings has its tab.
+// (History, HistoryEmpty), and money moved into or out of jars among them
+// (HistoryJars). Opens from Home's "See all"; Savings has its tab.
 export default function HistoryScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -31,9 +46,15 @@ export default function HistoryScreen() {
   const today = useToday();
   const profile = useProfile();
   const transactions = useAllTransactions();
+  const jars = useAllJars();
+  const jarEntries = useJarEntries();
+  const pickJar = usePickedJar((s) => s.pick);
   const dayLabel = useDayLabel();
   const money = useMoneyText();
-  const groups = useMemo(() => dayGroups(transactions), [transactions]);
+  const groups = useMemo(
+    () => withJarMoves(dayGroups(transactions), jarMoves(jarEntries, jars)),
+    [transactions, jarEntries, jars],
+  );
   if (!profile) return null;
 
   const currency = profile.currency;
@@ -109,30 +130,49 @@ export default function HistoryScreen() {
                   <Text accessibilityRole="header" style={styles.dayLabel}>
                     {label}
                   </Text>
-                  <Text style={styles.dayTotal}>{money(total)}</Text>
+                  {/* A day of jar moves only spent nothing: no "₾0.00". */}
+                  {item.rows.every((row) => 'jarId' in row) ? null : (
+                    <Text style={styles.dayTotal}>{money(total)}</Text>
+                  )}
                 </View>
                 <View style={styles.list}>
-                  {item.rows.map((row) => (
-                    <SwipeRow
-                      key={row.id}
-                      onEdit={() =>
-                        isAutomatic(row)
-                          ? router.push({ pathname: '/transaction-scope', params: { id: row.id } })
-                          : router.push({ pathname: '/add-transaction', params: { id: row.id } })
-                      }
-                      onDelete={() =>
-                        router.push({ pathname: '/transaction-delete', params: { id: row.id } })
-                      }
-                    >
-                      <TransactionRow
-                        transaction={row}
-                        variant="history"
-                        onPress={() =>
-                          router.push({ pathname: '/transaction', params: { id: row.id } })
-                        }
+                  {item.rows.map((row) =>
+                    'jarId' in row ? (
+                      <JarMoveRow
+                        key={row.id}
+                        move={row}
+                        onPress={() => {
+                          if (jars.some((j) => j.id === row.jarId && !j.closedAt)) {
+                            pickJar(row.jarId);
+                          }
+                          router.navigate('/savings');
+                        }}
                       />
-                    </SwipeRow>
-                  ))}
+                    ) : (
+                      <SwipeRow
+                        key={row.id}
+                        onEdit={() =>
+                          isAutomatic(row)
+                            ? router.push({
+                                pathname: '/transaction-scope',
+                                params: { id: row.id },
+                              })
+                            : router.push({ pathname: '/add-transaction', params: { id: row.id } })
+                        }
+                        onDelete={() =>
+                          router.push({ pathname: '/transaction-delete', params: { id: row.id } })
+                        }
+                      >
+                        <TransactionRow
+                          transaction={row}
+                          variant="history"
+                          onPress={() =>
+                            router.push({ pathname: '/transaction', params: { id: row.id } })
+                          }
+                        />
+                      </SwipeRow>
+                    ),
+                  )}
                 </View>
               </View>
             );

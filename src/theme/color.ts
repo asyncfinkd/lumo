@@ -248,6 +248,8 @@ export const savingsColor = {
   monthLabel: '#B0A49B',
   divider: 'rgba(160,118,28,0.14)',
   pill: 'rgba(255,255,255,0.8)',
+  /** The "Done" tag on a closed jar's row in History (HistoryJars). */
+  doneTag: '#DDEEE3',
   confetti: [
     '#F6BC55',
     '#F2845C',
