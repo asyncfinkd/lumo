@@ -32,6 +32,12 @@ export const shadow = {
   cropThumb: '0px 2px 8px 0px rgba(0,0,0,0.35)',
   photoToast:
     'inset 0px 0px 0px 1px rgba(255,255,255,0.9), 0px 12px 32px -10px rgba(200,145,106,0.35)',
+  /** The small repeat badge on automatic rows (RowTypes). */
+  rowBadge: '0px 2px 6px 0px rgba(43,37,34,0.16)',
+  /** The focused search field (HistorySearch): an ink ring plus a soft glow. */
+  searchField: 'inset 0px 0px 0px 2px #2B2522, 0px 8px 24px -14px rgba(200,145,106,0.5)',
+  /** The empty History illustration's tile. */
+  emptyTile: '0px 10px 30px -14px rgba(200,145,106,0.4)',
   /** Selected chip: a white inner ring plus a glow in the category color. */
   chipSelected: (fg: string) =>
     `inset 0px 0px 0px 1px rgba(255,255,255,0.7), 0px 4px 12px -6px ${fg}55`,

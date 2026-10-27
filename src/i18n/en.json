@@ -47,6 +47,38 @@
     "monthlyIncome": "monthly income",
     "welcomeToast": "All set. You've got this 🌞"
   },
+  "history": {
+    "title": "History",
+    "back": "Back to Home",
+    "search": "Search history",
+    "spent": "{{month}} · {{amount}} spent",
+    "nothingYet": "{{month}} · nothing yet",
+    "emptyTitle": "Nothing here yet",
+    "emptyBody": "Your spending will show up here, day by day. Add your first one whenever you're ready.",
+    "addExpense": "Add expense",
+    "adjusted": "Balance adjusted",
+    "notCounted": "Not counted as spending",
+    "adjustment": "Adjustment",
+    "auto": "Auto",
+    "autoBill": "Auto · bill",
+    "autoSalary": "Auto · salary",
+    "searchScreen": {
+      "label": "Search transactions",
+      "placeholder": "Shop, category or amount",
+      "clear": "Clear search",
+      "cancel": "Cancel",
+      "show": "Show",
+      "all": "All",
+      "spending": "Spending",
+      "income": "Income",
+      "automatic": "Automatic",
+      "recent": "Recent",
+      "matches_one": "{{count}} match",
+      "matches_other": "{{count}} matches",
+      "noMatch": "Nothing matches “{{query}}”",
+      "noMatchHint": "Try a shop name, a category like “coffee”, or an amount."
+    }
+  },
   "balance": {
     "title": "What's in your account?",
     "hint": "All your money, right now.",
