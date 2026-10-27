@@ -6,23 +6,27 @@ import { Button } from '@/components/Button';
 import { CloseIcon, MinusIcon, PlusIcon } from '@/components/Icons';
 import { Jar } from '@/components/Jar';
 import { Press } from '@/components/Press';
+import { SegmentedControl } from '@/components/SegmentedControl';
 import { Sheet } from '@/components/Sheet';
 import { db } from '@/db/client';
 import { currencies, formatMoney, parseAmount } from '@/domain/money';
 import { useProfile, useToday } from '@/features/live';
 import { usePickedJar } from '@/features/savings/dropStore';
 import { createJar } from '@/features/savings/repo';
-import { JAR_TONES, type JarTone, monthAfter, monthsToGo } from '@/features/savings/savings';
+import { type Cadence, fullBy, JAR_TONES, type JarTone } from '@/features/savings/savings';
 import { color, fontFamily, jarColor, radius, shadow, size, text } from '@/theme';
 
-/** "Each month" moves in ₾50 steps (SavingsNew). */
-const STEP = 5000;
-const TONE_NAMES: Record<JarTone, string> = {
+/** "Each month" moves in ₾50 steps (SavingsNew), "Each day" in ₾1, from ₾250 and ₾5. */
+const PLAN = {
+  month: { step: 5000, start: 25000 },
+  day: { step: 100, start: 500 },
+} as const;
+const TONE_NAMES = {
   gold: 'savings.new.tones.gold',
   sky: 'savings.new.tones.sky',
   blush: 'savings.new.tones.blush',
   sage: 'savings.new.tones.sage',
-};
+} as const satisfies Record<JarTone, string>;
 
 // "New jar" (SavingsNew): what it's for, its color, the goal and how much
 // goes in each month, with when it will be full.
@@ -35,18 +39,20 @@ export default function SavingsNewScreen() {
   const [name, setName] = useState('');
   const [tone, setTone] = useState<JarTone>('gold');
   const [goalText, setGoalText] = useState('');
-  const [monthlyMinor, setMonthlyMinor] = useState(25000);
+  const [cadence, setCadence] = useState<Cadence>('month');
+  const [planMinor, setPlanMinor] = useState<number>(PLAN.month.start);
+  const step = PLAN[cadence].step;
 
   const currency = profile?.currency ?? 'GEL';
   const money = (minor: number) => formatMoney(minor, currency, { decimals: 'auto' });
   const goalMinor = parseAmount(goalText.replace(/\s/g, ''), currency) ?? 0;
-  const monthly = goalMinor > 0 ? Math.min(monthlyMinor, goalMinor) : monthlyMinor;
+  const plan = goalMinor > 0 ? Math.min(planMinor, goalMinor) : planMinor;
   const ready = name.trim().length > 0 && goalMinor > 0;
-  const full = goalMinor > 0 ? monthAfter(today, monthsToGo(goalMinor, monthly)) : null;
+  const full = goalMinor > 0 ? fullBy(today, goalMinor, { planMinor: plan, cadence }) : null;
 
   const create = (close: () => void) => {
     if (!ready) return;
-    const id = createJar(db, { name, tone, goalMinor, monthlyMinor: monthly }, today);
+    const id = createJar(db, { name, tone, goalMinor, planMinor: plan, cadence }, today);
     pick(id);
     close();
   };
@@ -103,36 +109,59 @@ export default function SavingsNewScreen() {
             })}
           </View>
 
+          <View style={styles.cadence}>
+            <SegmentedControl
+              accessibilityLabel={t('savings.new.cadence')}
+              options={[
+                { value: 'day', label: t('savings.new.day') },
+                { value: 'month', label: t('savings.new.month') },
+              ]}
+              value={cadence}
+              onChange={(next) => {
+                setCadence(next);
+                setPlanMinor(PLAN[next].start);
+              }}
+            />
+          </View>
+
           <View style={styles.plan}>
             <View style={[styles.planRow, styles.planDivider]}>
               <Text style={styles.planLabel}>{t('savings.new.goal')}</Text>
               <Text style={styles.planSymbol}>{currencies[currency].symbol}</Text>
-              <TextInput
-                accessibilityLabel={t('savings.new.goal')}
-                placeholder="0"
-                placeholderTextColor={color.placeholder}
-                value={goalText}
-                onChangeText={(next) => setGoalText(next.replace(/[^\d.,]/g, '').slice(0, 9))}
-                keyboardType="decimal-pad"
-                style={styles.goalInput}
-              />
+              {/* A hidden copy of the text sizes the field, so it grows as you type. */}
+              <View>
+                <Text accessible={false} style={[styles.goalInput, styles.sizer]}>
+                  {goalText || '0'}
+                </Text>
+                <TextInput
+                  accessibilityLabel={t('savings.new.goal')}
+                  placeholder="0"
+                  placeholderTextColor={color.placeholder}
+                  value={goalText}
+                  onChangeText={(next) => setGoalText(next.replace(/[^\d.,]/g, '').slice(0, 9))}
+                  keyboardType="decimal-pad"
+                  style={[styles.goalInput, StyleSheet.absoluteFill]}
+                />
+              </View>
             </View>
             <View style={styles.planRow}>
-              <Text style={styles.planLabel}>{t('savings.new.monthly')}</Text>
+              <Text style={styles.planLabel}>
+                {t(cadence === 'day' ? 'savings.new.daily' : 'savings.new.monthly')}
+              </Text>
               <Press
-                accessibilityLabel={t('savings.new.less', { amount: money(STEP) })}
-                onPress={() => setMonthlyMinor((v) => Math.max(STEP, v - STEP))}
+                accessibilityLabel={t(`savings.new.less.${cadence}`, { amount: money(step) })}
+                onPress={() => setPlanMinor((v) => Math.max(step, v - step))}
                 style={styles.step}
               >
                 <MinusIcon color={color.ink} size={14} />
               </Press>
               <Text accessibilityLiveRegion="polite" style={styles.monthly}>
-                {money(monthly)}
+                {money(plan)}
               </Text>
               <Press
-                accessibilityLabel={t('savings.new.more', { amount: money(STEP) })}
+                accessibilityLabel={t(`savings.new.more.${cadence}`, { amount: money(step) })}
                 onPress={() =>
-                  setMonthlyMinor((v) => Math.min(goalMinor > 0 ? goalMinor : v + STEP, v + STEP))
+                  setPlanMinor((v) => Math.min(goalMinor > 0 ? goalMinor : v + step, v + step))
                 }
                 style={styles.step}
               >
@@ -200,8 +229,9 @@ const styles = StyleSheet.create({
   tone: { width: 40, height: 40, borderRadius: 20 },
   toneOn: { boxShadow: shadow.toneOn },
   toneOff: { boxShadow: shadow.toneRing },
+  cadence: { marginTop: 18 },
   plan: {
-    marginTop: 18,
+    marginTop: 10,
     paddingVertical: 4,
     paddingHorizontal: 16,
     borderRadius: 22,
@@ -213,14 +243,13 @@ const styles = StyleSheet.create({
   planLabel: { ...text.label, flex: 1, color: color.muted },
   planSymbol: { fontFamily: fontFamily.extrabold, fontSize: 18, color: color.ink },
   goalInput: {
-    // Grows with the number, so the symbol stays right next to it.
-    minWidth: 12,
     padding: 0,
     fontFamily: fontFamily.extrabold,
     fontSize: 18,
     color: color.ink,
     fontVariant: ['tabular-nums'],
   },
+  sizer: { opacity: 0 },
   step: {
     width: 34,
     height: 34,

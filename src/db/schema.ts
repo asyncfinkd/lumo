@@ -176,8 +176,14 @@ export const jars = sqliteTable(
     /** The jar's color (SavingsNew): Honey, Sky, Blush or Sage. */
     tone: text('tone', { enum: ['gold', 'sky', 'blush', 'sage'] }).notNull(),
     goalMinor: integer('goal_minor').notNull(),
-    /** "Each month": the plan the pace line is measured against. */
-    monthlyMinor: integer('monthly_minor').notNull(),
+    /**
+     * "Each day" or "Each month": the plan the pace line is measured against.
+     * The column kept its first name from when every jar was monthly.
+     */
+    planMinor: integer('monthly_minor').notNull(),
+    cadence: text('cadence', { enum: ['day', 'month'] })
+      .notNull()
+      .default('month'),
     currency: text('currency', { enum: currencyCodes }).notNull(),
     /** Local date it was made: month 0 of the plan. */
     startDate: text('start_date').notNull(),
@@ -186,7 +192,7 @@ export const jars = sqliteTable(
   },
   (t) => [
     check('jars_goal_positive', sql`${t.goalMinor} > 0`),
-    check('jars_monthly_positive', sql`${t.monthlyMinor} > 0`),
+    check('jars_monthly_positive', sql`${t.planMinor} > 0`),
   ],
 );
 

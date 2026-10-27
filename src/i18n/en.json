@@ -248,8 +248,14 @@
     "newJar": "New jar",
     "of": " of {{goal}}",
     "ofBoth": "{{saved}} of {{goal}}",
-    "paceReady": "{{amount}} a month · ready by {{month}}",
-    "paceAhead": "✨ A month ahead of plan",
+    "paceReady": {
+      "day": "{{amount}} a day · ready by {{month}}",
+      "month": "{{amount}} a month · ready by {{month}}"
+    },
+    "paceAhead": {
+      "week": "✨ A week ahead of plan",
+      "month": "✨ A month ahead of plan"
+    },
     "add": "Add to jar",
     "otherJars": "Other jars",
     "tile": "{{amount}} · {{percent}}%",
@@ -289,8 +295,14 @@
       "namePlaceholder": "What are you saving for?",
       "goal": "Goal",
       "monthly": "Each month",
-      "less": "{{amount}} less each month",
-      "more": "{{amount}} more each month",
+      "less": {
+        "day": "{{amount}} less each day",
+        "month": "{{amount}} less each month"
+      },
+      "more": {
+        "day": "{{amount}} more each day",
+        "month": "{{amount}} more each month"
+      },
       "fullBy": "Full by {{month}}",
       "create": "Create jar",
       "tones": {
@@ -298,7 +310,11 @@
         "sky": "Sky jar",
         "blush": "Blush jar",
         "sage": "Sage jar"
-      }
+      },
+      "cadence": "How often",
+      "day": "Day",
+      "month": "Month",
+      "daily": "Each day"
     }
   },
   "onboarding": {

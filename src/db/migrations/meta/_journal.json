@@ -71,6 +71,13 @@
       "when": 1793115500385,
       "tag": "0009_harsh_johnny_blaze",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1793116853014,
+      "tag": "0010_chubby_leo",
+      "breakpoints": true
     }
   ]
 }

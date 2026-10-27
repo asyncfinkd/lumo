@@ -114,9 +114,9 @@ export default function SavingsScreen() {
             paceText={(jar, savedMinor) => {
               const pace = jarPace(jar, savedMinor, today);
               if (pace.type === 'full') return null;
-              if (pace.type === 'ahead') return t('savings.paceAhead');
-              return t('savings.paceReady', {
-                amount: money(jar.monthlyMinor),
+              if (pace.type === 'ahead') return t(`savings.paceAhead.${pace.by}`);
+              return t(`savings.paceReady.${jar.cadence}`, {
+                amount: money(jar.planMinor),
                 month: monthName(pace.year, pace.month),
               });
             }}

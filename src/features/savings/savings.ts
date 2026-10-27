@@ -1,14 +1,21 @@
 // What the Savings boards say about a jar: how full it is, the pace line, the
 // quick amounts and how long it took. Pure, so it's tested without React.
 
-import type { CalendarDate } from '@/domain/dates';
+import { addDays, type CalendarDate, diffDays } from '@/domain/dates';
 
 /** The four jar colors (SavingsNew): Honey, Sky, Blush, Sage. */
 export const JAR_TONES = ['gold', 'sky', 'blush', 'sage'] as const;
 export type JarTone = (typeof JAR_TONES)[number];
 
 type Entry = { jarId: string; amountMinor: number };
-type JarPlan = { goalMinor: number; monthlyMinor: number; startDate: CalendarDate };
+/** How often the plan's amount goes in: "Each day" or "Each month". */
+export type Cadence = 'day' | 'month';
+type JarPlan = {
+  goalMinor: number;
+  planMinor: number;
+  cadence: Cadence;
+  startDate: CalendarDate;
+};
 
 /** What's in each jar, by jar id. */
 export function savedByJar(entries: readonly Entry[]): Map<string, number> {
@@ -42,37 +49,62 @@ export function monthAfter(today: CalendarDate, months: number): { year: number;
   return { year: Math.floor(index / 12), month: (index % 12) + 1 };
 }
 
-/** Months of saving `monthlyMinor` until `leftMinor` is in: at least 1. */
-export function monthsToGo(leftMinor: number, monthlyMinor: number): number {
-  return Math.max(1, Math.ceil(leftMinor / monthlyMinor));
+/** Days or months of saving `planMinor` until `leftMinor` is in: at least 1. */
+export function stepsToGo(leftMinor: number, planMinor: number): number {
+  return Math.max(1, Math.ceil(leftMinor / planMinor));
+}
+
+/** The month the jar will be full when `leftMinor` still has to go in. */
+export function fullBy(
+  today: CalendarDate,
+  leftMinor: number,
+  plan: { planMinor: number; cadence: Cadence },
+): { year: number; month: number } {
+  const steps = stepsToGo(leftMinor, plan.planMinor);
+  if (plan.cadence === 'month') return monthAfter(today, steps);
+  const [year, month] = parts(addDays(today, steps));
+  return { year, month };
 }
 
 export type Pace =
-  /** "✨ A month ahead of plan" (SavingsAdded). */
-  | { type: 'ahead' }
+  /** "✨ A month ahead of plan" (SavingsAdded); a week for a daily jar. */
+  | { type: 'ahead'; by: 'week' | 'month' }
   /** "₾300 a month · ready by February" (Savings). */
   | { type: 'readyBy'; year: number; month: number }
   | { type: 'full' };
 
 /**
- * The plan is the monthly amount for every whole month since the jar was made.
- * A jar a full month's amount past that is ahead; otherwise it shows when it
- * will be full at the monthly amount.
+ * The plan is the jar's amount for every whole month (or day) since it was
+ * made. A monthly jar a month's amount past that is ahead, a daily one a
+ * week's; otherwise the pace shows when it will be full at the plan's amount.
  */
 export function jarPace(jar: JarPlan, savedMinor: number, today: CalendarDate): Pace {
   const leftMinor = jar.goalMinor - savedMinor;
   if (leftMinor <= 0) return { type: 'full' };
-  const planned = jar.monthlyMinor * monthsBetween(jar.startDate, today);
-  if (savedMinor >= planned + jar.monthlyMinor) return { type: 'ahead' };
-  return { type: 'readyBy', ...monthAfter(today, monthsToGo(leftMinor, jar.monthlyMinor)) };
+  const daily = jar.cadence === 'day';
+  const elapsed = daily
+    ? Math.max(0, diffDays(jar.startDate, today))
+    : monthsBetween(jar.startDate, today);
+  const lead = jar.planMinor * (daily ? 7 : 1);
+  if (savedMinor >= jar.planMinor * elapsed + lead) {
+    return { type: 'ahead', by: daily ? 'week' : 'month' };
+  }
+  return { type: 'readyBy', ...fullBy(today, leftMinor, jar) };
 }
 
-/** The add sheet's chips: ₾50, ₾100, ₾200 and the jar's monthly amount ("USUAL"). */
-export function quickAmounts(monthlyMinor: number): { minor: number; usual: boolean }[] {
-  const amounts = [5000, 10000, 20000].filter((minor) => minor !== monthlyMinor);
-  return [...amounts, monthlyMinor]
+/**
+ * The add sheet's chips, the plan's amount among them ("USUAL"): ₾50, ₾100,
+ * ₾200 for a monthly jar, ₾10, ₾20, ₾50 for a daily one.
+ */
+export function quickAmounts(
+  planMinor: number,
+  cadence: Cadence = 'month',
+): { minor: number; usual: boolean }[] {
+  const base = cadence === 'day' ? [1000, 2000, 5000] : [5000, 10000, 20000];
+  const amounts = base.filter((minor) => minor !== planMinor);
+  return [...amounts, planMinor]
     .sort((a, b) => a - b)
-    .map((minor) => ({ minor, usual: minor === monthlyMinor }));
+    .map((minor) => ({ minor, usual: minor === planMinor }));
 }
 
 /**
@@ -80,10 +112,11 @@ export function quickAmounts(monthlyMinor: number): { minor: number; usual: bool
  * jar; a jar with less than the smallest one offers all of it.
  */
 export function takeOutAmounts(
-  monthlyMinor: number,
+  planMinor: number,
   savedMinor: number,
+  cadence: Cadence = 'month',
 ): { minor: number; usual: boolean; all: boolean }[] {
-  const chips = quickAmounts(monthlyMinor)
+  const chips = quickAmounts(planMinor, cadence)
     .filter((c) => c.minor < savedMinor)
     .map((c) => ({ ...c, all: false }));
   if (savedMinor <= 0) return [];

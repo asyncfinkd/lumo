@@ -1,0 +1,1 @@
+ALTER TABLE `jars` ADD `cadence` text DEFAULT 'month' NOT NULL;

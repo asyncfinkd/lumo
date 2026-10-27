@@ -42,10 +42,12 @@ export default function SavingsAddScreen() {
   if (!jar) return null;
   const money = (minor: number) => formatMoney(minor, jar.currency, { decimals: 'auto' });
   const chips = out
-    ? takeOutAmounts(jar.monthlyMinor, savedMinor)
-    : quickAmounts(jar.monthlyMinor).map((c) => ({ ...c, all: false }));
-  // ₾100 to start with, or the first amount the jar can give back.
-  const amountMinor = chosen ?? chips.find((c) => c.minor === 10000)?.minor ?? chips[0]?.minor ?? 0;
+    ? takeOutAmounts(jar.planMinor, savedMinor, jar.cadence)
+    : quickAmounts(jar.planMinor, jar.cadence).map((c) => ({ ...c, all: false }));
+  // ₾100 to start with (the usual amount on a daily jar), or the first amount
+  // the jar can give back.
+  const start = jar.cadence === 'day' ? jar.planMinor : 10000;
+  const amountMinor = chosen ?? chips.find((c) => c.minor === start)?.minor ?? chips[0]?.minor ?? 0;
   const pct = jarPercent(savedMinor, jar.goalMinor);
   const after = out ? savedMinor - amountMinor : savedMinor + amountMinor;
   const afterPct = jarPercent(after, jar.goalMinor);
@@ -165,7 +167,7 @@ export default function SavingsAddScreen() {
               {pace.type === 'full'
                 ? t('savings.addSheet.fills')
                 : pace.type === 'ahead'
-                  ? t('savings.paceAhead')
+                  ? t(`savings.paceAhead.${pace.by}`)
                   : t(out ? 'savings.outSheet.readyBy' : 'savings.addSheet.onTrack', {
                       month: monthName(pace.year, pace.month),
                     })}

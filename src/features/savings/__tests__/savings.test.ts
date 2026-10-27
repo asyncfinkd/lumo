@@ -18,7 +18,12 @@ import {
 
 const id = randomUUID;
 // New laptop on the Savings board: ₾3,000 at ₾300 a month.
-const laptop = { goalMinor: 300000, monthlyMinor: 30000, startDate: '2026-04-27' };
+const laptop = {
+  goalMinor: 300000,
+  planMinor: 30000,
+  cadence: 'month' as const,
+  startDate: '2026-04-27',
+};
 
 describe('jarPercent', () => {
   it('rounds and stays within 0–100', () => {
@@ -49,12 +54,42 @@ describe('jarPace', () => {
 
   it('is a month ahead once a whole month past the plan', () => {
     // Plan: 6 months × ₾300 = ₾1,800; ₾2,100 is a month ahead.
-    expect(jarPace(laptop, 210000, '2026-10-27')).toEqual({ type: 'ahead' });
+    expect(jarPace(laptop, 210000, '2026-10-27')).toEqual({ type: 'ahead', by: 'month' });
     expect(jarPace(laptop, 209999, '2026-10-27').type).toBe('readyBy');
   });
 
   it('is full at the goal', () => {
     expect(jarPace(laptop, 300000, '2026-10-27')).toEqual({ type: 'full' });
+  });
+});
+
+describe('a daily jar', () => {
+  // ₾5 a day toward ₾1,500, started Oct 1.
+  const bike = {
+    goalMinor: 150000,
+    planMinor: 500,
+    cadence: 'day' as const,
+    startDate: '2026-10-01',
+  };
+
+  it('is ready when the days at ₾5 run out', () => {
+    // ₾100 in, ₾1,400 to go: 280 days from Oct 27 is Aug 4, 2027.
+    expect(jarPace(bike, 10000, '2026-10-27')).toEqual({ type: 'readyBy', year: 2027, month: 8 });
+  });
+
+  it('is a week ahead once seven days past the plan', () => {
+    // Plan: 26 days × ₾5 = ₾130; a week ahead from ₾165.
+    expect(jarPace(bike, 16500, '2026-10-27')).toEqual({ type: 'ahead', by: 'week' });
+    expect(jarPace(bike, 16499, '2026-10-27').type).toBe('readyBy');
+  });
+
+  it('offers small amounts, the daily one as usual', () => {
+    expect(quickAmounts(500, 'day')).toEqual([
+      { minor: 500, usual: true },
+      { minor: 1000, usual: false },
+      { minor: 2000, usual: false },
+      { minor: 5000, usual: false },
+    ]);
   });
 });
 
@@ -92,7 +127,13 @@ describe('jars in the database', () => {
     const db = withBalance();
     const jar = createJar(
       db,
-      { name: 'New laptop', tone: 'gold', goalMinor: 300000, monthlyMinor: 30000 },
+      {
+        name: 'New laptop',
+        tone: 'gold',
+        goalMinor: 300000,
+        planMinor: 30000,
+        cadence: 'month' as const,
+      },
       '2026-10-27',
       id,
     );
@@ -113,7 +154,13 @@ describe('jars in the database', () => {
     const db = withBalance();
     const jar = createJar(
       db,
-      { name: 'Rainy day', tone: 'sky', goalMinor: 200000, monthlyMinor: 20000 },
+      {
+        name: 'Rainy day',
+        tone: 'sky',
+        goalMinor: 200000,
+        planMinor: 20000,
+        cadence: 'month' as const,
+      },
       '2026-10-27',
       id,
     );
@@ -124,7 +171,13 @@ describe('jars in the database', () => {
 
   it('refuses an empty name or a zero amount', () => {
     const db = withBalance();
-    const input = { name: ' ', tone: 'sage' as const, goalMinor: 150000, monthlyMinor: 25000 };
+    const input = {
+      name: ' ',
+      tone: 'sage' as const,
+      goalMinor: 150000,
+      planMinor: 25000,
+      cadence: 'month' as const,
+    };
     expect(() => createJar(db, input, '2026-10-27', id)).toThrow();
     const jar = createJar(db, { ...input, name: 'New bike' }, '2026-10-27', id);
     expect(() => addToJar(db, jar, 0, '2026-10-27', id)).toThrow(RangeError);
@@ -150,7 +203,8 @@ describe('takeOutAmounts', () => {
       name: 'Rainy day',
       tone: 'sky' as const,
       goalMinor: 200000,
-      monthlyMinor: 20000,
+      planMinor: 20000,
+      cadence: 'month' as const,
     };
     const jar = createJar(db, input, '2026-10-27', id);
     addToJar(db, jar, 10000, '2026-10-27', id);

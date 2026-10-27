@@ -11,6 +11,7 @@ import m0006 from './0006_loud_fixer.sql';
 import m0007 from './0007_chubby_skrulls.sql';
 import m0008 from './0008_clumsy_lord_tyger.sql';
 import m0009 from './0009_harsh_johnny_blaze.sql';
+import m0010 from './0010_chubby_leo.sql';
 
   export default {
     journal,
@@ -24,7 +25,8 @@ m0005,
 m0006,
 m0007,
 m0008,
-m0009
+m0009,
+m0010
     }
   }
   

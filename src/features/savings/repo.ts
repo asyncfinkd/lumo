@@ -6,7 +6,7 @@ import { newId as defaultNewId } from '@/db/id';
 import { jarEntries, jars, profile } from '@/db/schema';
 import type { Db } from '@/db/types';
 import type { CalendarDate } from '@/domain/dates';
-import type { JarTone } from './savings';
+import type { Cadence, JarTone } from './savings';
 
 export function openJarsQuery(db: Db) {
   return db.select().from(jars).where(isNull(jars.closedAt)).orderBy(asc(jars.createdAt));
@@ -36,7 +36,8 @@ export type JarInput = {
   name: string;
   tone: JarTone;
   goalMinor: number;
-  monthlyMinor: number;
+  planMinor: number;
+  cadence: Cadence;
 };
 
 /** "Create jar" (SavingsNew). Returns the new jar's id. */
@@ -49,7 +50,7 @@ export function createJar(
   const name = input.name.trim();
   if (!name) throw new Error('Name is required');
   assertPositive('goalMinor', input.goalMinor);
-  assertPositive('monthlyMinor', input.monthlyMinor);
+  assertPositive('planMinor', input.planMinor);
   const me = db.select({ currency: profile.currency }).from(profile).get();
   if (!me) throw new Error('No profile yet');
   const id = newId();
@@ -59,7 +60,8 @@ export function createJar(
       name,
       tone: input.tone,
       goalMinor: input.goalMinor,
-      monthlyMinor: input.monthlyMinor,
+      planMinor: input.planMinor,
+      cadence: input.cadence,
       currency: me.currency,
       startDate: today,
     })
