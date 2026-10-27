@@ -13,6 +13,7 @@ import { Fill } from '@/components/motion';
 import { Press } from '@/components/Press';
 import { Sheet } from '@/components/Sheet';
 import { formatMoney } from '@/domain/money';
+import { BUDGETING } from '@/features/flags';
 import { type BudgetRow, budgetRows } from '@/features/budgets/budgetRows';
 import {
   useAllTransactions,
@@ -148,7 +149,7 @@ export default function TransactionScreen() {
             ))}
           </View>
 
-          {budget && summary ? (
+          {!BUDGETING ? null : budget && summary ? (
             <BudgetCard
               label={v.label}
               row={

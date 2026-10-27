@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  // BellIcon, (Reminders, #15)
+  BellIcon,
   CameraIcon,
   ChevronRightIcon,
   DownloadIcon,
@@ -21,6 +21,7 @@ import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
 import { currencies, formatMoney } from '@/domain/money';
 import { useBills, useCategories, useIncomes, useProfile } from '@/features/live';
+import { BUDGETING } from '@/features/flags';
 import { Avatar } from '@/features/profile/Avatar';
 import { PhotoToast } from '@/features/profile/photoToast';
 import {
@@ -151,16 +152,17 @@ export default function ProfileScreen() {
             {t('profile.preferences')}
           </Text>
           <View style={styles.list}>
-            {/*
-              Hidden until their pages are built, so testers don't tap rows
-              that do nothing: Reminders (#15), App icon (#17).
             <Row
               tile={categoryPalette.butter}
               icon={<BellIcon color={categoryPalette.butter.fg} />}
               label={t('profile.reminders')}
-              sub={t('profile.remindersSub')}
+              sub={BUDGETING ? t('profile.remindersSub') : t('profile.remindersSubNoBudgets')}
               value={profile.reminders ? t('profile.on') : t('profile.off')}
+              onPress={() => router.push('/profile-reminders')}
             />
+            {/*
+              Hidden until its page is built, so testers don't tap a row that
+              does nothing: App icon (#17).
             <Row
               icon={<Image source={appIcon} accessible={false} style={styles.appIcon} />}
               label={t('profile.appIcon')}

@@ -14,6 +14,7 @@ import { useDatabase } from '@/db/useDatabase';
 import { CategoriesProvider } from '@/features/categories/CategoriesProvider';
 import { useProfileStatus } from '@/features/live';
 import { DueTransactionsSync } from '@/features/recurring/DueTransactionsSync';
+import { RemindersSync } from '@/features/reminders/RemindersSync';
 import i18n, { applyLanguage } from '@/i18n';
 import { color } from '@/theme';
 
@@ -74,12 +75,12 @@ function AppStack() {
 
   return (
     <CategoriesProvider>
+      {onboarded ? <RemindersSync /> : null}
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
         <Stack.Protected guard={onboarded} redirectTo="/welcome">
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="add-transaction" options={sheetOptions} />
           <Stack.Screen name="balance" options={sheetOptions} />
-          <Stack.Screen name="history" />
           <Stack.Screen name="transaction" options={sheetOptions} />
           <Stack.Screen
             name="transaction-delete"
@@ -94,6 +95,7 @@ function AppStack() {
           <Stack.Screen name="profile-bills" />
           <Stack.Screen name="profile-language" />
           <Stack.Screen name="profile-export" />
+          <Stack.Screen name="profile-reminders" />
           <Stack.Screen name="profile-bill" options={sheetOptions} />
           <Stack.Screen name="profile-category" options={sheetOptions} />
           <Stack.Screen

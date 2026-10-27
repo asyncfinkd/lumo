@@ -13,6 +13,7 @@
     "home": "Home",
     "insights": "Insights",
     "budgets": "Budgets",
+    "history": "History",
     "profile": "Profile",
     "add": "Add transaction"
   },
@@ -45,7 +46,11 @@
     "seeAll": "See all",
     "monthlyBill": "monthly bill",
     "monthlyIncome": "monthly income",
-    "welcomeToast": "All set. You've got this 🌞"
+    "welcomeToast": "All set. You've got this 🌞",
+    "yourBalance": "Your balance",
+    "moreThan": "more than on {{date}}",
+    "lessThan": "less than on {{date}}",
+    "sameAs": "the same as on {{date}}"
   },
   "history": {
     "title": "History",
@@ -365,7 +370,8 @@
     "nameHint": "This is how Lumo greets you on Home.",
     "nameCount": "{{count}} / {{max}}",
     "preview": "Preview",
-    "friend": "friend"
+    "friend": "friend",
+    "remindersSubNoBudgets": "Bills and payday"
   },
   "categories": {
     "coffee": "Coffee",
@@ -537,5 +543,35 @@
     "no": "No",
     "everything": "Everything",
     "footer": "Made with Lumo on {{date}}. Everything stays on your phone."
+  },
+  "remindersScreen": {
+    "title": "Reminders",
+    "intro": "Gentle nudges, never nagging. Lumo only taps you when it actually helps.",
+    "sampleCaption": "This is what a reminder looks like",
+    "now": "now",
+    "all": "Reminders",
+    "bills": "Before a bill is due",
+    "billsHint": "A day before rent, Telasi and the rest",
+    "payday": "Payday",
+    "paydayHint": "When your salary lands, with what’s left to plan",
+    "low": "A budget is running low",
+    "lowHint": "When a category has 15% left",
+    "evening": "Evening check-in",
+    "eveningHint": "At 21:00, if you haven’t added anything today",
+    "quiet": "Quiet hours: no reminders between 22:00 and 8:00.",
+    "blocked": "Notifications are off for Lumo. Turn them on in Settings.",
+    "openSettings": "Open Settings",
+    "remindBefore": "Remind me a day before",
+    "notify": {
+      "billTitle": "{{name}} is due tomorrow",
+      "billAuto": "{{amount}} · It’ll be added for you on the {{day}}.",
+      "billManual": "{{amount}} · Add it when you pay.",
+      "paydayTitle": "Payday 🌿",
+      "paydayBody": "{{name}} lands today: {{amount}}. A good moment to plan the month.",
+      "lowTitle": "{{category}} is running low",
+      "lowBody": "{{left}} left this month. Easy does it.",
+      "eveningTitle": "Anything to add today?",
+      "eveningBody": "Nothing added yet today. It only takes a second."
+    }
   }
 }

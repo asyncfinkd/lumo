@@ -9,6 +9,7 @@ import { CategoryIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
 import { db } from '@/db/client';
 import { formatMoney } from '@/domain/money';
+import { BUDGETING } from '@/features/flags';
 import { type CategoryView, useCategories } from '@/features/categories/categories';
 import { categoryUsage, deleteCategory } from '@/features/categories/repo';
 import { useBudgets, useProfile } from '@/features/live';
@@ -97,7 +98,7 @@ export default function ProfileCategoryDeleteScreen() {
         })}
       </View>
 
-      {budget ? (
+      {BUDGETING && budget ? (
         <Text style={styles.note}>
           {t('categoryManage.budgetRemoved', {
             amount: formatMoney(budget.limitMinor, profile?.currency ?? 'GEL', {

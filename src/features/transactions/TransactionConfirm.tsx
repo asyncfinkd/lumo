@@ -8,6 +8,7 @@ import { Press } from '@/components/Press';
 import { db } from '@/db/client';
 import { categorySpent } from '@/domain/budgets';
 import { formatMoney } from '@/domain/money';
+import { BUDGETING } from '@/features/flags';
 import { useAllTransactions, useBudgets, useMoneyMonth } from '@/features/live';
 import { deleteTransaction, type Scope } from '@/features/transactions/repo';
 import { useTransactionView } from '@/features/transactions/useTransactionView';
@@ -77,7 +78,8 @@ export function TransactionConfirm({
     title = t('history.confirm.deleteExpense');
     const budget = tx.categoryId && budgets.find((b) => b.categoryId === tx.categoryId);
     // Only says it "goes back" when it's in this period's budget.
-    const counted = budget && summary && categorySpent([tx], budget.categoryId, summary.period) > 0;
+    const counted =
+      BUDGETING && budget && summary && categorySpent([tx], budget.categoryId, summary.period) > 0;
     body = counted
       ? t('history.confirm.bodyBudget', { amount: money(tx.amountMinor), category: v.label })
       : t('history.confirm.bodyExpense');

@@ -79,7 +79,7 @@ export function CategoryIcon({
   );
 }
 
-export type TabIconName = 'home' | 'insights' | 'budgets' | 'profile';
+export type TabIconName = 'home' | 'insights' | 'budgets' | 'history' | 'profile';
 
 export function TabIcon({ name, color }: { name: TabIconName; color: string }) {
   const s = line(color);
@@ -115,6 +115,13 @@ export function TabIcon({ name, color }: { name: TabIconName; color: string }) {
           <Path {...s} d="M6.5 6.5 15 3.8a1.5 1.5 0 0 1 2 1.4v1.3" />
         </>
       )}
+      {name === 'history' && (
+        // A receipt: every transaction, day by day.
+        <>
+          <Path {...s} fill={color} fillOpacity={0.22} d="M6 3.5h12v17l-3-2-3 2-3-2-3 2z" />
+          <Path {...s} d="M9 8.5h6M9 12.5h4" />
+        </>
+      )}
       {name === 'profile' && (
         <>
           <Circle {...s} fill={color} fillOpacity={0.22} cx={12} cy={8.5} r={4} />
@@ -145,6 +152,21 @@ export function CloseIcon({ size = 18, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
       <Path {...line(color, 2.4)} d="M6.5 6.5l11 11M17.5 6.5l-11 11" />
+    </Svg>
+  );
+}
+
+/** Up (or, turned, down): the balance chip on Home (Main). */
+export function ArrowUpIcon({ color, down = false }: { color: string; down?: boolean }) {
+  return (
+    <Svg
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      accessible={false}
+      style={down ? { transform: [{ rotate: '180deg' }] } : undefined}
+    >
+      <Path {...line(color, 2.4)} d="M12 18.5v-13M6.5 11 12 5.5 17.5 11" />
     </Svg>
   );
 }
@@ -361,6 +383,33 @@ export function SearchIcon({ color, size = 20 }: IconProps) {
     <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
       <Circle {...s} fill={color} fillOpacity={0.15} cx={11} cy={11} r={6.5} />
       <Path {...s} d="m16 16 4.5 4.5" />
+    </Svg>
+  );
+}
+
+/** "Evening check-in" (ProfileReminders). */
+export function MoonIcon({ color }: { color: string }) {
+  const s = line(color, 1.9);
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" accessible={false}>
+      <Path
+        {...s}
+        fill={color}
+        fillOpacity={0.22}
+        d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z"
+      />
+    </Svg>
+  );
+}
+
+/** "A budget is running low" (ProfileReminders): a purse. */
+export function PurseIcon({ color }: { color: string }) {
+  const s = line(color, 1.9);
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" accessible={false}>
+      <Rect {...s} fill={color} fillOpacity={0.22} x={3.5} y={6.5} width={17} height={13} rx={4} />
+      <Path {...s} d="M16 13h1.5" />
+      <Path {...s} d="M6.5 6.5 15 3.8a1.5 1.5 0 0 1 2 1.4v1.3" />
     </Svg>
   );
 }

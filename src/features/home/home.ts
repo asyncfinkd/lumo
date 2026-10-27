@@ -2,7 +2,8 @@
 // Yesterday lists. Pure, so it's tested without React.
 
 import { addDays, type CalendarDate } from '@/domain/dates';
-import type { TransactionSource } from '@/domain/leftToSpend';
+import { totalBalance } from '@/domain/balance';
+import type { MoneyTransaction, TransactionSource } from '@/domain/leftToSpend';
 
 export type GreetingKey = 'morning' | 'afternoon' | 'evening';
 
@@ -36,4 +37,19 @@ export function recentDays<T extends Listed>(
     today: shown.filter((t) => t.date === today).sort(byTime),
     yesterday: shown.filter((t) => t.date === yesterday).sort(byTime),
   };
+}
+
+/**
+ * How the balance moved since the 1st of this month ("₾800 more than on Oct
+ * 1", Main). `null` when there was no balance before the 1st to compare with.
+ */
+export function monthChange(
+  transactions: readonly (MoneyTransaction & { date: CalendarDate })[],
+  today: CalendarDate,
+): { since: CalendarDate; deltaMinor: number } | null {
+  const since = `${today.slice(0, 7)}-01`;
+  const start = totalBalance(transactions.filter((t) => t.date < since));
+  const now = totalBalance(transactions);
+  if (start === null || now === null) return null;
+  return { since, deltaMinor: now - start };
 }

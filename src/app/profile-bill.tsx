@@ -13,7 +13,7 @@ import { type CurrencyCode, currencies, parseAmount } from '@/domain/money';
 import { useCategories } from '@/features/categories/categories';
 import { useBills, useProfile } from '@/features/live';
 import { cleanAmount } from '@/features/onboarding/bills';
-import { deleteBill, saveBill, setBillActive } from '@/features/recurring/repo';
+import { deleteBill, saveBill, setBillActive, setBillRemind } from '@/features/recurring/repo';
 import { color, fontFamily, radius, shadow, size, text } from '@/theme';
 
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -49,6 +49,7 @@ function BillForm({
   const [day, setDay] = useState(bill?.day ?? payday);
   const [categoryId, setCategoryId] = useState(bill?.categoryId ?? 'bills');
   const [auto, setAuto] = useState(bill?.active ?? true);
+  const [remind, setRemind] = useState(bill?.remind ?? true);
   const [pickingDay, setPickingDay] = useState(false);
 
   const amountMinor = parseAmount(typed, currency);
@@ -66,6 +67,7 @@ function BillForm({
       categoryId,
     });
     setBillActive(db, saved.id, auto);
+    setBillRemind(db, saved.id, remind);
     close();
   };
 
@@ -145,7 +147,6 @@ function BillForm({
               })}
             </View>
 
-            {/* "Remind me a day before" waits for reminders (#15). */}
             <View style={styles.switches}>
               <View style={styles.switchRow}>
                 <View style={styles.switchText}>
@@ -160,6 +161,16 @@ function BillForm({
                   value={auto}
                   onChange={setAuto}
                   accessibilityLabel={t('billsManage.addAutomatically')}
+                />
+              </View>
+              <View style={[styles.switchRow, styles.remindRow]}>
+                <Text style={[styles.switchTitle, styles.switchText]}>
+                  {t('remindersScreen.remindBefore')}
+                </Text>
+                <Switch
+                  value={remind}
+                  onChange={setRemind}
+                  accessibilityLabel={t('remindersScreen.remindBefore')}
                 />
               </View>
             </View>
@@ -303,6 +314,7 @@ const styles = StyleSheet.create({
   },
   switchRow: { minHeight: 60, flexDirection: 'row', alignItems: 'center', gap: 12 },
   switchText: { flex: 1, gap: 2 },
+  remindRow: { minHeight: 56 },
   switchTitle: { fontFamily: fontFamily.bold, fontSize: 15, color: color.ink },
   switchHint: { fontFamily: fontFamily.semibold, fontSize: 12, color: color.muted },
   actions: { marginTop: 18, flexDirection: 'row', gap: 10 },

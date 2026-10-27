@@ -36,6 +36,9 @@ export const shadow = {
   rowBadge: '0px 2px 6px 0px rgba(43,37,34,0.16)',
   /** The focused search field (HistorySearch): an ink ring plus a soft glow. */
   searchField: 'inset 0px 0px 0px 2px #2B2522, 0px 8px 24px -14px rgba(200,145,106,0.5)',
+  /** The sample notification and the main Reminders row (ProfileReminders). */
+  notificationCard: '0px 10px 28px -14px rgba(43,37,34,0.3)',
+  masterRow: '0px 6px 20px -10px rgba(200,145,106,0.2)',
   /** A picked option card (Export's CSV / PDF): an ink ring. */
   optionPicked: 'inset 0px 0px 0px 2px #2B2522',
   optionIdle: '0px 6px 20px -12px rgba(200,145,106,0.25)',
