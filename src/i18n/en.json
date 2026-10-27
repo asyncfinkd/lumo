@@ -474,5 +474,68 @@
     "delete": "Delete bill",
     "save": "Save",
     "addButton": "Add bill"
+  },
+  "language": {
+    "title": "Language",
+    "label": "App language",
+    "more": "More languages are on the way.",
+    "preview": "Preview",
+    "previewLeft_one": "{{amount}} left to spend · {{count}} day to go",
+    "previewLeft_other": "{{amount}} left to spend · {{count}} days to go"
+  },
+  "exportData": {
+    "title": "Export",
+    "heading": "Take your data with you",
+    "hint": "A copy of your money, saved where you choose.",
+    "time": "Time",
+    "ranges": {
+      "month": "This month",
+      "three": "Last 3 months",
+      "year": "This year",
+      "all": "Everything"
+    },
+    "format": "Format",
+    "csv": "CSV",
+    "csvHint": "Opens in Excel, Numbers or Sheets",
+    "pdf": "PDF",
+    "pdfHint": "A tidy summary to read or print",
+    "transactions": "Transactions",
+    "budgets": "Budgets",
+    "billsAndIncome": "Bills and income",
+    "madeHere": "Made on your phone. You choose where it goes.",
+    "cta": "Export {{format}}",
+    "failed": "Couldn’t make the file. Try again.",
+    "fileTitle": "Lumo · my money",
+    "columns": {
+      "date": "Date",
+      "time": "Time",
+      "type": "Type",
+      "category": "Category",
+      "title": "Name",
+      "note": "Note",
+      "amount": "Amount",
+      "currency": "Currency",
+      "added": "Added",
+      "limit": "Monthly budget",
+      "name": "Name",
+      "day": "Day of month",
+      "auto": "Added automatically"
+    },
+    "kind": {
+      "expense": "Expense",
+      "income": "Income",
+      "bill": "Bill",
+      "salary": "Income"
+    },
+    "source": {
+      "manual": "By you",
+      "bill": "From your bills",
+      "recurring_income": "From your income",
+      "adjustment": "Balance adjusted"
+    },
+    "yes": "Yes",
+    "no": "No",
+    "everything": "Everything",
+    "footer": "Made with Lumo on {{date}}. Everything stays on your phone."
   }
 }

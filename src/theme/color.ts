@@ -78,6 +78,8 @@ export const color = {
   softInk: '#5E554F',
   /** Second line on a dark button ("This and future ones"). */
   onDarkHint: 'rgba(255,255,255,0.85)',
+  /** An option card that isn't picked (Export's CSV / PDF). */
+  optionIdle: 'rgba(255,255,255,0.6)',
   /** The "Every 24th" day button on the bill sheet. */
   dueChip: '#EDE4DB',
   /** A History row while it's swiped open. */

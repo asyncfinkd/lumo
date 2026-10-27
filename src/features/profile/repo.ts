@@ -50,6 +50,11 @@ export function setPhoto(db: Db, uri: string | null): void {
   db.update(profile).set({ photoUri: uri }).run();
 }
 
+/** `null` follows the phone's language again. */
+export function setLanguage(db: Db, language: 'en' | 'ka' | null): void {
+  db.update(profile).set({ language }).run();
+}
+
 export function setReminders(db: Db, on: boolean): void {
   db.update(profile).set({ reminders: on }).run();
 }
