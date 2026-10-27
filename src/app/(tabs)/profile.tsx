@@ -9,7 +9,7 @@ import {
   // BellIcon, (Reminders, #15)
   CameraIcon,
   ChevronRightIcon,
-  // DownloadIcon, (Export, #16)
+  DownloadIcon,
   GlobeIcon,
   GridIcon,
   MoneyIcon,
@@ -182,14 +182,13 @@ export default function ProfileScreen() {
             {t('profile.yourData')}
           </Text>
           <View style={styles.list}>
-            {/* Export, hidden until its page is built (#16).
             <Row
               tile={categoryPalette.sage}
               icon={<DownloadIcon color={categoryPalette.sage.fg} />}
               label={t('profile.export')}
               value={t('profile.exportFormat')}
+              onPress={() => router.push('/profile-export')}
             />
-            */}
             <Row
               tile={{ bg: color.dangerSoft, fg: color.danger }}
               icon={<TrashIcon color={color.danger} />}
