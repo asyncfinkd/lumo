@@ -3,6 +3,7 @@ import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } fro
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useScreenTop } from '@/components/useScreenTop';
 import { Orbs } from '@/components/Backdrop';
 import { Button } from '@/components/Button';
 import { db } from '@/db/client';
@@ -21,6 +22,7 @@ export default function ProfileNameScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const screenTop = useScreenTop();
   const hour = useHour();
   const profile = useProfile();
   const [name, setName] = useState<string | null>(null);
@@ -37,7 +39,7 @@ export default function ProfileNameScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={[styles.root, { paddingTop: insets.top }]}
+      style={[styles.root, { paddingTop: screenTop }]}
     >
       <Orbs />
       <SettingsHeader title={t('profile.name')} />

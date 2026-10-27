@@ -9,6 +9,7 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useScreenTop } from '@/components/useScreenTop';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { Press } from '@/components/Press';
 import { db } from '@/db/client';
@@ -33,6 +34,7 @@ export default function ProfilePhotoCropScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const screenTop = useScreenTop();
   const { width: area } = useWindowDimensions();
   const params = useLocalSearchParams<{ uri: string; width: string; height: string }>();
   const profile = useProfile();
@@ -82,11 +84,11 @@ export default function ProfilePhotoCropScreen() {
     router.dismissTo('/profile');
   };
 
-  const top = insets.top + 101;
+  const top = screenTop + 101;
 
   return (
     <View style={styles.root}>
-      <View style={[styles.header, { marginTop: insets.top }]}>
+      <View style={[styles.header, { marginTop: screenTop }]}>
         <Press onPress={() => router.back()} style={styles.cancel}>
           <Text style={styles.cancelText}>{t('common.cancel')}</Text>
         </Press>

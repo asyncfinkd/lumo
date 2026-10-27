@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useScreenTop } from '@/components/useScreenTop';
 import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
 import type { Transaction } from '@/db/schema';
@@ -24,8 +24,8 @@ import { color, fontFamily, radius, shadow, size, space, text } from '@/theme';
 export default function HomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
-  const refreshControl = usePullToRefresh(insets.top);
+  const screenTop = useScreenTop();
+  const refreshControl = usePullToRefresh(screenTop);
   const hour = useHour();
   const { today, profile, summary } = useMoneyMonth();
   const recent = recentDays(useTransactionsBetween(addDays(today, -1), addDays(today, 1)), today);
@@ -37,7 +37,7 @@ export default function HomeScreen() {
 
   return (
     <ScrollView
-      contentContainerStyle={[styles.content, { paddingTop: insets.top }]}
+      contentContainerStyle={[styles.content, { paddingTop: screenTop }]}
       showsVerticalScrollIndicator={false}
       refreshControl={refreshControl}
     >

@@ -1,6 +1,7 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useScreenTop } from '@/components/useScreenTop';
 import { Orbs } from '@/components/Backdrop';
 import { CheckIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
@@ -38,6 +39,7 @@ const LANGUAGES: {
 export default function ProfileLanguageScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const screenTop = useScreenTop();
   const hour = useHour();
   const { today, profile, summary } = useMoneyMonth();
   if (!profile || !summary) return null;
@@ -46,7 +48,7 @@ export default function ProfileLanguageScreen() {
   const name = profile.name.trim();
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
+    <View style={[styles.root, { paddingTop: screenTop }]}>
       <Orbs />
       <SettingsHeader title={t('language.title')} />
       <ScrollView

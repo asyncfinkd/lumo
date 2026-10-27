@@ -2,6 +2,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useScreenTop } from '@/components/useScreenTop';
 import { BottomFade, Orbs } from '@/components/Backdrop';
 import { PlusIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
@@ -17,6 +18,7 @@ export default function ProfileBillsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const screenTop = useScreenTop();
   const profile = useProfile();
   const bills = [...useBills()].sort((a, b) => a.day - b.day || a.name.localeCompare(b.name));
   if (!profile) return null;
@@ -31,7 +33,7 @@ export default function ProfileBillsScreen() {
     t('onboarding.income.paydayValue', { count: day, ordinal: true });
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
+    <View style={[styles.root, { paddingTop: screenTop }]}>
       <Orbs />
       <SettingsHeader
         title={t('billsManage.title')}

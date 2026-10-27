@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useScreenTop } from '@/components/useScreenTop';
 import { CalendarIcon, CategoryIcon } from '@/components/Icons';
 import { Fill, Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
@@ -16,7 +16,7 @@ import { color, gradient, radius, shadow, space, text } from '@/theme';
 export default function BudgetsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const screenTop = useScreenTop();
   const { profile, summary } = useMoneyMonth();
   const budgets = useBudgets();
   const bills = useActiveBills();
@@ -33,7 +33,7 @@ export default function BudgetsScreen() {
 
   return (
     <ScrollView
-      contentContainerStyle={[styles.content, { paddingTop: insets.top }]}
+      contentContainerStyle={[styles.content, { paddingTop: screenTop }]}
       showsVerticalScrollIndicator={false}
     >
       <Rise style={styles.header}>
