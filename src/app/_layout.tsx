@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -12,6 +12,7 @@ import {
 import { Placeholder } from '@/components/Placeholder';
 import { useDatabase } from '@/db/useDatabase';
 import { CategoriesProvider } from '@/features/categories/CategoriesProvider';
+import { LaunchScreen } from '@/features/launch/LaunchScreen';
 import { useProfileStatus } from '@/features/live';
 import { DueTransactionsSync } from '@/features/recurring/DueTransactionsSync';
 import { RemindersSync } from '@/features/reminders/RemindersSync';
@@ -29,12 +30,22 @@ export default function RootLayout() {
 
   const database = useDatabase();
   const fontsDone = fontsLoaded || !!fontError;
+  // The loading screen (Splash) covers the app until the first profile read,
+  // then fades away and is removed.
+  const [appLoaded, setAppLoaded] = useState(false);
+  const [launchGone, setLaunchGone] = useState(false);
+  const onLoaded = useCallback(() => setAppLoaded(true), []);
+  const onLaunchGone = useCallback(() => setLaunchGone(true), []);
+  const hideNativeSplash = useCallback(() => {
+    SplashScreen.hideAsync();
+  }, []);
 
   useEffect(() => {
     if (fontsDone && database.error) SplashScreen.hideAsync();
   }, [fontsDone, database.error]);
 
-  if (!fontsDone || (!database.ready && !database.error)) return null;
+  // The native splash stays until the fonts are in; the loading screen needs them.
+  if (!fontsDone) return null;
   if (database.error) {
     return <Placeholder title={i18n.t('errors.generic')} note={database.error.message} />;
   }
@@ -42,8 +53,15 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar style="dark" />
-      <DueTransactionsSync />
-      <AppStack />
+      {database.ready ? (
+        <>
+          <DueTransactionsSync />
+          <AppStack onLoaded={onLoaded} />
+        </>
+      ) : null}
+      {launchGone ? null : (
+        <LaunchScreen done={appLoaded} onShown={hideNativeSplash} onGone={onLaunchGone} />
+      )}
     </GestureHandlerRootView>
   );
 }
@@ -56,8 +74,8 @@ const sheetOptions = {
 } as const;
 
 // Onboarding until the profile is complete, the app after. Mounted once the
-// database is ready; keeps the splash up until the first profile read.
-function AppStack() {
+// database is ready; tells the loading screen when the first profile read is in.
+function AppStack({ onLoaded }: { onLoaded: () => void }) {
   const { loaded, profile } = useProfileStatus();
   const onboarded = !!profile?.onboardedAt;
 
@@ -68,8 +86,8 @@ function AppStack() {
   }, [loaded, language]);
 
   useEffect(() => {
-    if (loaded) SplashScreen.hideAsync();
-  }, [loaded]);
+    if (loaded) onLoaded();
+  }, [loaded, onLoaded]);
 
   if (!loaded) return null;
 
