@@ -13,6 +13,7 @@ import { Placeholder } from '@/components/Placeholder';
 import { useDatabase } from '@/db/useDatabase';
 import { CategoriesProvider } from '@/features/categories/CategoriesProvider';
 import { LaunchScreen } from '@/features/launch/LaunchScreen';
+import { AmountsHiddenContext } from '@/features/privacy/amounts';
 import { useProfileStatus } from '@/features/live';
 import { DueTransactionsSync } from '@/features/recurring/DueTransactionsSync';
 import { RemindersSync } from '@/features/reminders/RemindersSync';
@@ -93,52 +94,57 @@ function AppStack({ onLoaded }: { onLoaded: () => void }) {
 
   return (
     <CategoriesProvider>
-      {onboarded ? <RemindersSync /> : null}
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
-        <Stack.Protected guard={onboarded} redirectTo="/welcome">
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="add-transaction" options={sheetOptions} />
-          <Stack.Screen name="balance" options={sheetOptions} />
-          <Stack.Screen name="transaction" options={sheetOptions} />
-          <Stack.Screen
-            name="transaction-delete"
-            options={{ ...sheetOptions, animation: 'fade' }}
-          />
-          <Stack.Screen name="transaction-scope" options={{ ...sheetOptions, animation: 'fade' }} />
-          <Stack.Screen name="history-search" options={{ animation: 'fade' }} />
-          <Stack.Screen name="edit-budget" options={sheetOptions} />
-          <Stack.Screen name="profile-photo" options={sheetOptions} />
-          <Stack.Screen name="profile-name" />
-          <Stack.Screen name="profile-categories" />
-          <Stack.Screen name="profile-bills" />
-          <Stack.Screen name="profile-language" />
-          <Stack.Screen name="profile-export" />
-          <Stack.Screen name="profile-reminders" />
-          <Stack.Screen name="profile-bill" options={sheetOptions} />
-          <Stack.Screen name="profile-category" options={sheetOptions} />
-          <Stack.Screen
-            name="profile-category-delete"
-            options={{ ...sheetOptions, animation: 'fade' }}
-          />
-          <Stack.Screen name="profile-currency" />
-          <Stack.Screen name="profile-income" />
-          <Stack.Screen
-            name="profile-delete-all"
-            options={{ ...sheetOptions, animation: 'fade' }}
-          />
-          <Stack.Screen
-            name="profile-photo-crop"
-            options={{
-              presentation: 'fullScreenModal',
-              contentStyle: { backgroundColor: color.cropBg },
-            }}
-          />
-        </Stack.Protected>
-        <Stack.Protected guard={!onboarded} redirectTo="/">
-          <Stack.Screen name="(onboarding)" />
-        </Stack.Protected>
-        <Stack.Screen name="dev-reset" />
-      </Stack>
+      <AmountsHiddenContext.Provider value={profile?.hideAmounts ?? false}>
+        {onboarded ? <RemindersSync /> : null}
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
+          <Stack.Protected guard={onboarded} redirectTo="/welcome">
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="add-transaction" options={sheetOptions} />
+            <Stack.Screen name="balance" options={sheetOptions} />
+            <Stack.Screen name="transaction" options={sheetOptions} />
+            <Stack.Screen
+              name="transaction-delete"
+              options={{ ...sheetOptions, animation: 'fade' }}
+            />
+            <Stack.Screen
+              name="transaction-scope"
+              options={{ ...sheetOptions, animation: 'fade' }}
+            />
+            <Stack.Screen name="history-search" options={{ animation: 'fade' }} />
+            <Stack.Screen name="edit-budget" options={sheetOptions} />
+            <Stack.Screen name="profile-photo" options={sheetOptions} />
+            <Stack.Screen name="profile-name" />
+            <Stack.Screen name="profile-categories" />
+            <Stack.Screen name="profile-bills" />
+            <Stack.Screen name="profile-language" />
+            <Stack.Screen name="profile-export" />
+            <Stack.Screen name="profile-reminders" />
+            <Stack.Screen name="profile-bill" options={sheetOptions} />
+            <Stack.Screen name="profile-category" options={sheetOptions} />
+            <Stack.Screen
+              name="profile-category-delete"
+              options={{ ...sheetOptions, animation: 'fade' }}
+            />
+            <Stack.Screen name="profile-currency" />
+            <Stack.Screen name="profile-income" />
+            <Stack.Screen
+              name="profile-delete-all"
+              options={{ ...sheetOptions, animation: 'fade' }}
+            />
+            <Stack.Screen
+              name="profile-photo-crop"
+              options={{
+                presentation: 'fullScreenModal',
+                contentStyle: { backgroundColor: color.cropBg },
+              }}
+            />
+          </Stack.Protected>
+          <Stack.Protected guard={!onboarded} redirectTo="/">
+            <Stack.Screen name="(onboarding)" />
+          </Stack.Protected>
+          <Stack.Screen name="dev-reset" />
+        </Stack>
+      </AmountsHiddenContext.Provider>
     </CategoriesProvider>
   );
 }

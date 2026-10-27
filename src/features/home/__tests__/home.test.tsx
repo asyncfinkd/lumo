@@ -112,6 +112,7 @@ describe('BalanceCard', () => {
         change={{ since: '2026-10-01', deltaMinor: 80000 }}
         currency="GEL"
         onBalance={() => {}}
+        onToggleHidden={() => {}}
       />,
     );
     expect(screen.getByText('Your balance')).toBeOnTheScreen();
@@ -121,7 +122,13 @@ describe('BalanceCard', () => {
 
   it('asks for the balance when there is none yet', async () => {
     await render(
-      <BalanceCard balanceMinor={null} change={null} currency="GEL" onBalance={() => {}} />,
+      <BalanceCard
+        balanceMinor={null}
+        change={null}
+        currency="GEL"
+        onBalance={() => {}}
+        onToggleHidden={() => {}}
+      />,
     );
     expect(screen.getByText('Add your balance')).toBeOnTheScreen();
   });

@@ -7,6 +7,7 @@ import { formatMoney } from '@/domain/money';
 import { useCategories } from '@/features/categories/categories';
 import { isAutomatic } from '@/features/history/history';
 import { clockTime } from '@/features/home/home';
+import { maskAmount, useAmountsHidden } from '@/features/privacy/amounts';
 import { color, fontFamily, radius, shadow, size, text } from '@/theme';
 
 /**
@@ -76,7 +77,10 @@ export function TransactionRow({
   });
   const tile = adjust ? { bg: color.adjustTile, fg: color.muted } : category.tint;
 
-  const label = [title, meta, amount, tag].filter(Boolean).join(', ');
+  const hidden = useAmountsHidden();
+  const label = [title, meta, hidden ? t('home.amountHidden') : amount, tag]
+    .filter(Boolean)
+    .join(', ');
   const body = (
     <>
       <View style={[styles.tile, { backgroundColor: tile.bg }]}>
@@ -105,7 +109,7 @@ export function TransactionRow({
           adjust && variant !== 'home' && styles.adjustAmount,
         ]}
       >
-        {amount}
+        {hidden ? maskAmount(amount) : amount}
       </Text>
     </>
   );

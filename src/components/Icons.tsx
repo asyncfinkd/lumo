@@ -156,6 +156,39 @@ export function CloseIcon({ size = 18, color }: IconProps) {
   );
 }
 
+/** The eye on Home's balance card: amounts shown (Main). */
+export function EyeIcon({ color }: { color: string }) {
+  const s = line(color, 1.9);
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" accessible={false}>
+      <Path
+        {...s}
+        fill={color}
+        fillOpacity={0.15}
+        d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"
+      />
+      <Circle {...s} cx={12} cy={12} r={2.8} />
+    </Svg>
+  );
+}
+
+/** The eye, crossed out: amounts hidden (Main). */
+export function EyeOffIcon({ color }: { color: string }) {
+  const s = line(color, 1.9);
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" accessible={false}>
+      <Path
+        {...s}
+        fill={color}
+        fillOpacity={0.15}
+        d="M10 5.7A9 9 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-2.6 3.4M6.6 6.9C3.9 8.6 2.5 12 2.5 12s3.5 6.5 9.5 6.5a9.6 9.6 0 0 0 4.6-1.2"
+      />
+      <Path {...s} d="M9.9 9.9a2.8 2.8 0 0 0 4 4" />
+      <Path {...s} d="M3.5 3.5l17 17" />
+    </Svg>
+  );
+}
+
 /** Up (or, turned, down): the balance chip on Home (Main). */
 export function ArrowUpIcon({ color, down = false }: { color: string; down?: boolean }) {
   return (

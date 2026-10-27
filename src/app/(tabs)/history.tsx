@@ -11,6 +11,7 @@ import { formatMoney } from '@/domain/money';
 import { dayGroups, isAutomatic, monthSpent } from '@/features/history/history';
 import { SwipeRow } from '@/features/history/SwipeRow';
 import { useDayLabel } from '@/features/history/useDayLabel';
+import { useMoneyText } from '@/features/privacy/amounts';
 import { useAllTransactions, useProfile, useToday } from '@/features/live';
 import { usePullToRefresh } from '@/features/money/usePullToRefresh';
 import { HeaderButton } from '@/features/profile/SettingsHeader';
@@ -28,6 +29,7 @@ export default function HistoryScreen() {
   const profile = useProfile();
   const transactions = useAllTransactions();
   const dayLabel = useDayLabel();
+  const money = useMoneyText();
   const groups = useMemo(() => dayGroups(transactions), [transactions]);
   if (!profile) return null;
 
@@ -38,7 +40,7 @@ export default function HistoryScreen() {
   const subtitle =
     groups.length === 0
       ? t('history.nothingYet', { month })
-      : t('history.spent', { month, amount: formatMoney(spent, currency) });
+      : t('history.spent', { month, amount: money(formatMoney(spent, currency)) });
 
   const header = (
     <View style={styles.header}>
@@ -100,7 +102,7 @@ export default function HistoryScreen() {
                   <Text accessibilityRole="header" style={styles.dayLabel}>
                     {label}
                   </Text>
-                  <Text style={styles.dayTotal}>{total}</Text>
+                  <Text style={styles.dayTotal}>{money(total)}</Text>
                 </View>
                 <View style={styles.list}>
                   {item.rows.map((row) => (
