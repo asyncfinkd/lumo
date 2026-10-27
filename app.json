@@ -50,7 +50,8 @@
           "photosPermission": "Lumo shows your photos only so you can pick a profile photo.",
           "microphonePermission": false
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true
