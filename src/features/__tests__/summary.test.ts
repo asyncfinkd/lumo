@@ -37,4 +37,47 @@ describe('summarizeMonth', () => {
     expect(summary.left.leftMinor).toBe(265000);
     expect(summary.cameInMinor).toBe(0);
   });
+
+  it('keeps a running total per day for the trend lines', () => {
+    const summary = summarizeMonth({
+      today: '2026-10-31',
+      payday: SAMPLE_PAYDAY,
+      incomes: sampleIncomes,
+      bills: sampleBills,
+      transactions: buildSampleTransactions('2026-10-31'),
+    });
+    // Oct 5 to Oct 31, ending on the card's totals and never going down.
+    expect(summary.cameInByDay).toHaveLength(27);
+    expect(summary.cameInByDay.at(-1)).toBe(summary.cameInMinor);
+    expect(summary.wentOutByDay.at(-1)).toBe(summary.wentOutMinor);
+    for (const series of [summary.cameInByDay, summary.wentOutByDay]) {
+      series.forEach((v, i) => expect(v).toBeGreaterThanOrEqual(series[i - 1] ?? 0));
+    }
+  });
+
+  it('a later-dated row this period counts on today, an adjustment never', () => {
+    const tx = (date: string, amountMinor: number, extra = {}) => ({
+      id: date,
+      kind: 'expense' as const,
+      source: 'manual' as const,
+      amountMinor,
+      date,
+      categoryId: null,
+      ...extra,
+    });
+    const summary = summarizeMonth({
+      today: '2026-10-07',
+      payday: 5,
+      incomes: [],
+      bills: [],
+      transactions: [
+        tx('2026-10-05', 100),
+        tx('2026-10-20', 50),
+        tx('2026-10-06', 999, { source: 'adjustment' }),
+        tx('2026-10-04', 7),
+      ],
+    });
+    expect(summary.wentOutByDay).toEqual([100, 100, 150]);
+    expect(summary.cameInByDay).toEqual([0, 0, 0]);
+  });
 });

@@ -104,8 +104,18 @@ export default function HomeScreen() {
       </Rise>
 
       <Rise delay={120} style={styles.flows}>
-        <FlowCard kind="in" minor={summary.cameInMinor} currency={profile.currency} />
-        <FlowCard kind="out" minor={summary.wentOutMinor} currency={profile.currency} />
+        <FlowCard
+          kind="in"
+          minor={summary.cameInMinor}
+          byDay={summary.cameInByDay}
+          currency={profile.currency}
+        />
+        <FlowCard
+          kind="out"
+          minor={summary.wentOutMinor}
+          byDay={summary.wentOutByDay}
+          currency={profile.currency}
+        />
       </Rise>
 
       {jar ? (

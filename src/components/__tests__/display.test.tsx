@@ -51,8 +51,8 @@ describe('Sparkline', () => {
   it('renders both kinds', async () => {
     await render(
       <>
-        <Sparkline kind="in" />
-        <Sparkline kind="out" />
+        <Sparkline kind="in" values={[0, 380000, 380000]} />
+        <Sparkline kind="out" values={[0, 0, 0]} />
       </>,
     );
   });

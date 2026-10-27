@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import Animated, {
   Easing,
   useAnimatedProps,
@@ -10,32 +10,30 @@ import Animated, {
 import Svg, { Defs, LinearGradient, Path, Stop } from 'react-native-svg';
 import { color } from '@/theme';
 import { easing } from './motion';
+import { sparkPath } from './sparkPath';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-// The two trend lines from the design's Came in / Went out cards, with their
-// measured lengths (for drawing them in).
-const LINES = {
-  in: {
-    d: 'M3 24 C12 24 16 21 24 20 S36 14 42 10 S52 6 57 6',
-    length: 58.15,
-    tint: color.cameInLine,
-    areaOpacity: 0.28,
-  },
-  out: {
-    d: 'M3 22 C10 21 14 15 22 15 S34 18 40 13 S51 8 57 8',
-    length: 57.44,
-    tint: color.wentOutLine,
-    areaOpacity: 0.3,
-  },
+// The Came in / Went out cards' colors (Main).
+const TINTS = {
+  in: { tint: color.cameInLine, areaOpacity: 0.28 },
+  out: { tint: color.wentOutLine, areaOpacity: 0.3 },
 } as const;
 
-type Props = { kind: keyof typeof LINES; replayKey?: number };
+type Props = {
+  kind: keyof typeof TINTS;
+  /** The running total for each day so far, oldest first. */
+  values: readonly number[];
+  replayKey?: number;
+};
 
-/** A small decorative trend line: ".draw" strokes it in, ".fadein" fills the area. */
-export function Sparkline({ kind, replayKey = 0 }: Props) {
+/**
+ * The trend line on Came in / Went out: how the period's total grew, day by
+ * day. ".draw" strokes it in, ".fadein" fills the area.
+ */
+export function Sparkline({ kind, values, replayKey = 0 }: Props) {
   const reduceMotion = useReducedMotion();
-  const line = LINES[kind];
+  const line = { ...TINTS[kind], ...useMemo(() => sparkPath(values), [values]) };
   const draw = useSharedValue(reduceMotion ? 1 : 0);
   const fade = useSharedValue(reduceMotion ? 1 : 0);
 
@@ -67,11 +65,7 @@ export function Sparkline({ kind, replayKey = 0 }: Props) {
           <Stop offset={1} stopColor={line.tint} stopOpacity={0} />
         </LinearGradient>
       </Defs>
-      <AnimatedPath
-        d={`${line.d} L57 30 L3 30 Z`}
-        fill={`url(#${gradientId})`}
-        animatedProps={areaProps}
-      />
+      <AnimatedPath d={line.area} fill={`url(#${gradientId})`} animatedProps={areaProps} />
       <AnimatedPath
         d={line.d}
         stroke={line.tint}
