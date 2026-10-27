@@ -27,15 +27,25 @@ import {
   useProfile,
   useToday,
 } from '@/features/live';
+import { writeBackupFile } from '@/features/backup/files';
 import { BUDGETING } from '@/features/flags';
 import { SettingsHeader } from '@/features/profile/SettingsHeader';
 import { color, fontFamily, radius, shadow, size, space, text } from '@/theme';
 
+const SHARE: Record<Format, { mimeType: string; UTI: string }> = {
+  csv: { mimeType: 'text/csv', UTI: 'public.comma-separated-values-text' },
+  pdf: { mimeType: 'application/pdf', UTI: 'com.adobe.pdf' },
+  backup: { mimeType: 'application/octet-stream', UTI: 'public.data' },
+};
+
 const RANGES: ExportRange[] = ['month', 'three', 'year', 'all'];
-const FORMATS: ExportFormat[] = ['csv', 'pdf'];
+/** CSV and PDF are to read; the backup is everything, to restore in Lumo. */
+type Format = ExportFormat | 'backup';
+const FORMATS: Format[] = ['csv', 'pdf', 'backup'];
 
 // ProfileExport: pick a time and CSV or PDF; Lumo makes the file on the phone
-// and opens the share sheet, so you choose where it goes.
+// and opens the share sheet, so you choose where it goes. The Lumo backup holds
+// everything, so Restore from backup picks up exactly here.
 export default function ProfileExportScreen() {
   const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -50,11 +60,15 @@ export default function ProfileExportScreen() {
   const incomes = useIncomes();
   const categories = useCategories();
   const [range, setRange] = useState<ExportRange>('month');
-  const [format, setFormat] = useState<ExportFormat>('csv');
+  const [format, setFormat] = useState<Format>('csv');
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  const chosen = useMemo(() => inRange(transactions, range, today), [transactions, range, today]);
+  const backup = format === 'backup';
+  const chosen = useMemo(
+    () => (backup ? transactions : inRange(transactions, range, today)),
+    [backup, transactions, range, today],
+  );
   if (!profile) return null;
 
   const words: ExportWords = {
@@ -90,7 +104,9 @@ export default function ProfileExportScreen() {
       const data = { transactions: chosen, budgets, bills, incomes };
       const name = `Lumo ${today}`;
       let target: File;
-      if (format === 'csv') {
+      if (format === 'backup') {
+        target = await writeBackupFile(`Lumo ${today}`);
+      } else if (format === 'csv') {
         target = new File(Paths.cache, `${name}.csv`);
         if (target.exists) target.delete();
         await target.write(buildCsv(data, words));
@@ -112,8 +128,8 @@ export default function ProfileExportScreen() {
         await new File(uri).copy(target);
       }
       await Sharing.shareAsync(target.uri, {
-        mimeType: format === 'csv' ? 'text/csv' : 'application/pdf',
-        UTI: format === 'csv' ? 'public.comma-separated-values-text' : 'com.adobe.pdf',
+        mimeType: SHARE[format].mimeType,
+        UTI: SHARE[format].UTI,
         dialogTitle: t('exportData.title'),
       });
     } catch {
@@ -127,8 +143,9 @@ export default function ProfileExportScreen() {
     { label: t('exportData.transactions'), count: chosen.length },
     ...(BUDGETING ? [{ label: t('exportData.budgets'), count: budgets.length }] : []),
     { label: t('exportData.billsAndIncome'), count: bills.length + incomes.length },
+    ...(backup ? [{ label: t('exportData.categories'), count: categories.list.length }] : []),
   ];
-  const formatName = format === 'csv' ? t('exportData.csv') : t('exportData.pdf');
+  const formatName = t(`exportData.${format}`);
 
   return (
     <View style={[styles.root, { paddingTop: screenTop }]}>
@@ -143,27 +160,31 @@ export default function ProfileExportScreen() {
         </Text>
         <Text style={styles.hint}>{t('exportData.hint')}</Text>
 
-        <Text accessibilityRole="header" style={styles.section}>
-          {t('exportData.time')}
-        </Text>
-        <View accessibilityRole="radiogroup" style={styles.chips}>
-          {RANGES.map((r) => {
-            const on = r === range;
-            return (
-              <Press
-                key={r}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: on }}
-                onPress={() => setRange(r)}
-                style={[styles.chip, on ? styles.chipOn : styles.chipOff]}
-              >
-                <Text style={[styles.chipText, on && { color: color.white }]}>
-                  {t(`exportData.ranges.${r}`)}
-                </Text>
-              </Press>
-            );
-          })}
-        </View>
+        {backup ? null : (
+          <>
+            <Text accessibilityRole="header" style={styles.section}>
+              {t('exportData.time')}
+            </Text>
+            <View accessibilityRole="radiogroup" style={styles.chips}>
+              {RANGES.map((r) => {
+                const on = r === range;
+                return (
+                  <Press
+                    key={r}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: on }}
+                    onPress={() => setRange(r)}
+                    style={[styles.chip, on ? styles.chipOn : styles.chipOff]}
+                  >
+                    <Text style={[styles.chipText, on && { color: color.white }]}>
+                      {t(`exportData.ranges.${r}`)}
+                    </Text>
+                  </Press>
+                );
+              })}
+            </View>
+          </>
+        )}
 
         <Text accessibilityRole="header" style={[styles.section, styles.sectionGap]}>
           {t('exportData.format')}
@@ -177,7 +198,11 @@ export default function ProfileExportScreen() {
                 accessibilityRole="radio"
                 accessibilityState={{ checked: on }}
                 onPress={() => setFormat(f)}
-                style={[styles.format, on ? styles.formatOn : styles.formatOff]}
+                style={[
+                  styles.format,
+                  f === 'backup' && styles.formatWide,
+                  on ? styles.formatOn : styles.formatOff,
+                ]}
               >
                 <Text style={styles.formatName}>{t(`exportData.${f}`)}</Text>
                 <Text style={styles.formatHint}>{t(`exportData.${f}Hint`)}</Text>
@@ -246,14 +271,16 @@ const styles = StyleSheet.create({
   chipOn: { backgroundColor: color.ink },
   chipOff: { backgroundColor: color.listCard },
   chipText: { fontFamily: fontFamily.bold, fontSize: 14, color: color.ink },
-  formats: { flexDirection: 'row', gap: 10 },
+  formats: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   format: {
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: '40%',
     padding: 14,
     borderRadius: 22,
     borderCurve: 'continuous',
     gap: 4,
   },
+  formatWide: { flexBasis: '100%' },
   formatOn: { backgroundColor: color.white, boxShadow: shadow.optionPicked },
   formatOff: { backgroundColor: color.optionIdle, boxShadow: shadow.optionIdle },
   formatName: { fontFamily: fontFamily.extrabold, fontSize: 16, color: color.ink },
