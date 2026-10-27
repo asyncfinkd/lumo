@@ -44,6 +44,8 @@ export const profile = sqliteTable('profile', {
   photoUri: text('photo_uri'),
   /** The Reminders switch in Profile. */
   reminders: integer('reminders', { mode: 'boolean' }).notNull().default(true),
+  /** The app's language (ProfileLanguage); `null` follows the phone's. */
+  language: text('language', { enum: ['en', 'ka'] }),
 });
 
 /** The fixed v1 set from the design: 6 expense and 4 income categories. */

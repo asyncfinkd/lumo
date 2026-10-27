@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -14,7 +14,7 @@ import { useDatabase } from '@/db/useDatabase';
 import { CategoriesProvider } from '@/features/categories/CategoriesProvider';
 import { useProfileStatus } from '@/features/live';
 import { DueTransactionsSync } from '@/features/recurring/DueTransactionsSync';
-import i18n from '@/i18n';
+import i18n, { applyLanguage } from '@/i18n';
 import { color } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -60,6 +60,12 @@ function AppStack() {
   const { loaded, profile } = useProfileStatus();
   const onboarded = !!profile?.onboardedAt;
 
+  // The saved language, before the first frame shows (ProfileLanguage).
+  const language = profile?.language;
+  useLayoutEffect(() => {
+    if (loaded) applyLanguage(language);
+  }, [loaded, language]);
+
   useEffect(() => {
     if (loaded) SplashScreen.hideAsync();
   }, [loaded]);
@@ -86,6 +92,7 @@ function AppStack() {
           <Stack.Screen name="profile-name" />
           <Stack.Screen name="profile-categories" />
           <Stack.Screen name="profile-bills" />
+          <Stack.Screen name="profile-language" />
           <Stack.Screen name="profile-bill" options={sheetOptions} />
           <Stack.Screen name="profile-category" options={sheetOptions} />
           <Stack.Screen

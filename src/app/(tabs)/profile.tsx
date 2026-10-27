@@ -10,7 +10,7 @@ import {
   CameraIcon,
   ChevronRightIcon,
   // DownloadIcon, (Export, #16)
-  // GlobeIcon, (Language, #20)
+  GlobeIcon,
   GridIcon,
   MoneyIcon,
   PersonIcon,
@@ -146,15 +146,14 @@ export default function ProfileScreen() {
           </View>
         </Rise>
 
-        {/*
-          Hidden until their pages are built, so testers don't tap rows that do
-          nothing: Reminders (#15), App icon (#17), Language (#20).
-
         <Rise delay={120} style={styles.section}>
           <Text accessibilityRole="header" style={styles.sectionTitle}>
             {t('profile.preferences')}
           </Text>
           <View style={styles.list}>
+            {/*
+              Hidden until their pages are built, so testers don't tap rows
+              that do nothing: Reminders (#15), App icon (#17).
             <Row
               tile={categoryPalette.butter}
               icon={<BellIcon color={categoryPalette.butter.fg} />}
@@ -167,15 +166,16 @@ export default function ProfileScreen() {
               label={t('profile.appIcon')}
               value={t('profile.appIconLight')}
             />
+            */}
             <Row
               tile={{ bg: color.track, fg: color.muted }}
               icon={<GlobeIcon color={color.muted} />}
               label={t('profile.language')}
               value={t('profile.languageName')}
+              onPress={() => router.push('/profile-language')}
             />
           </View>
         </Rise>
-        */}
 
         <Rise delay={160} style={styles.section}>
           <Text accessibilityRole="header" style={styles.sectionTitle}>

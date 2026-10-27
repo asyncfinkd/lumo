@@ -474,5 +474,13 @@
     "delete": "Delete bill",
     "save": "Save",
     "addButton": "Add bill"
+  },
+  "language": {
+    "title": "Language",
+    "label": "App language",
+    "more": "More languages are on the way.",
+    "preview": "Preview",
+    "previewLeft_one": "{{amount}} left to spend · {{count}} day to go",
+    "previewLeft_other": "{{amount}} left to spend · {{count}} days to go"
   }
 }
