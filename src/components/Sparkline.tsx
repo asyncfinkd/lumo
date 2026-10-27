@@ -58,7 +58,9 @@ export function Sparkline({ kind, replayKey = 0 }: Props) {
   const gradientId = `spark-${kind}`;
 
   return (
-    <Svg width={60} height={30} viewBox="0 0 60 30" accessible={false}>
+    // Fills its box (60×30 at most, see FlowCard); on a narrow screen it shrinks
+    // with its proportions instead of spilling out of the card.
+    <Svg width="100%" height="100%" viewBox="0 0 60 30" accessible={false}>
       <Defs>
         <LinearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
           <Stop offset={0} stopColor={line.tint} stopOpacity={line.areaOpacity} />
