@@ -93,6 +93,7 @@ function AppStack() {
           <Stack.Screen name="profile-categories" />
           <Stack.Screen name="profile-bills" />
           <Stack.Screen name="profile-language" />
+          <Stack.Screen name="profile-export" />
           <Stack.Screen name="profile-bill" options={sheetOptions} />
           <Stack.Screen name="profile-category" options={sheetOptions} />
           <Stack.Screen
