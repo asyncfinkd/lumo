@@ -332,7 +332,25 @@
         "month": "დროა ამ თვის {{amount}} ქილაში ჩააგდო?"
       }
     },
-    "settingsLabel": "{{name}}. ქილის პარამეტრები"
+    "settingsLabel": "{{name}}. ქილის პარამეტრები",
+    "home": {
+      "savingFor": "ვზოგავ",
+      "amounts": "{{saved}} / {{goal}}",
+      "by": "{{month}}-მდე",
+      "full": "სავსეა",
+      "label": "დანაზოგი: ქილა „{{name}}“, სავსეა {{percent}}%-ით. დანაზოგის გახსნა",
+      "percentSign": "%"
+    },
+    "insights": {
+      "seeJars": "ქილები",
+      "putAway": "გადადებულია: {{month}}",
+      "ofCameIn": "შემოსულის {{percent}}%",
+      "barsLabel": "გადადებული თვეების მიხედვით: {{list}}",
+      "streak_one": "{{count}} თვე ზედიზედ საუკეთესო ტემპით.",
+      "streak_other": "{{count}} თვე ზედიზედ საუკეთესო ტემპით.",
+      "best": "ჯერჯერობით შენი საუკეთესო თვეა.",
+      "fullIn": "ამ ტემპით ქილა „{{name}}“ აივსება: {{month}}."
+    }
   },
   "onboarding": {
     "step": "ნაბიჯი {{step}} / {{total}}",

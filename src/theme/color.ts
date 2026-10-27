@@ -135,6 +135,14 @@ export const gradient = {
   heroGlow: 'linear-gradient(150deg, rgba(255,241,204,0.45) 0%, rgba(255,255,255,0) 70%)',
   /** Behind the featured jar (Savings). */
   jarGlow: 'radial-gradient(circle, rgba(255,240,205,0.95) 0%, rgba(255,240,205,0) 68%)',
+  /** "Saving for" on Home (Main) and its glow behind the jar. */
+  savingFor: 'linear-gradient(115deg, #FFF0C9 0%, #FFF7E6 45%, rgba(255,255,255,0.8) 100%)',
+  savingForGlow: 'radial-gradient(circle, rgba(255,226,150,0.7) 0%, rgba(255,226,150,0) 70%)',
+  /** The Savings card on Insights (InsightsSavings). */
+  savingsCard: 'linear-gradient(140deg, #FFF0C9 0%, #FFF8EA 55%, rgba(255,255,255,0.85) 100%)',
+  /** A jar's progress bar and this month's bar. */
+  jarBar: 'linear-gradient(90deg, #FFD27A, #F6BC55)',
+  jarBarTall: 'linear-gradient(180deg, #FFD27A, #F6BC55)',
   /** Behind the full jar (SavingsDone). */
   jarDoneGlow: 'radial-gradient(circle, rgba(255,231,160,0.95) 0%, rgba(255,231,160,0) 66%)',
   bottomFade:
@@ -233,6 +241,13 @@ export const savingsColor = {
   /** The dashed "New jar" tile. */
   newTileBorder: 'rgba(43,37,34,0.14)',
   doneOrb: '#FFE3A3',
+  /** "Saving for" on Home and Savings on Insights (Main, InsightsSavings). */
+  cardLabel: '#A0761C',
+  barTrack: 'rgba(214,160,70,0.18)',
+  barIdle: 'rgba(214,160,70,0.28)',
+  monthLabel: '#B0A49B',
+  divider: 'rgba(160,118,28,0.14)',
+  pill: 'rgba(255,255,255,0.8)',
   confetti: [
     '#F6BC55',
     '#F2845C',
