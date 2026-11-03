@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-10-26
-- **Issue:** [#10](https://github.com/asyncfinkd/lumo/issues/10)
+- **Issue:** [#10](https://github.com/asyncfinkd/kept/issues/10)
 
 ## Context
 
@@ -28,11 +28,11 @@ We rely on the platforms' own backups, which belong to the user, not to us:
 | iOS | The database lives in the app's `Documents` folder, which iCloud (and Finder) backups include | Don't mark the database as excluded from backup |
 | Android | [Auto Backup](https://developer.android.com/identity/data/autobackup) to the user's Google Drive | Keep `allowBackup` enabled. Limit is 25 MB per app, far above our needs |
 
-These restore on a new device of the **same platform**. Moving between iOS and Android needs Export / Import ([#16](https://github.com/asyncfinkd/lumo/issues/16)), which is planned after v1.
+These restore on a new device of the **same platform**. Moving between iOS and Android needs Export / Import ([#16](https://github.com/asyncfinkd/kept/issues/16)), which is planned after v1.
 
 ### Security on the device
 
-- **App lock** (Face ID / fingerprint) is planned after v1 ([#24](https://github.com/asyncfinkd/lumo/issues/24)).
+- **App lock** (Face ID / fingerprint) is planned after v1 ([#24](https://github.com/asyncfinkd/kept/issues/24)).
 - **Database encryption** (SQLCipher) is deferred. If the key is not in the backup, a restored database can't be opened; if it is, encryption adds little. We'll revisit it together with app lock.
 
 ## Consequences
@@ -44,12 +44,12 @@ These restore on a new device of the **same platform**. Moving between iOS and A
 - Less to build and maintain for a solo developer
 
 **Trade-offs we accept**
-- No open banking (TBC, Bank of Georgia APIs need a server). Automatic input can only come from bank messages on the device ([#9](https://github.com/asyncfinkd/lumo/issues/9)).
+- No open banking (TBC, Bank of Georgia APIs need a server). Automatic input can only come from bank messages on the device ([#9](https://github.com/asyncfinkd/kept/issues/9)).
 - No shared budgets (couples, families)
 - No sync between devices
 - We can't see how people use the app or which crashes are most common beyond what the stores show
-- If a user turns off iCloud / Google backup and loses the phone, the data is gone. Export ([#16](https://github.com/asyncfinkd/lumo/issues/16)) is the answer for those users.
+- If a user turns off iCloud / Google backup and loses the phone, the data is gone. Export ([#16](https://github.com/asyncfinkd/kept/issues/16)) is the answer for those users.
 
 **Rules for code**
 - Never add a network call, SDK or library that sends data off the device without a new ADR that replaces this one.
-- Use UUIDs for IDs so a future Import can merge without duplicates ([ADR 0003](https://github.com/asyncfinkd/lumo/issues/12)).
+- Use UUIDs for IDs so a future Import can merge without duplicates ([ADR 0003](https://github.com/asyncfinkd/kept/issues/12)).

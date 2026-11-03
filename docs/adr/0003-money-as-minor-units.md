@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-10-26
-- **Issue:** [#12](https://github.com/asyncfinkd/lumo/issues/12)
+- **Issue:** [#12](https://github.com/asyncfinkd/kept/issues/12)
 
 ## Context
 
@@ -16,7 +16,7 @@ v1 has one currency per user, picked from 8 currencies in onboarding ([MVP scope
 
 - Every amount is an **integer number of minor units** (tetri, cents): `₾754.70` is stored as `75470`.
 - SQLite column type `INTEGER`, named `*_minor` (`amount_minor`, `limit_minor`).
-- Amounts are **always positive**. Direction comes from the row's `kind` (`income` / `expense`). A balance adjustment ([#6](https://github.com/asyncfinkd/lumo/issues/6)) is stored as income or expense depending on its sign.
+- Amounts are **always positive**. Direction comes from the row's `kind` (`income` / `expense`). A balance adjustment ([#6](https://github.com/asyncfinkd/kept/issues/6)) is stored as income or expense depending on its sign.
 - Every money row also stores its **currency code** (`GEL`). In v1 it always equals the profile currency; storing it now keeps a future multi-currency change a data migration, not a guess.
 - In TypeScript, amounts are plain `number`s, always integers. `Number.MAX_SAFE_INTEGER` in tetri is about ₾90 trillion, so `bigint` isn't needed.
 
@@ -43,11 +43,11 @@ One function formats every amount. The v1 style matches the design for every loc
 - Symbol first, comma thousands, dot decimal: `₾1,234.50`.
 - Expenses use a real minus sign `−` (U+2212), income a `+`, both before the symbol.
 - Digits and grouping come from `Intl.NumberFormat('en-US')`. Symbols come from our own table (`₾ $ € £ ₺ ֏ ₼ ₴`), because `Intl` symbol support differs between iOS and Android.
-- A Georgian number format comes with the Georgian language ([#20](https://github.com/asyncfinkd/lumo/issues/20)).
+- A Georgian number format comes with the Georgian language ([#20](https://github.com/asyncfinkd/kept/issues/20)).
 
 ### IDs
 
-All rows use **UUID v4** IDs (`expo-crypto` `randomUUID()`), not autoincrement, so a future Import ([#16](https://github.com/asyncfinkd/lumo/issues/16)) can merge without collisions ([ADR 0001](0001-local-only-data.md)).
+All rows use **UUID v4** IDs (`expo-crypto` `randomUUID()`), not autoincrement, so a future Import ([#16](https://github.com/asyncfinkd/kept/issues/16)) can merge without collisions ([ADR 0001](0001-local-only-data.md)).
 
 ## Consequences
 
