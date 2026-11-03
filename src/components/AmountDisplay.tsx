@@ -64,36 +64,44 @@ export function AmountDisplay({
 }
 
 /**
- * Android clips the top of a line shorter than the font's own height (Nunito
- * is about 1.37× its size), which cut off the digits and the ₾. There the line
- * is that tall and the pieces sit on the text baseline; iOS keeps the design's
- * tight lines.
+ * A line shorter than the font's own height (Nunito is about 1.37× its size)
+ * gets its top clipped, which cut off the digits and the ₾. So each line is
+ * that tall and the pieces sit on the text baseline, which also keeps them
+ * lined up when iOS or Android text is set larger.
  */
 const ANDROID = Platform.OS === 'android';
 const fullLine = (fontSize: number) => Math.ceil(fontSize * 1.37);
+const SYMBOL_SIZE = 30;
+/** The design's row; the amount's full line is taller. */
+const ROW = 64;
+const LINE = fullLine(text.amount.fontSize);
 
 const styles = StyleSheet.create({
-  row: ANDROID
-    ? { minHeight: 64, flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center' }
-    : { height: 64, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center' },
+  row: {
+    minHeight: LINE,
+    // iOS keeps the design's 64pt row: the extra line height reaches up into
+    // the space above instead of pushing everything below down. (Android
+    // already had the taller row.)
+    marginTop: ANDROID ? 0 : ROW - LINE,
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'center',
+  },
   symbol: {
     fontFamily: text.subtitle.fontFamily,
-    fontSize: 30,
-    lineHeight: ANDROID ? fullLine(30) : 30,
+    fontSize: SYMBOL_SIZE,
+    lineHeight: fullLine(SYMBOL_SIZE),
     color: color.subtle,
     marginRight: 4,
-    marginBottom: ANDROID ? 0 : 9,
   },
-  amount: {
-    ...text.amount,
-    ...(ANDROID ? { lineHeight: fullLine(text.amount.fontSize) } : null),
-    color: color.ink,
-  },
+  amount: { ...text.amount, lineHeight: LINE, color: color.ink },
   caret: {
     width: 3,
     height: 46,
     marginLeft: 4,
-    marginBottom: ANDROID ? -4 : 6,
+    // A view's baseline is its bottom edge: dip just below the digits. (Yoga
+    // ignores a margin for baseline alignment on iOS.)
+    transform: [{ translateY: 4 }],
     borderRadius: 999,
     backgroundColor: color.ink,
   },
