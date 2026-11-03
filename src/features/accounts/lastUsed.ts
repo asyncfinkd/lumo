@@ -5,23 +5,25 @@
 import type { TransactionKind, TransactionSource } from '@/domain/leftToSpend';
 
 /**
- * The account of the last expense (or income) you added yourself, if that
- * account is still there; otherwise the first account.
+ * The account of the expense (or income) you added or changed last, if that
+ * account is still there; otherwise the first account. `updatedAt`, so moving
+ * one to another account counts as using it.
  */
 export function lastUsedAccount(
   transactions: readonly {
     kind: TransactionKind;
     source: TransactionSource;
     accountId: string;
-    createdAt: string;
+    updatedAt: string;
   }[],
   kind: TransactionKind,
   accountIds: readonly string[],
 ): string | undefined {
-  let last: { accountId: string; createdAt: string } | undefined;
+  const ids = new Set(accountIds);
+  let last: { accountId: string; updatedAt: string } | undefined;
   for (const t of transactions) {
-    if (t.kind !== kind || t.source !== 'manual' || !accountIds.includes(t.accountId)) continue;
-    if (!last || t.createdAt > last.createdAt) last = t;
+    if (t.kind !== kind || t.source !== 'manual' || !ids.has(t.accountId)) continue;
+    if (!last || t.updatedAt > last.updatedAt) last = t;
   }
   return last?.accountId ?? accountIds[0];
 }
