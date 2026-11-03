@@ -168,7 +168,14 @@
   "balance": {
     "title": "What's in your account?",
     "hint": "All your money, right now.",
-    "amountLabel": "Balance {{amount}}"
+    "amountLabel": "Balance {{amount}}",
+    "change": "Change your balance",
+    "whatsIn": "What’s really in {{name}} right now?",
+    "shows": "Lumo shows for {{name}}",
+    "adjustment": "Adjustment",
+    "noneNeeded": "None needed",
+    "matches": "All matches. Nothing to fix.",
+    "explainIn": "We’ll save the difference as an adjustment in {{name}}. It’s not counted as spending."
   },
   "addTransaction": {
     "newExpense": "New expense",
@@ -195,7 +202,16 @@
       "covered": "{{category}} already covered this month {{emoji}}",
       "stillLeftToSpend": "Nice! Still {{amount}} left to spend ✨",
       "overMonth": "{{amount}} over this month — that's okay 🤍"
-    }
+    },
+    "transfer": "Transfer",
+    "moveMoney": "Move money",
+    "from": "From",
+    "to": "To",
+    "fromLabel": "From {{name}}. Change",
+    "toLabel": "To {{name}}. Change",
+    "swap": "Swap From and To",
+    "notSpending": "Not counted as spending.",
+    "moveAmount": "Move {{amount}}"
   },
   "budgets": {
     "title": "Budgets",
@@ -797,6 +813,13 @@
     "lastTitle": "{{name}} is your only account",
     "lastBody": "Lumo needs one place to keep your money. Add another account first, then you can delete this one.",
     "addAnother": "Add an account",
-    "okay": "Okay"
+    "okay": "Okay",
+    "moveMoney": "Move money",
+    "fixBalance": "Fix a balance",
+    "movingNote": "Moving money between accounts isn’t spending. It never touches your budgets or Insights.",
+    "fix": "Fix",
+    "pickFrom": "Move from",
+    "pickTo": "Move to",
+    "which": "Which account"
   }
 }

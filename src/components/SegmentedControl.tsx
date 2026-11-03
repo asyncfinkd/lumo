@@ -35,7 +35,10 @@ export function SegmentedControl<T extends string>({
   tone = 'sheet',
 }: Props<T>) {
   const reduceMotion = useReducedMotion();
-  const [segment, setSegment] = useState(0);
+  // The track's width, not a segment's: options can arrive after the first
+  // layout (Transfer, once accounts load), and the width alone won't change.
+  const [width, setWidth] = useState(0);
+  const segment = width > 0 ? (width - PAD * 2) / options.length : 0;
   const x = useSharedValue(0);
   const index = Math.max(
     options.findIndex((o) => o.value === value),
@@ -58,7 +61,7 @@ export function SegmentedControl<T extends string>({
       accessibilityRole="radiogroup"
       accessibilityLabel={accessibilityLabel}
       style={[styles.track, tone === 'sheet' ? styles.sheetTrack : styles.cardTrack]}
-      onLayout={(e) => setSegment((e.nativeEvent.layout.width - PAD * 2) / options.length)}
+      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
     >
       {segment > 0 && (
         <Animated.View
