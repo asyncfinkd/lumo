@@ -36,7 +36,7 @@ afterAll(() => {
 
 /** A migrations folder with only the first `count` migrations, as an older app had. */
 function migrationsUpTo(count: number): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'lumo-migrations-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kept-migrations-'));
   folders.push(dir);
   fs.mkdirSync(path.join(dir, 'meta'));
   const entries = journal.entries.slice(0, count);

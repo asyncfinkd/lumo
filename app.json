@@ -2,7 +2,7 @@
   "expo": {
     "name": "Kept",
     "slug": "lumo",
-    "scheme": "lumo",
+    "scheme": "kept",
     "version": "1.0.0",
     "runtimeVersion": {
       "policy": "fingerprint"
@@ -12,12 +12,12 @@
     "userInterfaceStyle": "light",
     "backgroundColor": "#FBF7F2",
     "ios": {
-      "bundleIdentifier": "com.asyncfinkd.lumo",
+      "bundleIdentifier": "com.asyncfinkd.kept",
       "supportsTablet": false,
       "infoPlist": {}
     },
     "android": {
-      "package": "com.asyncfinkd.lumo",
+      "package": "com.asyncfinkd.kept",
       "allowBackup": true,
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
