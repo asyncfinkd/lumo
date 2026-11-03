@@ -1,10 +1,9 @@
-<p align="center"><img src="./docs/images/banner.gif" alt="Kept – Money, but calmer." width="100%"></p>
+<p align="center"><img src="./docs/images/banner.gif" alt="Kept – Your money. Kept. A calm budget tracker that lives on your phone." width="100%"></p>
 
 <h1 align="center">Kept</h1>
-<p align="center"><b>Money, but calmer.</b><br>A cozy budget tracker that shows what's left to spend, gently. No spreadsheets, no guilt.</p>
+<p align="center"><b>Money, but calmer.</b><br>A cozy budget tracker that lives on your phone. No spreadsheets, no guilt.</p>
 
 <p align="center">
-  <img alt="Status" src="https://img.shields.io/badge/status-in%20progress-F2845C">
   <img alt="Platforms" src="https://img.shields.io/badge/platforms-iOS%20%7C%20Android-2B2522">
   <img alt="Currencies" src="https://img.shields.io/badge/currencies-%E2%82%BE%20%24%20%E2%82%AC-6BAF8D">
 </p>
@@ -31,7 +30,7 @@ No account. No servers. No cloud. Kept keeps everything in one small SQLite file
 
 <p align="center"><img src="./docs/images/screens.png" alt="Home, Add expense, Budgets and Insights screens" width="100%"></p>
 
-- **Left to spend:** front and center, every day. One clear number on the Home screen with a soft progress bar and the days left, then what came in, what went out, and today's transactions.
+- **Your balance:** every account in one number on the Home screen, then what came in, what went out, your savings jar and today's transactions.
 - **Add in seconds:** a bottom sheet with a big amount, a number pad, Expense / Income switch, category chips, date and note. Fast with one thumb, with kind feedback like _"Nice! Still ₾46.90 left for coffee"_.
 - **Budgets that nudge:** never nag, never shout. Per-category budgets with friendly notes like _"Running a little low · easy does it"_ and _"All paid this month ✓"_. Bars warm up as you get close to a limit.
 - **Where it went:** Insights shows a donut by category with Week / Month views, plus one human sentence like _"You spent 18% less on coffee than in September. Nice!"_
