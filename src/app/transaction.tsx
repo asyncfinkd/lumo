@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
+  AccountIcon,
   CategoryIcon,
   CloseIcon,
   InfoIcon,
@@ -13,6 +14,7 @@ import { Fill } from '@/components/motion';
 import { Press } from '@/components/Press';
 import { Sheet } from '@/components/Sheet';
 import { formatMoney } from '@/domain/money';
+import { type AccountView, useAccountViews } from '@/features/accounts/accounts';
 import { BUDGETING } from '@/features/flags';
 import { type BudgetRow, budgetRows } from '@/features/budgets/budgetRows';
 import {
@@ -27,7 +29,8 @@ import { color, fontFamily, gradient, radius, shadow, size, text } from '@/theme
 
 // TransactionDetail: what it was, when, where it came from, how its budget
 // stands, and Delete / Edit. Five looks: manual, no budget, automatic bill,
-// income, balance adjusted.
+// income, balance adjusted. With two or more accounts it also says which one
+// paid or got it (TransactionDetail-Account).
 export default function TransactionScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -38,6 +41,7 @@ export default function TransactionScreen() {
   const incomes = useIncomes();
   const { summary } = useMoneyMonth();
   const view = useTransactionView();
+  const accounts = useAccountViews();
   const tx = transactions.find((x) => x.id === id);
 
   if (!tx) return null;
@@ -51,9 +55,23 @@ export default function TransactionScreen() {
         ? incomes.find((i) => i.id === tx.recurringId)?.day
         : undefined;
 
-  const rows: { label: string; value: string; auto?: boolean }[] = [
+  const rows: { label: string; value: string; auto?: boolean; account?: AccountView }[] = [
     { label: t('history.detail.when'), value: v.when },
   ];
+  const account = accounts.length > 1 ? accounts.find((a) => a.id === tx.accountId) : undefined;
+  if (account) {
+    rows.push({
+      label: t(
+        v.adjust
+          ? 'history.detail.account'
+          : v.income
+            ? 'history.detail.wentTo'
+            : 'history.detail.paidFrom',
+      ),
+      value: account.label,
+      account,
+    });
+  }
   if (repeatDay) {
     rows.push({
       label: t('history.detail.repeats'),
@@ -140,6 +158,16 @@ export default function TransactionScreen() {
               <View key={r.label} style={styles.fact}>
                 <Text style={styles.factLabel}>{r.label}</Text>
                 <View style={styles.factValueRow}>
+                  {r.account ? (
+                    <View style={[styles.factTile, { backgroundColor: r.account.tint.bg }]}>
+                      <AccountIcon
+                        kind={r.account.kind}
+                        size={14}
+                        width={2.1}
+                        color={r.account.tint.fg}
+                      />
+                    </View>
+                  ) : null}
                   <Text numberOfLines={1} style={styles.factValue}>
                     {r.value}
                   </Text>
@@ -336,6 +364,15 @@ const styles = StyleSheet.create({
   },
   factLabel: { ...text.subtitle, color: color.muted },
   factValueRow: { flexShrink: 1, flexDirection: 'row', alignItems: 'center', gap: 6 },
+  factTile: {
+    width: 24,
+    height: 24,
+    marginRight: 2,
+    borderRadius: 8,
+    borderCurve: 'continuous',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   factValue: { flexShrink: 1, fontFamily: fontFamily.bold, fontSize: 15, color: color.ink },
   autoTag: {
     height: 20,
