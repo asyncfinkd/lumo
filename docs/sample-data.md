@@ -1,6 +1,6 @@
 # Sample data
 
-One dataset for the design mocks and the dev seed. Decided in [#5](https://github.com/asyncfinkd/lumo/issues/5). Numbers follow the rules in [#2](https://github.com/asyncfinkd/lumo/issues/2) (left to spend), [#4](https://github.com/asyncfinkd/lumo/issues/4) (bills) and [#6](https://github.com/asyncfinkd/lumo/issues/6) (total balance).
+One dataset for the design mocks and the dev seed. Decided in [#5](https://github.com/asyncfinkd/kept/issues/5). Numbers follow the rules in [#2](https://github.com/asyncfinkd/kept/issues/2) (left to spend), [#4](https://github.com/asyncfinkd/kept/issues/4) (bills) and [#6](https://github.com/asyncfinkd/kept/issues/6) (total balance).
 
 ## Profile
 

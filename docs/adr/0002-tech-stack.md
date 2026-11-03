@@ -2,12 +2,12 @@
 
 - **Status:** Accepted
 - **Date:** 2026-10-26
-- **Issue:** [#11](https://github.com/asyncfinkd/lumo/issues/11)
+- **Issue:** [#11](https://github.com/asyncfinkd/kept/issues/11)
 
 ## Context
 
-- One developer who knows React and React Native, shipping v1 to iOS and Android in 1–2 months ([#7](https://github.com/asyncfinkd/lumo/issues/7)).
-- The design leans on motion and glass: rolling digits, sheets, blur, a drawn donut. The [#8](https://github.com/asyncfinkd/lumo/issues/8) spike rebuilt those screens in React Native + Expo, matched the design side by side, and ran at **60 FPS on a real iPhone and Android phone**.
+- One developer who knows React and React Native, shipping v1 to iOS and Android in 1–2 months ([#7](https://github.com/asyncfinkd/kept/issues/7)).
+- The design leans on motion and glass: rolling digits, sheets, blur, a drawn donut. The [#8](https://github.com/asyncfinkd/kept/issues/8) spike rebuilt those screens in React Native + Expo, matched the design side by side, and ran at **60 FPS on a real iPhone and Android phone**.
 - All data stays on the device ([ADR 0001](0001-local-only-data.md)). Money is integer minor units ([ADR 0003](0003-money-as-minor-units.md)).
 - The development Mac has Xcode 26.6 (iOS 26 simulators) and Android Studio.
 
@@ -27,7 +27,7 @@
 | Glass | **expo-blur** | No `tint`; the design's own color layer on top. Android content inside `BlurTargetView` |
 | Haptics | **expo-haptics** | Numpad and primary buttons |
 | Font | **Nunito** on both platforms (`@expo-google-fonts/nunito`) | Same look everywhere, as in the spike |
-| i18n | **i18next + react-i18next + expo-localization** | All copy through i18n from day one; Georgian in v1.1 ([#20](https://github.com/asyncfinkd/lumo/issues/20)) |
+| i18n | **i18next + react-i18next + expo-localization** | All copy through i18n from day one; Georgian in v1.1 ([#20](https://github.com/asyncfinkd/kept/issues/20)) |
 | IDs | **expo-crypto** `randomUUID()` | UUID v4 ([ADR 0003](0003-money-as-minor-units.md)) |
 | Dates | Plain `Date` + helpers in `src/domain/dates.ts` | Payday periods are small; add a library only if it grows |
 | Tests | **jest-expo** + React Native Testing Library | Domain logic first (money, left to spend, periods) |
@@ -65,5 +65,5 @@ Rule: `domain/` has no React and no database imports, so it's fully unit-testabl
 
 **Costs**
 - Expo SDK upgrades ship breaking changes; we upgrade once per SDK, deliberately, in its own PR.
-- When we add a native module outside Expo Go (bank messages, [#9](https://github.com/asyncfinkd/lumo/issues/9)), development moves fully to a development build, which we can already make locally.
+- When we add a native module outside Expo Go (bank messages, [#9](https://github.com/asyncfinkd/kept/issues/9)), development moves fully to a development build, which we can already make locally.
 - Don't start Metro with `CI=1` while developing: CI mode turns off file watching and reloads, so the app keeps showing old code.

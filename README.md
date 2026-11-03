@@ -72,8 +72,8 @@ Everything lives on your phone, so you are the only one in control of it. These 
 > Kept is in active development. You need Node 22+, and for simulators Xcode and/or Android Studio.
 
 ```bash
-git clone https://github.com/asyncfinkd/lumo.git
-cd lumo
+git clone https://github.com/asyncfinkd/kept.git
+cd kept
 npm install
 ```
 
