@@ -30,7 +30,7 @@ export default function WelcomeScreen() {
       </View>
       <View style={styles.actions}>
         <Button label={t('onboarding.welcome.start')} onPress={() => router.push('/name')} />
-        {/* A new phone: pick up from a Lumo backup instead of starting over. */}
+        {/* A new phone: pick up from a Kept backup instead of starting over. */}
         <Button
           variant="quiet"
           label={t('onboarding.welcome.restore')}

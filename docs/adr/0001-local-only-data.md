@@ -6,13 +6,13 @@
 
 ## Context
 
-Lumo holds personal financial data: income, bills, every purchase. The product promise is "Money, but calmer", and part of feeling calm is knowing that your money data isn't sitting on someone else's server.
+Kept holds personal financial data: income, bills, every purchase. The product promise is "Money, but calmer", and part of feeling calm is knowing that your money data isn't sitting on someone else's server.
 
 All v1 features ([MVP scope](../mvp-scope.md)) work with one person's data on one device. Nothing in v1 needs a server to compute or display. We are one developer with a 1–2 month target, so a backend would also mean auth, hosting, security and compliance work we can't afford.
 
 ## Decision
 
-**All user data stays on the device. Lumo has no backend, no accounts, and we never receive or store user data.**
+**All user data stays on the device. Kept has no backend, no accounts, and we never receive or store user data.**
 
 - Data lives in a SQLite database on the device.
 - The v1 app makes **no network requests**. Fonts and assets are bundled. One currency per user means no exchange rates are needed.

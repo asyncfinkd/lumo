@@ -5,7 +5,7 @@ import { BackupError, summarize } from './backup';
 import { pickBackup, restoreFromBackup } from './files';
 
 /**
- * "Restore from backup": choose a .lumo file, then everything on this phone is
+ * "Restore from backup": choose a .kept (or older .lumo) file, then everything on this phone is
  * replaced by it. `ask` puts the backup's name, date and size in a question
  * first; on a new install there's nothing to lose, so Welcome doesn't ask.
  */

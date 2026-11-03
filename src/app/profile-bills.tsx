@@ -12,7 +12,7 @@ import { HeaderButton, SettingsHeader } from '@/features/profile/SettingsHeader'
 import { BillTile } from '@/features/recurring/BillTile';
 import { color, fontFamily, gradient, radius, shadow, space, text } from '@/theme';
 
-// ProfileBills: every monthly bill, what they add up to, and which ones Lumo
+// ProfileBills: every monthly bill, what they add up to, and which ones Kept
 // adds by itself. Tap one to change it, or add a new one.
 export default function ProfileBillsScreen() {
   const { t } = useTranslation();

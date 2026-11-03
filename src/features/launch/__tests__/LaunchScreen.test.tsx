@@ -6,9 +6,9 @@ describe('LaunchScreen', () => {
   beforeEach(() => jest.useFakeTimers());
   afterEach(() => jest.useRealTimers());
 
-  it('says Lumo is opening, with the tagline and the privacy line', async () => {
+  it('says Kept is opening, with the tagline and the privacy line', async () => {
     await render(<LaunchScreen done={false} onShown={() => {}} onGone={() => {}} />);
-    expect(screen.getByLabelText('Lumo is opening')).toBeOnTheScreen();
+    expect(screen.getByLabelText('Kept is opening')).toBeOnTheScreen();
     expect(screen.getByText('Money, but calmer.')).toBeOnTheScreen();
     expect(screen.getByText('Everything stays on this phone')).toBeOnTheScreen();
   });

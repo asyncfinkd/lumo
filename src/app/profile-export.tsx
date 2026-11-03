@@ -39,12 +39,12 @@ const SHARE: Record<Format, { mimeType: string; UTI: string }> = {
 };
 
 const RANGES: ExportRange[] = ['month', 'three', 'year', 'all'];
-/** CSV and PDF are to read; the backup is everything, to restore in Lumo. */
+/** CSV and PDF are to read; the backup is everything, to restore in Kept. */
 type Format = ExportFormat | 'backup';
 const FORMATS: Format[] = ['csv', 'pdf', 'backup'];
 
-// ProfileExport: pick a time and CSV or PDF; Lumo makes the file on the phone
-// and opens the share sheet, so you choose where it goes. The Lumo backup holds
+// ProfileExport: pick a time and CSV or PDF; Kept makes the file on the phone
+// and opens the share sheet, so you choose where it goes. The Kept backup holds
 // everything, so Restore from backup picks up exactly here.
 export default function ProfileExportScreen() {
   const { t, i18n } = useTranslation();
@@ -102,10 +102,10 @@ export default function ProfileExportScreen() {
     setFailed(false);
     try {
       const data = { transactions: chosen, budgets, bills, incomes };
-      const name = `Lumo ${today}`;
+      const name = `Kept ${today}`;
       let target: File;
       if (format === 'backup') {
-        target = await writeBackupFile(`Lumo ${today}`);
+        target = await writeBackupFile(name);
       } else if (format === 'csv') {
         target = new File(Paths.cache, `${name}.csv`);
         if (target.exists) target.delete();

@@ -1,4 +1,4 @@
-// Parts of Lumo that are built but switched off for now.
+// Parts of Kept that are built but switched off for now.
 
 /**
  * Budgets and Left to spend (#51, #2). Phase 1 tracks your balance only: no

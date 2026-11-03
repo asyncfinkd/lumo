@@ -198,7 +198,7 @@
     "amountLabel": "Balance {{amount}}",
     "change": "Change your balance",
     "whatsIn": "What’s really in {{name}} right now?",
-    "shows": "Lumo shows for {{name}}",
+    "shows": "Kept shows for {{name}}",
     "adjustment": "Adjustment",
     "noneNeeded": "None needed",
     "matches": "All matches. Nothing to fix.",
@@ -485,7 +485,7 @@
   },
   "profile": {
     "title": "Profile",
-    "since": "Using Lumo since {{month}}",
+    "since": "Using Kept since {{month}}",
     "changePhoto": "Change profile photo",
     "yourMoney": "Your money",
     "preferences": "Preferences",
@@ -510,18 +510,18 @@
         "fingerprint": "Lock with fingerprint"
       },
       "off": "Keep your money private",
-      "on": "Asked each time Lumo opens",
+      "on": "Asked each time Kept opens",
       "setUp": {
         "faceid": "Set up Face ID in Settings first",
         "touchid": "Set up Touch ID in Settings first",
         "fingerprint": "Set up a fingerprint in Settings first"
       }
     },
-    "footer": "Lumo {{version}} · made with care",
+    "footer": "Kept {{version}} · made with care",
     "deleteAll": {
       "row": "Delete all data",
       "title": "Delete all your data?",
-      "body": "Every transaction, budget, bill and goal on this phone goes away, and Lumo starts fresh. This can't be undone.",
+      "body": "Every transaction, budget, bill and goal on this phone goes away, and Kept starts fresh. This can't be undone.",
       "typeBefore": "Type ",
       "typeAfter": " to confirm",
       "typeLabel": "Type {{word}} to confirm",
@@ -560,7 +560,7 @@
     "off": "Off",
     "yourData": "Your data",
     "currencyHint": "New amounts use this. What you've already added stays as it is.",
-    "nameHint": "This is how Lumo greets you on Home.",
+    "nameHint": "This is how Kept greets you on Home.",
     "nameCount": "{{count}} / {{max}}",
     "preview": "Preview",
     "friend": "friend",
@@ -708,7 +708,7 @@
     "madeHere": "Made on your phone. You choose where it goes.",
     "cta": "Export {{format}}",
     "failed": "Couldn’t make the file. Try again.",
-    "fileTitle": "Lumo · my money",
+    "fileTitle": "Kept · my money",
     "columns": {
       "date": "Date",
       "time": "Time",
@@ -739,14 +739,14 @@
     "yes": "Yes",
     "no": "No",
     "everything": "Everything",
-    "footer": "Made with Lumo on {{date}}. Everything stays on your phone.",
-    "backup": "Lumo backup",
+    "footer": "Made with Kept on {{date}}. Everything stays on your phone.",
+    "backup": "Kept backup",
     "backupHint": "Everything, to pick up where you left off",
     "categories": "Categories"
   },
   "remindersScreen": {
     "title": "Reminders",
-    "intro": "Gentle nudges, never nagging. Lumo only taps you when it actually helps.",
+    "intro": "Gentle nudges, never nagging. Kept only taps you when it actually helps.",
     "sampleCaption": "This is what a reminder looks like",
     "now": "now",
     "all": "Reminders",
@@ -759,7 +759,7 @@
     "evening": "Evening check-in",
     "eveningHint": "At 21:00, if you haven’t added anything today",
     "quiet": "Quiet hours: no reminders between 22:00 and 8:00.",
-    "blocked": "Notifications are off for Lumo. Turn them on in Settings.",
+    "blocked": "Notifications are off for Kept. Turn them on in Settings.",
     "openSettings": "Open Settings",
     "remindBefore": "Remind me a day before",
     "notify": {
@@ -775,7 +775,7 @@
     }
   },
   "launch": {
-    "opening": "Lumo is opening",
+    "opening": "Kept is opening",
     "private": "Everything stays on this phone"
   },
   "backup": {
@@ -784,13 +784,13 @@
     "confirmBody_other": "{{name}}’s backup from {{date}}, with {{count}} transactions. Everything on this phone now will be replaced.",
     "restore": "Restore",
     "doneTitle": "Restored",
-    "doneBody": "Lumo is back where the backup left off.",
+    "doneBody": "Kept is back where the backup left off.",
     "failedTitle": "Couldn’t restore",
-    "invalid": "This file isn’t a Lumo backup, or it’s damaged.",
-    "newer": "This backup was made by a newer Lumo. Update Lumo, then try again."
+    "invalid": "This file isn’t a Kept backup, or it’s damaged.",
+    "newer": "This backup was made by a newer Kept. Update Kept, then try again."
   },
   "lock": {
-    "title": "Lumo is locked",
+    "title": "Kept is locked",
     "body": "Your money stays private until you unlock.",
     "failedTitle": "Didn’t recognize you",
     "failedBody": "No worries, it happens. Try again whenever you’re ready.",
@@ -800,7 +800,7 @@
       "fingerprint": "Unlock with fingerprint"
     },
     "passcodeHint": "After a few tries, your phone will ask for its passcode instead.",
-    "prompt": "Unlock Lumo"
+    "prompt": "Unlock Kept"
   },
   "accounts": {
     "main": "Main",
@@ -847,7 +847,7 @@
     "deleteEverything": "Delete everything",
     "keep": "Keep it",
     "lastTitle": "{{name}} is your only account",
-    "lastBody": "Lumo needs one place to keep your money. Add another account first, then you can delete this one.",
+    "lastBody": "Kept needs one place to keep your money. Add another account first, then you can delete this one.",
     "addAnother": "Add an account",
     "okay": "Okay",
     "moveMoney": "Move money",
