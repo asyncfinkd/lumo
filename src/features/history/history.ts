@@ -24,7 +24,7 @@ export type DayGroup<T> = {
   rows: T[];
 };
 
-/** Bills and salary that Lumo added on their day. */
+/** Bills and salary that Kept added on their day. */
 export function isAutomatic(t: { source: TransactionSource }): boolean {
   return t.source === 'bill' || t.source === 'recurring_income';
 }

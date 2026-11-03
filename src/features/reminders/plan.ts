@@ -27,7 +27,7 @@ export type Reminder = { id: string; at: Date; title: string; body: string };
 
 export type ReminderWords = {
   billTitle: (name: string) => string;
-  /** `auto`: Lumo adds it on its day; otherwise you add it when you pay. */
+  /** `auto`: Kept adds it on its day; otherwise you add it when you pay. */
   billBody: (amount: string, auto: boolean, day: number) => string;
   paydayTitle: () => string;
   paydayBody: (name: string, amount: string) => string;

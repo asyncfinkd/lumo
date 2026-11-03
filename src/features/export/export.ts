@@ -1,4 +1,4 @@
-// Profile → Export (#16): the file Lumo makes, as CSV or as a PDF summary.
+// Profile → Export (#16): the file Kept makes, as CSV or as a PDF summary.
 // Pure, so it's tested without React; the screen writes and shares the file.
 
 import { addDays, type CalendarDate } from '@/domain/dates';

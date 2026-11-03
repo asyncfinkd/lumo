@@ -151,12 +151,12 @@ describe('pdf', () => {
       'GEL',
       {
         ...words,
-        title: 'Lumo',
+        title: 'Kept',
         period: 'October 2026',
         cameIn: 'Came in',
         wentOut: 'Went out',
         byCategory: 'By category',
-        footer: 'Made with Lumo',
+        footer: 'Made with Kept',
       },
     );
     expect(html).toContain('Came in<b>₾3,800.00</b>');

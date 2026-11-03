@@ -18,7 +18,7 @@ import { color, fontFamily, radius, shadow, size, text } from '@/theme';
 
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 
-// ProfileBillEdit: a bill's name, amount, due day, category and whether Lumo
+// ProfileBillEdit: a bill's name, amount, due day, category and whether Kept
 // adds it by itself. With no `id` it adds a new bill.
 export default function ProfileBillScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();

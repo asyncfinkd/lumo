@@ -1,4 +1,4 @@
-// Reading and writing the .lumo file on the phone (./backup.ts is the format).
+// Reading and writing the .kept file on the phone (./backup.ts is the format).
 
 import { File, Paths } from 'expo-file-system';
 import { db } from '@/db/client';
@@ -7,7 +7,7 @@ import { deletePhotoFile } from '@/features/profile/photo';
 import { getProfile } from '@/features/profile/repo';
 import { type Backup, BACKUP_EXTENSION, buildBackup, parseBackup, restoreBackup } from './backup';
 
-/** Writes everything into `<name>.lumo` in the cache, ready for the share sheet. */
+/** Writes everything into `<name>.kept` in the cache, ready for the share sheet. */
 export async function writeBackupFile(name: string): Promise<File> {
   const photoUri = getProfile(db)?.photoUri;
   const photoFile = photoUri ? new File(photoUri) : null;

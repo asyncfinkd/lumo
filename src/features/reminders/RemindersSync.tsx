@@ -1,4 +1,4 @@
-// Keeps the phone's scheduled reminders in step with Lumo (#15). Mounted once
+// Keeps the phone's scheduled reminders in step with Kept (#15). Mounted once
 // in the root layout; renders nothing. Whenever bills, income, transactions or
 // the switches change, it plans the next weeks again (./plan.ts) and replaces
 // what's scheduled. A budget running low is sent the moment it happens.
@@ -24,7 +24,7 @@ import { newlyLow, outsideQuietHours, planReminders } from './plan';
 
 export const CHANNEL = 'reminders';
 
-// Shown as a banner even while Lumo is open, without a sound: gentle.
+// Shown as a banner even while Kept is open, without a sound: gentle.
 Notifications?.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,
@@ -34,7 +34,7 @@ Notifications?.setNotificationHandler({
   }),
 });
 
-/** Whether Lumo may show notifications; never asks. */
+/** Whether Kept may show notifications; never asks. */
 export async function notificationsAllowed(): Promise<boolean> {
   if (!Notifications) return false;
   const { IosAuthorizationStatus } = Notifications;
@@ -168,7 +168,7 @@ export function RemindersSync() {
     };
   }, [plan, t]);
 
-  // A budget running low: compare with the last time, only while Lumo runs,
+  // A budget running low: compare with the last time, only while Kept runs,
   // so a restart never repeats one.
   const lowBefore = useRef<Map<string, number> | null>(null);
   useEffect(() => {

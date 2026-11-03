@@ -42,7 +42,7 @@ function Tick({ on }: { on: boolean }) {
 }
 
 // AccountDelete (#21): its transactions move to another account, keeping the
-// total, or go with it. The last account stays: Lumo needs one.
+// total, or go with it. The last account stays: Kept needs one.
 export default function AccountDeleteScreen() {
   const { t } = useTranslation();
   const router = useRouter();

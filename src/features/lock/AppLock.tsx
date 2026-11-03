@@ -10,16 +10,16 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle } from 'react-native-svg';
 import { Orbs } from '@/components/Backdrop';
 import { FaceIdIcon, FingerprintIcon, LockIcon } from '@/components/Icons';
+import { KeptCoin, KeptK } from '@/components/KeptMark';
 import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
 import { color, fontFamily, radius, shadow, size, text } from '@/theme';
 import { authenticate, type LockKind, useBiometrics } from './biometrics';
 
 /**
- * App lock (#24): covers the app when Lumo opens and whenever it comes back
+ * App lock (#24): covers the app when Kept opens and whenever it comes back
  * from the background, and asks for Face ID / Touch ID / a fingerprint.
  * Turning the lock on in Profile doesn't lock right away; the next open does.
  * If the phone has no biometrics set up any more, nothing is locked, so a
@@ -75,7 +75,7 @@ export function AppLock({ enabled }: { enabled: boolean }) {
   );
 }
 
-/** LockScreen / LockScreenFailed: the Lumo tile with a lock badge and one calm line. */
+/** LockScreen / LockScreenFailed: the Kept tile with a lock badge and one calm line. */
 function LockScreen({
   kind,
   failed,
@@ -117,10 +117,10 @@ function LockScreen({
       <View style={[styles.main, { paddingTop: insets.top + 91 }]}>
         <Animated.View style={[styles.tileWrap, shakeStyle]}>
           <View style={styles.tile}>
-            <Svg width={TILE} height={TILE} viewBox="0 0 1024 1024">
-              <Circle cx={590} cy={448} r={190} fill={color.iconInk} fillOpacity={0.45} />
-              <Circle cx={442} cy={578} r={190} fill={color.iconInk} />
-            </Svg>
+            <KeptK size={TILE} />
+            <View style={StyleSheet.absoluteFill}>
+              <KeptCoin size={TILE} />
+            </View>
           </View>
           <View style={[styles.badge, failed && { backgroundColor: color.lockFailed }]}>
             <LockIcon color={color.white} size={15} width={2.4} />
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     borderCurve: 'continuous',
     overflow: 'hidden',
-    backgroundColor: color.iconCream,
+    backgroundColor: color.bg,
     boxShadow: shadow.lockTile,
   },
   badge: {

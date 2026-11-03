@@ -1,6 +1,6 @@
 # Contributing
 
-Lumo is built by one person, with the rules of a team. Every change goes through a pull request, including docs.
+Kept is built by one person, with the rules of a team. Every change goes through a pull request, including docs.
 
 ## Workflow
 

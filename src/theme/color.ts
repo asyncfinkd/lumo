@@ -84,9 +84,6 @@ export const color = {
   softInk: '#5E554F',
   /** Second line on a dark button ("This and future ones"). */
   onDarkHint: 'rgba(255,255,255,0.85)',
-  /** The app icon's colors (LumoIcon board): ink mark on cream. */
-  iconInk: '#141318',
-  iconCream: '#F6F1EA',
   /** The sample notification (ProfileReminders). */
   notificationCard: 'rgba(255,255,255,0.9)',
   /** An option card that isn't picked (Export's CSV / PDF). */
@@ -107,7 +104,7 @@ export const color = {
   /** The tile when the phone has no Face ID / fingerprint set up. */
   lockTileOff: '#F2EDE8',
   lockIconOff: '#B8ADA5',
-  /** The badge on the Lumo tile after a failed try (LockScreenFailed). */
+  /** The badge on the Kept tile after a failed try (LockScreenFailed). */
   lockFailed: '#C4553C',
 
   // Switch
@@ -136,7 +133,7 @@ export const color = {
 export const gradient = {
   progress: 'linear-gradient(90deg, #F7A27F, #F2845C)',
   budgetCalm: 'linear-gradient(90deg, #F9B596, #F59C78)',
-  /** The warm glow behind the icon while Lumo opens (Splash). */
+  /** The warm glow behind the icon while Kept opens (Splash). */
   launchHalo: 'radial-gradient(circle, rgba(255,226,170,0.75) 0%, rgba(255,226,170,0) 65%)',
   heroGlow: 'linear-gradient(150deg, rgba(255,241,204,0.45) 0%, rgba(255,255,255,0) 70%)',
   /** Behind the featured jar (Savings). */
