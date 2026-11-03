@@ -2,10 +2,10 @@ import { lastUsedAccount } from '../lastUsed';
 
 const tx = (
   accountId: string,
-  createdAt: string,
+  updatedAt: string,
   kind: 'expense' | 'income' = 'expense',
   source: 'manual' | 'bill' | 'adjustment' = 'manual',
-) => ({ accountId, createdAt, kind, source });
+) => ({ accountId, updatedAt, kind, source });
 
 describe('lastUsedAccount', () => {
   const ids = ['main', 'cash'];
