@@ -23,6 +23,32 @@ const GAP = 6;
 const C = 2 * Math.PI * R;
 /** The design draws up to six categories. */
 const MAX_SEGMENTS = 6;
+/** Room a slot needs: both round caps, the gap and a sliver of arc. */
+const MIN_SLOT = STROKE + GAP + 4;
+
+/**
+ * How much of the ring each share gets. Round caps make every arc at least
+ * STROKE long, so a small share gets MIN_SLOT and the rest is split by size —
+ * otherwise its cap spills into the next category.
+ */
+export function slotLengths(values: readonly number[]): number[] {
+  const pinned = values.map(() => false);
+  for (;;) {
+    const free = C - pinned.filter(Boolean).length * MIN_SLOT;
+    const freeTotal = values.reduce((sum, v, i) => (pinned[i] ? sum : sum + v), 0);
+    const slots = values.map((v, i) =>
+      pinned[i] ? MIN_SLOT : freeTotal > 0 ? (v / freeTotal) * free : 0,
+    );
+    let changed = false;
+    slots.forEach((slot, i) => {
+      if (!pinned[i] && slot < MIN_SLOT) {
+        pinned[i] = true;
+        changed = true;
+      }
+    });
+    if (!changed) return slots;
+  }
+}
 
 // One arc. Moving the offset of a full-length dash draws it from its start.
 function Segment({
@@ -70,7 +96,7 @@ type Props = {
 export function Donut({ items, currency, label, replayKey = 0 }: Props) {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
-  const shown = items.slice(0, MAX_SEGMENTS);
+  const shown = items.filter((item) => item.minor > 0).slice(0, MAX_SEGMENTS);
   const total = shown.reduce((sum, item) => sum + item.minor, 0);
 
   // A fixed number of hooks, one per possible segment.
@@ -106,9 +132,10 @@ export function Donut({ items, currency, label, replayKey = 0 }: Props) {
     startAngle: number;
     progress: SharedValue<number>;
   }[] = [];
+  const slots = slotLengths(shown.map((item) => item.minor));
   let cum = 0;
   for (const [i, item] of shown.entries()) {
-    const len = total > 0 ? (item.minor / total) * C : 0;
+    const len = slots[i]!;
     segments.push({
       key: item.key,
       chart: item.chart,

@@ -4,7 +4,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '@/i18n';
 import { DigitRoll } from '../DigitRoll';
-import { Donut } from '../Donut';
+import { Donut, slotLengths } from '../Donut';
 import { Sheet } from '../Sheet';
 import { Sparkline } from '../Sparkline';
 
@@ -44,6 +44,20 @@ describe('Donut', () => {
         name: 'Donut chart: Groceries 27%, Home 27%, Treats 17%, Bills 12%, Getting around 10%, Coffee 8%. ₾3,000 spent this month',
       }),
     ).toBeOnTheScreen();
+  });
+
+  it('keeps small shares from running into their neighbours', () => {
+    const slots = slotLengths([96000, 1500, 1200, 800, 300, 200]);
+    const ring = 2 * Math.PI * 78;
+    expect(slots.reduce((a, b) => a + b, 0)).toBeCloseTo(ring);
+    // Round caps (22) plus the gap (6) must fit in every slot.
+    for (const slot of slots) expect(slot).toBeGreaterThanOrEqual(28);
+    expect(slots[0]).toBeGreaterThan(slots[1]!);
+  });
+
+  it('splits by size when every share is large enough', () => {
+    const slots = slotLengths([3, 1]);
+    expect(slots[0]! / slots[1]!).toBeCloseTo(3);
   });
 });
 
