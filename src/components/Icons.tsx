@@ -1,4 +1,5 @@
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import type { AccountKind } from '@/db/accounts';
 import type { CategoryIconKey } from '@/db/categories';
 
 // Icons copied path-for-path from the Budget Tracker design boards.
@@ -678,6 +679,34 @@ export function FingerprintIcon({ color, size = 20, width = 1.9 }: IconProps & {
         {...s}
         d="M12 12v1.4a17 17 0 0 1-1.9 7.2M16.9 16.3a19 19 0 0 1-.7 3.5M7.1 15.6a14 14 0 0 1-.9 2.6"
       />
+    </Svg>
+  );
+}
+
+// Account kinds (Accounts, EditAccount): a filled shape and its lines.
+const ACCOUNT_PATHS: Record<AccountKind, [string, string]> = {
+  cash: [
+    'M6 6.5h12a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-5a3 3 0 0 1 3-3z',
+    'M9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0M6.5 9.5v.01M17.5 14.5v.01',
+  ],
+  debit: [
+    'M6 5.5h12a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-7a3 3 0 0 1 3-3z',
+    'M3 10h18M6.5 15h3',
+  ],
+};
+
+export function AccountIcon({
+  kind,
+  size = 22,
+  color,
+  width = 1.8,
+}: IconProps & { kind: AccountKind; width?: number }) {
+  const [shape, lines] = ACCOUNT_PATHS[kind];
+  const s = line(color, width);
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
+      <Path {...s} fill={color} fillOpacity={0.22} d={shape} />
+      <Path {...s} d={lines} />
     </Svg>
   );
 }

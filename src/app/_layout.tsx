@@ -133,6 +133,9 @@ function AppStack({ onLoaded }: { onLoaded: () => void }) {
               options={{ ...sheetOptions, animation: 'fade' }}
             />
             <Stack.Screen name="profile-currency" />
+            <Stack.Screen name="accounts" />
+            <Stack.Screen name="account" options={sheetOptions} />
+            <Stack.Screen name="account-delete" options={{ ...sheetOptions, animation: 'fade' }} />
             <Stack.Screen name="profile-income" />
             <Stack.Screen
               name="profile-delete-all"

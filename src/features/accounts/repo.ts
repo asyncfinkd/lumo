@@ -29,6 +29,11 @@ export function transfersQuery(db: Db) {
   return db.select().from(transfers).orderBy(desc(transfers.date), desc(transfers.occurredAt));
 }
 
+/** One account, read once when its sheet opens (EditAccount). */
+export function accountById(db: Db, id: AccountId): Account | undefined {
+  return db.select().from(accounts).where(eq(accounts.id, id)).get();
+}
+
 export type AccountInput = {
   name: string;
   kind: AccountKind;
