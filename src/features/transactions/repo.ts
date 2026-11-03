@@ -75,7 +75,7 @@ export function addTransaction(db: Db, input: TransactionInput, newId = defaultN
 export type Scope = 'one' | 'future';
 
 /** Marks a bill or salary date as handled so `syncDueTransactions` never recreates it. */
-function skip(db: Db, recurringId: string, date: CalendarDate, newId: () => string) {
+export function skip(db: Db, recurringId: string, date: CalendarDate, newId: () => string) {
   db.insert(skippedOccurrences)
     .values({ id: newId(), recurringId, date })
     .onConflictDoNothing()

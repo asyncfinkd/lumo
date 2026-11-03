@@ -11,8 +11,8 @@ import { Sheet } from '@/components/Sheet';
 import { db } from '@/db/client';
 import { defaultAccountId } from '@/db/defaultAccount';
 import { currencies, formatMoney, parseAmount } from '@/domain/money';
-import { useAccountViews } from '@/features/accounts/accounts';
-import { accountsQuery } from '@/features/accounts/repo';
+import { accountLabel, useAccountViews } from '@/features/accounts/accounts';
+import { accountById, accountsQuery } from '@/features/accounts/repo';
 import { useToday } from '@/features/live';
 import { adjustBalance, currentAccountBalance, getProfile } from '@/features/profile/repo';
 import { color, fontFamily, radius, text } from '@/theme';
@@ -36,22 +36,34 @@ export default function BalanceScreen() {
     return current !== null && current > 0 ? typedAmount(current, currency) : '0';
   };
   const [typed, setTyped] = useState(() => startFor(accountId));
+  // Below zero opens as 0 (the numpad can't type a minus), so until the user
+  // types, there's nothing to change.
+  const [edited, setEdited] = useState(false);
 
   const account = views.find((a) => a.id === accountId);
-  const name = account?.label ?? '';
-  const shownMinor = account?.balanceMinor ?? 0;
+  // The live list arrives a render later; until then, read the account itself.
+  const row = account ? undefined : accountById(db, accountId);
+  const name = account?.label ?? (row ? accountLabel(row, t('accounts.main')) : '');
+  const shownMinor = account?.balanceMinor ?? currentAccountBalance(db, accountId) ?? 0;
   const typedMinor = parseAmount(typed, currency) ?? 0;
-  const diff = typedMinor - shownMinor;
+  const diff = edited || shownMinor >= 0 ? typedMinor - shownMinor : 0;
+
+  const type = (next: string) => {
+    setTyped(next);
+    setEdited(true);
+  };
 
   const pick = (id: string) => {
     setAccountId(id);
     setTyped(startFor(id));
+    setEdited(false);
   };
 
   const save = (close: () => void) => {
     const minor = parseAmount(typed, currency);
     if (minor === null) return;
-    adjustBalance(db, minor, today, accountId);
+    // One account at a time, Save does just what the card says.
+    if (!multi || diff !== 0) adjustBalance(db, minor, today, accountId);
     close();
   };
 
@@ -138,7 +150,7 @@ export default function BalanceScreen() {
           </Text>
 
           <View style={styles.keys}>
-            <Numpad value={typed} onChange={setTyped} currency={currency} keyHeight={46} />
+            <Numpad value={typed} onChange={type} currency={currency} keyHeight={46} />
           </View>
           <Button label={t('common.save')} onPress={() => save(close)} style={styles.save} />
         </>

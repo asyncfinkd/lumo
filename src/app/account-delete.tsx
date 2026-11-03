@@ -12,7 +12,7 @@ import { accountBalances } from '@/domain/balance';
 import { formatMoney } from '@/domain/money';
 import { useAccountViews } from '@/features/accounts/accounts';
 import { accountUsage, deleteAccount } from '@/features/accounts/repo';
-import { useAllTransactions, useProfile } from '@/features/live';
+import { useAllTransactions, useProfile, useToday } from '@/features/live';
 import { color, fontFamily, radius, text } from '@/theme';
 
 type How = 'move' | 'delete';
@@ -48,6 +48,7 @@ export default function AccountDeleteScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const profile = useProfile();
+  const today = useToday();
   const accounts = useAccountViews();
   const transactions = useAllTransactions();
   const currency = profile?.currency ?? 'GEL';
@@ -119,7 +120,7 @@ export default function AccountDeleteScreen() {
 
   const confirm = () => {
     if (how === 'move' && !moveTo) return;
-    deleteAccount(db, id, how === 'move' ? { moveTo: moveTo! } : 'delete');
+    deleteAccount(db, id, how === 'move' ? { moveTo: moveTo! } : 'delete', today);
     // Back past the edit sheet to the list.
     router.dismissTo('/accounts');
   };

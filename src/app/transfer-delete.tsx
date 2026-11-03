@@ -9,6 +9,7 @@ import { formatMoney } from '@/domain/money';
 import { deleteTransfer } from '@/features/accounts/repo';
 import { useTransferView } from '@/features/accounts/useTransferView';
 import { useTransfers } from '@/features/live';
+import { useMoneyText } from '@/features/privacy/amounts';
 import { color, fontFamily, radius, text } from '@/theme';
 
 // Deleting a transfer: DeleteConfirm with its own words (#21) — "Delete this
@@ -20,12 +21,16 @@ export default function TransferDeleteScreen() {
   const { id, close } = useLocalSearchParams<{ id: string; close?: string }>();
   const transfers = useTransfers();
   const view = useTransferView();
+  const money = useMoneyText();
   const transfer = transfers.find((x) => x.id === id);
   if (!transfer) return null;
 
   const v = view(transfer);
   const title = t('history.transfer.deleteTitle');
+  // The money comes back out of To: not if that leaves it below zero (#21).
+  const canDelete = !!v.to && v.to.balanceMinor >= transfer.amountMinor;
   const remove = () => {
+    if (!canDelete) return;
     router.dismiss(Number(close ?? 1));
     deleteTransfer(db, transfer.id);
   };
@@ -51,18 +56,25 @@ export default function TransferDeleteScreen() {
             {v.whenShort}
           </Text>
         </View>
-        <Text style={styles.itemAmount}>{v.amount}</Text>
+        <Text style={styles.itemAmount}>{money(v.amount)}</Text>
       </View>
 
       <Text style={styles.body}>
         {t('history.transfer.deleteBody', {
-          amount: formatMoney(transfer.amountMinor, transfer.currency, { decimals: 'auto' }),
+          amount: money(formatMoney(transfer.amountMinor, transfer.currency, { decimals: 'auto' })),
           name: v.from?.label ?? '',
         })}
       </Text>
 
       <View style={styles.actions}>
-        <Press accessibilityRole="button" haptic onPress={remove} style={styles.delete}>
+        <Press
+          accessibilityRole="button"
+          accessibilityState={{ disabled: !canDelete }}
+          disabled={!canDelete}
+          haptic
+          onPress={remove}
+          style={[styles.delete, !canDelete && styles.disabled]}
+        >
           <Text style={styles.deleteText}>{t('history.confirm.delete')}</Text>
         </Press>
         <Press accessibilityRole="button" onPress={() => router.back()} style={styles.keep}>
@@ -136,6 +148,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  disabled: { opacity: 0.4 },
   deleteText: { fontFamily: fontFamily.bold, fontSize: 16, color: color.white },
   keep: {
     height: 52,

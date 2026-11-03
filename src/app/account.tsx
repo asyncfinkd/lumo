@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -44,7 +44,10 @@ export default function AccountScreen() {
   const [tint, setTint] = useState<AccountColor | null>(row?.color ?? null);
   const [start, setStart] = useState('');
   // Live, so a Fix made from here shows up when it comes back.
-  const usage = transactions.filter((tx) => tx.accountId === params.id).length;
+  const usage = useMemo(
+    () => transactions.filter((tx) => tx.accountId === params.id).length,
+    [transactions, params.id],
+  );
   const shown = tint ?? KIND_COLOR[kind];
   const palette = categoryPalette[shown];
   const trimmed = name.trim();
@@ -58,9 +61,10 @@ export default function AccountScreen() {
     } else if (row) {
       // Main's translated name, left as it was, isn't a rename.
       updateAccount(db, row.id, {
-        name: trimmed === label ? row.name : trimmed,
+        name: trimmed,
         kind,
         color: shown,
+        renamed: trimmed !== label,
       });
     }
     close();

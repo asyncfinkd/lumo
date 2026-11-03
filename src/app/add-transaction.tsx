@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -29,7 +29,8 @@ import { type CurrencyCode, currencies, formatMoney, parseAmount } from '@/domai
 import { AccountPicker } from '@/features/accounts/AccountPicker';
 import { type AccountView, useAccountViews } from '@/features/accounts/accounts';
 import { lastUsedAccount } from '@/features/accounts/lastUsed';
-import { addTransfer, updateTransfer } from '@/features/accounts/repo';
+import { accountsQuery, addTransfer, updateTransfer } from '@/features/accounts/repo';
+import { useTransferView } from '@/features/accounts/useTransferView';
 import { useCategories } from '@/features/categories/categories';
 import { CATEGORY_EMOJI } from '@/features/categoryEmoji';
 import {
@@ -108,8 +109,12 @@ function TransactionForm({
 
   const currency: CurrencyCode = profile?.currency ?? existing?.currency ?? 'GEL';
   const accounts = useAccountViews();
+  const transferView = useTransferView();
   // Moving money needs somewhere to move it; editing a transaction never does.
-  const multi = !existing && accounts.length > 1;
+  // Counted once up front too, so the sheet doesn't change shape when the live
+  // list arrives a render later.
+  const [initialCount] = useState(() => accountsQuery(db).all().length);
+  const multi = !existing && (accounts.length || initialCount) > 1;
   const [chosen, setMode] = useState<Mode>(
     existing?.kind ?? (transfer || move ? 'transfer' : 'expense'),
   );
@@ -122,6 +127,8 @@ function TransactionForm({
   const [toPick, setToPick] = useState(move?.toAccountId);
   const from = fromPick ?? accounts[0]?.id;
   const to = toPick ?? accounts.find((a) => a.id !== from)?.id;
+  const fromAccount = accounts.find((a) => a.id === from);
+  const toAccount = accounts.find((a) => a.id === to);
   const [pickingFor, setPickingFor] = useState<'from' | 'to' | 'pay' | null>(null);
   // Per kind, so switching Expense ↔ Income keeps each one's own account.
   const [payPick, setPayPick] = useState<Partial<Record<TransactionKind, string>>>({});
@@ -205,10 +212,25 @@ function TransactionForm({
     setToPick(nextTo);
   };
 
+  // Cash and debit accounts can't go below zero (#21): what each account holds
+  // after this move (and, editing one, without the old one) can't drop under
+  // zero, or under what it holds now if it's already there.
+  const after = (a: AccountView) =>
+    a.balanceMinor +
+    (move?.fromAccountId === a.id ? move.amountMinor : 0) -
+    (move?.toAccountId === a.id ? move.amountMinor : 0) -
+    (a.id === from ? amountMinor : 0) +
+    (a.id === to ? amountMinor : 0);
+  const canMove =
+    !!fromAccount && !!toAccount && accounts.every((a) => after(a) >= Math.min(0, a.balanceMinor));
+  // A second tap while the sheet slides away would move the money twice.
+  const moved = useRef(false);
+
   const save = (close: () => void) => {
     if (amountMinor <= 0 || savedMessage) return;
     if (moving) {
-      if (!from || !to) return;
+      if (!from || !to || !canMove || moved.current) return;
+      moved.current = true;
       const input = {
         fromAccountId: from,
         toAccountId: to,
@@ -281,8 +303,6 @@ function TransactionForm({
           ? t('addTransaction.newExpense')
           : t('addTransaction.newIncome');
   const typedMoney = `${currencies[currency].symbol}${groupTyped(typed)}`;
-  const fromAccount = accounts.find((a) => a.id === from);
-  const toAccount = accounts.find((a) => a.id === to);
   // What AccountPicker shows and sets for each row that opens it.
   const pickers = {
     pay: {
@@ -309,10 +329,7 @@ function TransactionForm({
             : 'history.edit.addedOn',
         {
           name: move
-            ? t('history.transfer.between', {
-                from: accounts.find((a) => a.id === move.fromAccountId)?.label ?? '',
-                to: accounts.find((a) => a.id === move.toAccountId)?.label ?? '',
-              })
+            ? transferView(move).between
             : adjust
               ? t('history.adjusted')
               : existing!.title,
@@ -385,42 +402,44 @@ function TransactionForm({
               </View>
             ) : null}
 
-            {moving && fromAccount && toAccount ? (
-              <>
-                <View style={styles.transfer}>
-                  <AccountRow
-                    label={t('addTransaction.from')}
-                    a11y={t('addTransaction.fromLabel', { name: fromAccount.label })}
-                    account={fromAccount}
-                    currency={currency}
-                    onPress={() => setPickingFor('from')}
-                  />
-                  <View style={styles.transferLine} />
-                  <AccountRow
-                    label={t('addTransaction.to')}
-                    a11y={t('addTransaction.toLabel', { name: toAccount.label })}
-                    account={toAccount}
-                    currency={currency}
-                    onPress={() => setPickingFor('to')}
-                  />
-                  <Press
-                    accessibilityRole="button"
-                    accessibilityLabel={t('addTransaction.swap')}
-                    hitSlop={5}
-                    onPress={() => {
-                      setFromPick(to);
-                      setToPick(from);
-                    }}
-                    style={styles.swap}
-                  >
-                    <SwapIcon color={color.ink} />
-                  </Press>
-                </View>
-                <View style={styles.notSpending}>
-                  <InfoIcon color={color.muted} />
-                  <Text style={styles.notSpendingText}>{t('addTransaction.notSpending')}</Text>
-                </View>
-              </>
+            {moving ? (
+              fromAccount && toAccount ? (
+                <>
+                  <View style={styles.transfer}>
+                    <AccountRow
+                      label={t('addTransaction.from')}
+                      a11y={t('addTransaction.fromLabel', { name: fromAccount.label })}
+                      account={fromAccount}
+                      currency={currency}
+                      onPress={() => setPickingFor('from')}
+                    />
+                    <View style={styles.transferLine} />
+                    <AccountRow
+                      label={t('addTransaction.to')}
+                      a11y={t('addTransaction.toLabel', { name: toAccount.label })}
+                      account={toAccount}
+                      currency={currency}
+                      onPress={() => setPickingFor('to')}
+                    />
+                    <Press
+                      accessibilityRole="button"
+                      accessibilityLabel={t('addTransaction.swap')}
+                      hitSlop={5}
+                      onPress={() => {
+                        setFromPick(to);
+                        setToPick(from);
+                      }}
+                      style={styles.swap}
+                    >
+                      <SwapIcon color={color.ink} />
+                    </Press>
+                  </View>
+                  <View style={styles.notSpending}>
+                    <InfoIcon color={color.muted} />
+                    <Text style={styles.notSpendingText}>{t('addTransaction.notSpending')}</Text>
+                  </View>
+                </>
+              ) : null
             ) : adjust ? null : (
               <ScrollView
                 horizontal
@@ -520,7 +539,7 @@ function TransactionForm({
                 </Press>
                 <Button
                   label={t('history.edit.save')}
-                  disabled={amountMinor <= 0 || (moving && (!from || !to))}
+                  disabled={amountMinor <= 0 || (moving && !canMove)}
                   onPress={() => save(close)}
                   style={styles.editSave}
                 />
@@ -534,7 +553,7 @@ function TransactionForm({
                       ? t('addTransaction.addExpense')
                       : t('addTransaction.addIncome')
                 }
-                disabled={amountMinor <= 0 || (moving && (!from || !to))}
+                disabled={amountMinor <= 0 || (moving && !canMove)}
                 onPress={() => save(close)}
                 style={styles.save}
               />
