@@ -5,7 +5,7 @@ import { create } from 'zustand';
 import { AccountIcon, ChevronDownIcon, ChevronRightIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
 import { type CurrencyCode, formatMoney } from '@/domain/money';
-import type { AccountView } from '@/features/accounts/accounts';
+import { useAccountViews } from '@/features/accounts/accounts';
 import { useMoneyText } from '@/features/privacy/amounts';
 import { color, fontFamily, radius } from '@/theme';
 
@@ -18,20 +18,19 @@ const useSplitOpen = create<{ open: boolean; toggle: () => void }>()((set) => ({
   toggle: () => set((s) => ({ open: !s.open })),
 }));
 
+/** Tiles drawn in the closed row; the rest still count in "In N accounts". */
+const MAX_TILES = 3;
+
 /**
  * Home's balance with two or more accounts (Main-Accounts): "In 3 accounts"
- * under the total, opening to what each one holds and "See accounts".
+ * under the total, opening to what each one holds and "See accounts". Tap an
+ * account to fix its balance.
  */
-export function AccountsSplit({
-  accounts,
-  currency,
-}: {
-  accounts: readonly AccountView[];
-  currency: CurrencyCode;
-}) {
+export function AccountsSplit({ currency }: { currency: CurrencyCode }) {
   const { t } = useTranslation();
   const router = useRouter();
   const money = useMoneyText();
+  const accounts = useAccountViews();
   const { open, toggle } = useSplitOpen();
 
   return (
@@ -44,7 +43,7 @@ export function AccountsSplit({
         style={styles.toggle}
       >
         <View style={styles.stack}>
-          {accounts.map((a, i) => (
+          {accounts.slice(0, MAX_TILES).map((a, i) => (
             <View
               key={a.id}
               style={[
@@ -58,7 +57,9 @@ export function AccountsSplit({
             </View>
           ))}
         </View>
-        <Text style={styles.toggleText}>{t('home.inAccounts', { count: accounts.length })}</Text>
+        <Text numberOfLines={1} style={styles.toggleText}>
+          {t('home.inAccounts', { count: accounts.length })}
+        </Text>
         <View style={open && styles.flipped}>
           <ChevronDownIcon color={color.muted} />
         </View>
@@ -69,10 +70,11 @@ export function AccountsSplit({
             {accounts.map((a) => {
               const amount = money(formatMoney(a.balanceMinor, currency));
               return (
-                <View
+                <Press
                   key={a.id}
-                  accessible
                   accessibilityLabel={`${a.label}, ${amount}`}
+                  accessibilityHint={t('home.changeBalance')}
+                  onPress={() => router.push({ pathname: '/balance', params: { account: a.id } })}
                   style={styles.row}
                 >
                   <View style={[styles.tile, { backgroundColor: a.tint.bg }]}>
@@ -82,7 +84,7 @@ export function AccountsSplit({
                     {a.label}
                   </Text>
                   <Text style={styles.amount}>{amount}</Text>
-                </View>
+                </Press>
               );
             })}
           </View>
@@ -101,7 +103,7 @@ export function AccountsSplit({
 }
 
 const styles = StyleSheet.create({
-  line: { marginTop: 16, height: 1, backgroundColor: 'rgba(43,37,34,0.07)' },
+  line: { marginTop: 16, height: 1, backgroundColor: color.hairline },
   toggle: { marginTop: 10, height: 40, flexDirection: 'row', alignItems: 'center', gap: 12 },
   stack: { flexDirection: 'row' },
   tile: {

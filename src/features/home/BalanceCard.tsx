@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { DigitRoll } from '@/components/DigitRoll';
@@ -5,11 +6,9 @@ import { ArrowUpIcon, EyeIcon, EyeOffIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
 import type { CalendarDate } from '@/domain/dates';
 import { type CurrencyCode, formatMoney } from '@/domain/money';
-import type { AccountView } from '@/features/accounts/accounts';
 import { maskAmount, useAmountsHidden } from '@/features/privacy/amounts';
 import { shortDate } from '@/features/transactions/addForm';
 import { color, fontFamily, gradient, radius, shadow, text } from '@/theme';
-import { AccountsSplit } from './AccountsSplit';
 
 type Props = {
   balanceMinor: number | null;
@@ -20,8 +19,8 @@ type Props = {
   onBalance: () => void;
   /** The eye: hide or show every amount (Main). */
   onToggleHidden: () => void;
-  /** With two or more accounts: the split under the total (Main-Accounts). */
-  accounts?: readonly AccountView[];
+  /** With two or more accounts, `AccountsSplit` under the total (Main-Accounts). */
+  split?: ReactNode;
 };
 
 /**
@@ -34,7 +33,7 @@ export function BalanceCard({
   currency,
   onBalance,
   onToggleHidden,
-  accounts,
+  split,
 }: Props) {
   const { t, i18n } = useTranslation();
   const hidden = useAmountsHidden();
@@ -46,27 +45,11 @@ export function BalanceCard({
       })
     : null;
 
+  // The card is tappable, but VoiceOver gets its parts: the balance (which
+  // opens the sheet), the eye and the accounts split. A focusable card would
+  // hide everything inside it.
   return (
-    <Press
-      accessibilityRole="button"
-      accessibilityLabel={
-        balance && hidden
-          ? t('home.balanceHidden')
-          : balance
-            ? [
-                `${t('home.yourBalance')} ${balance}`,
-                changeLine && change
-                  ? `${formatMoney(Math.abs(change.deltaMinor), currency)} ${changeLine}`
-                  : null,
-              ]
-                .filter(Boolean)
-                .join(', ')
-            : t('home.addBalance')
-      }
-      accessibilityHint={balance ? t('home.changeBalance') : undefined}
-      onPress={onBalance}
-      style={styles.card}
-    >
+    <Press accessible={false} onPress={onBalance} style={styles.card}>
       <View style={styles.labelRow}>
         <Text style={styles.label}>{t('home.yourBalance')}</Text>
         <Press
@@ -81,29 +64,49 @@ export function BalanceCard({
           {hidden ? <EyeOffIcon color={color.muted} /> : <EyeIcon color={color.muted} />}
         </Press>
       </View>
-      {balanceMinor === null ? (
-        <Text style={styles.add}>{t('home.addBalance')}</Text>
-      ) : (
-        <View style={styles.amount}>
-          <DigitRoll minor={balanceMinor} currency={currency} hidden={hidden} />
-        </View>
-      )}
-      {change && changeLine ? (
-        <View style={styles.changeRow}>
-          <View style={[styles.chip, { backgroundColor: up ? color.goodSoft : color.calmSoft }]}>
-            <ArrowUpIcon color={up ? color.good : color.muted} down={!up} />
-            <Text style={[styles.chipText, { color: up ? color.good : color.muted }]}>
-              {hidden
-                ? maskAmount(formatMoney(Math.abs(change.deltaMinor), currency))
-                : formatMoney(Math.abs(change.deltaMinor), currency, { decimals: 'auto' })}
-            </Text>
+      <View
+        accessible
+        accessibilityRole="button"
+        accessibilityLabel={
+          balance && hidden
+            ? t('home.balanceHidden')
+            : balance
+              ? [
+                  `${t('home.yourBalance')} ${balance}`,
+                  changeLine && change
+                    ? `${formatMoney(Math.abs(change.deltaMinor), currency)} ${changeLine}`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(', ')
+              : t('home.addBalance')
+        }
+        accessibilityHint={balance ? t('home.changeBalance') : undefined}
+        accessibilityActions={[{ name: 'activate' }]}
+        onAccessibilityAction={onBalance}
+      >
+        {balanceMinor === null ? (
+          <Text style={styles.add}>{t('home.addBalance')}</Text>
+        ) : (
+          <View style={styles.amount}>
+            <DigitRoll minor={balanceMinor} currency={currency} hidden={hidden} />
           </View>
-          <Text style={styles.changeText}>{changeLine}</Text>
-        </View>
-      ) : null}
-      {accounts && accounts.length > 1 ? (
-        <AccountsSplit accounts={accounts} currency={currency} />
-      ) : null}
+        )}
+        {change && changeLine ? (
+          <View style={styles.changeRow}>
+            <View style={[styles.chip, { backgroundColor: up ? color.goodSoft : color.calmSoft }]}>
+              <ArrowUpIcon color={up ? color.good : color.muted} down={!up} />
+              <Text style={[styles.chipText, { color: up ? color.good : color.muted }]}>
+                {hidden
+                  ? maskAmount(formatMoney(Math.abs(change.deltaMinor), currency))
+                  : formatMoney(Math.abs(change.deltaMinor), currency, { decimals: 'auto' })}
+              </Text>
+            </View>
+            <Text style={styles.changeText}>{changeLine}</Text>
+          </View>
+        ) : null}
+      </View>
+      {balanceMinor === null ? null : split}
     </Press>
   );
 }

@@ -755,7 +755,7 @@ const styles = StyleSheet.create({
     borderCurve: 'continuous',
     backgroundColor: color.washSoft,
   },
-  transferLine: { marginHorizontal: 14, height: 1, backgroundColor: 'rgba(43,37,34,0.07)' },
+  transferLine: { marginHorizontal: 14, height: 1, backgroundColor: color.hairline },
   accountRow: {
     height: 62,
     paddingLeft: 10,
