@@ -27,12 +27,19 @@ export function TransactionRow({
   transaction,
   variant = 'home',
   day,
+  account,
   onPress,
 }: {
   transaction: Transaction;
   variant?: RowVariant;
   /** For `search`: "Today", "Sat, Oct 24". */
   day?: string;
+  /**
+   * For `history` with two or more accounts (HistoryAccounts): the account's
+   * dot, and its name unless History shows that account only. The time moves
+   * into the details.
+   */
+  account?: { label: string; dot: string; named: boolean };
   /** Opens the details sheet. */
   onPress?: () => void;
 }) {
@@ -53,6 +60,12 @@ export function TransactionRow({
           ? t('home.monthlyIncome')
           : time;
     meta = transaction.categoryId ? `${category.label} · ${when}` : when;
+  } else if (variant === 'history' && account) {
+    const parts = [
+      adjust ? t('history.notCounted') : transaction.categoryId ? category.label : null,
+      account.named ? account.label : null,
+    ].filter(Boolean);
+    meta = parts.length ? parts.join(' · ') : time;
   } else if (variant === 'history') {
     meta = adjust
       ? t('history.notCounted')
@@ -96,6 +109,7 @@ export function TransactionRow({
           {title}
         </Text>
         <View style={styles.metaLine}>
+          {account ? <View style={[styles.dot, { backgroundColor: account.dot }]} /> : null}
           <Text numberOfLines={1} style={styles.meta}>
             {meta}
           </Text>
@@ -156,6 +170,7 @@ const styles = StyleSheet.create({
   title: { ...text.rowTitle, color: color.ink },
   metaLine: { flexDirection: 'row', alignItems: 'center', gap: 6, minWidth: 0 },
   meta: { ...text.meta, flexShrink: 1, color: color.muted },
+  dot: { width: 8, height: 8, borderRadius: 4 },
   tag: {
     height: 20,
     paddingHorizontal: 7,

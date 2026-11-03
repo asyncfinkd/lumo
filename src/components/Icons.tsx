@@ -724,13 +724,22 @@ export function SwapIcon({ color, size = 16 }: IconProps) {
 }
 
 /** "Move money" (Accounts). */
-export function TransferIcon({ color, size = 18 }: IconProps) {
+export function TransferIcon({ color, size = 18, width = 2.2 }: IconProps & { width?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
       <Path
-        {...line(color, 2.2)}
+        {...line(color, width)}
         d="M5 8.5h13M14.5 5l3.5 3.5-3.5 3.5M19 15.5H6M9.5 12 6 15.5 9.5 19"
       />
+    </Svg>
+  );
+}
+
+/** From one account to the other (TransactionDetail-Transfer). */
+export function ArrowRightIcon({ color, size = 16 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
+      <Path {...line(color, 2.6)} d="M5 12h14M13.5 6.5 19 12l-5.5 5.5" />
     </Svg>
   );
 }

@@ -109,6 +109,8 @@ function AppStack({ onLoaded }: { onLoaded: () => void }) {
               name="transaction-delete"
               options={{ ...sheetOptions, animation: 'fade' }}
             />
+            <Stack.Screen name="transfer" options={sheetOptions} />
+            <Stack.Screen name="transfer-delete" options={{ ...sheetOptions, animation: 'fade' }} />
             <Stack.Screen
               name="transaction-scope"
               options={{ ...sheetOptions, animation: 'fade' }}

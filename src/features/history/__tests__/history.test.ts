@@ -1,11 +1,14 @@
 import type { TransactionKind, TransactionSource } from '@/domain/leftToSpend';
 import {
   dayGroups,
+  dayHasTotal,
   dayName,
   jarMoves,
   monthSpent,
   searchTransactions,
+  transferMoves,
   withJarMoves,
+  withTransfers,
 } from '../history';
 
 type Row = {
@@ -195,5 +198,71 @@ describe('jar moves (HistoryJars)', () => {
     expect(closed.rows.map((r) => r.id)).toEqual(['c3']);
     // Newest day first, newest row first.
     expect(groups.map((g) => g.date)).toEqual([...groups.map((g) => g.date)].sort().reverse());
+  });
+});
+
+describe('transfers (HistoryAccounts)', () => {
+  const transfer = (id: string, from: string, to: string, amountMinor: number, date: string) => ({
+    id,
+    fromAccountId: from,
+    toAccountId: to,
+    amountMinor,
+    currency: 'GEL' as const,
+    date,
+    occurredAt: `${date}T12:00:00.000Z`,
+    createdAt: `${date}T12:00:00.000Z`,
+  });
+  const transfers = [
+    transfer('m1', 'bank', 'cash', 20000, '2026-10-27'),
+    transfer('m2', 'cash', 'card', 5000, '2026-10-26'),
+    transfer('m3', 'bank', 'card', 7000, '2026-10-20'),
+  ];
+  const today = <G extends { date: string }>(g: G[]) => g.find((d) => d.date === '2026-10-27');
+
+  it('under All accounts, moves show between two and change no total', () => {
+    const moves = transferMoves(transfers, null);
+    expect(moves.map((m) => m.flow)).toEqual(['between', 'between', 'between']);
+    const groups = withTransfers(dayGroups(rows), moves);
+    expect(today(groups)!.totalMinor).toBe(today(dayGroups(rows))!.totalMinor);
+    expect(today(groups)!.rows.map((r) => r.id)).toContain('m1');
+    // A day of moves only spent nothing: no total.
+    const only = groups.find((g) => g.date === '2026-10-20')!;
+    expect(only.rows.map((r) => r.id)).toEqual(['m3']);
+    expect(dayHasTotal(only.rows)).toBe(false);
+    expect(dayHasTotal(today(groups)!.rows)).toBe(true);
+  });
+
+  it('for one account, keeps its moves only, in adds and out takes away', () => {
+    const moves = transferMoves(transfers, 'cash');
+    expect(moves.map((m) => [m.id, m.flow])).toEqual([
+      ['m1', 'in'],
+      ['m2', 'out'],
+    ]);
+    const groups = withTransfers([], moves);
+    expect(groups.map((g) => [g.date, g.totalMinor])).toEqual([
+      ['2026-10-27', 20000],
+      ['2026-10-26', -5000],
+    ]);
+    expect(groups.every((g) => dayHasTotal(g.rows))).toBe(true);
+  });
+
+  it('a day of jar moves only has no total either', () => {
+    const groups = withJarMoves(
+      [],
+      [
+        {
+          id: 'j',
+          jarId: 'trip',
+          name: 'Trip',
+          tone: 'sage',
+          amountMinor: 100,
+          currency: 'GEL',
+          date: '2026-10-27',
+          createdAt: '2026-10-27T10:00:00.000Z',
+          move: 'in',
+        },
+      ],
+    );
+    expect(dayHasTotal(groups[0]!.rows)).toBe(false);
   });
 });

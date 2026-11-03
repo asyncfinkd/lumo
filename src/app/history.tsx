@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { FlatList, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,12 +10,17 @@ import { EmptyClipboard } from '@/components/illustrations/EmptyClipboard';
 import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
 import { formatMoney } from '@/domain/money';
+import { useAccountViews } from '@/features/accounts/accounts';
+import { TransferRow } from '@/features/accounts/TransferRow';
 import {
   dayGroups,
+  dayHasTotal,
   isAutomatic,
   jarMoves,
   monthSpent,
+  transferMoves,
   withJarMoves,
+  withTransfers,
 } from '@/features/history/history';
 import { SwipeRow } from '@/features/history/SwipeRow';
 import { useDayLabel } from '@/features/history/useDayLabel';
@@ -26,6 +31,7 @@ import {
   useJarEntries,
   useProfile,
   useToday,
+  useTransfers,
 } from '@/features/live';
 import { usePullToRefresh } from '@/features/money/usePullToRefresh';
 import { HeaderButton } from '@/features/profile/SettingsHeader';
@@ -36,7 +42,9 @@ import { color, fontFamily, radius, shadow, space, text } from '@/theme';
 
 // History: every transaction by day, newest day first, with each day's total
 // (History, HistoryEmpty), and money moved into or out of jars among them
-// (HistoryJars). Opens from Home's "See all"; Savings has its tab.
+// (HistoryJars). Opens from Home's "See all"; Savings has its tab. With two
+// or more accounts (HistoryAccounts) it shows one account or all of them, each
+// row with its account's dot, and the moves between them.
 export default function HistoryScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -48,23 +56,40 @@ export default function HistoryScreen() {
   const transactions = useAllTransactions();
   const jars = useAllJars();
   const jarEntries = useJarEntries();
+  const transfers = useTransfers();
+  const accounts = useAccountViews();
+  const multi = accounts.length > 1;
+  const [picked, setPicked] = useState<string | null>(null);
+  // Back to All accounts once there's one left, or the one shown is gone.
+  const account = multi && accounts.some((a) => a.id === picked) ? picked : null;
   const pickJar = usePickedJar((s) => s.pick);
   const dayLabel = useDayLabel();
   const money = useMoneyText();
-  const groups = useMemo(
-    () => withJarMoves(dayGroups(transactions), jarMoves(jarEntries, jars)),
-    [transactions, jarEntries, jars],
-  );
+  const groups = useMemo(() => {
+    const mine = account ? transactions.filter((tx) => tx.accountId === account) : transactions;
+    const jarRows = jarMoves(jarEntries, jars).filter((m) => !account || m.accountId === account);
+    return withTransfers(withJarMoves(dayGroups(mine), jarRows), transferMoves(transfers, account));
+  }, [transactions, jarEntries, jars, transfers, account]);
   if (!profile) return null;
 
   const currency = profile.currency;
   const [y, m] = today.split('-').map(Number);
   const month = new Date(y!, m! - 1, 1).toLocaleDateString(i18n.language, { month: 'long' });
   const spent = monthSpent(transactions, today);
-  const subtitle =
-    groups.length === 0
+  const shown = accounts.find((a) => a.id === account);
+  const subtitle = shown
+    ? t('history.accounts.now', {
+        name: shown.label,
+        amount: money(formatMoney(shown.balanceMinor, currency)),
+      })
+    : groups.length === 0
       ? t('history.nothingYet', { month })
       : t('history.spent', { month, amount: money(formatMoney(spent, currency)) });
+  const dotOf = new Map(accounts.map((a) => [a.id, a]));
+  const rowAccount = (id: string) => {
+    const a = multi ? dotOf.get(id) : undefined;
+    return a ? { label: a.label, dot: a.tint.chart, named: !account } : undefined;
+  };
 
   const header = (
     <View style={styles.header}>
@@ -72,6 +97,34 @@ export default function HistoryScreen() {
         {t('history.title')}
       </Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
+      {multi ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          accessibilityRole="radiogroup"
+          accessibilityLabel={t('history.accounts.show')}
+          style={styles.chips}
+          contentContainerStyle={styles.chipsContent}
+        >
+          {[null, ...accounts].map((a) => {
+            const on = (a?.id ?? null) === account;
+            return (
+              <Press
+                key={a?.id ?? 'all'}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: on }}
+                onPress={() => setPicked(a?.id ?? null)}
+                style={[styles.chip, a && styles.chipDotted, on ? styles.chipOn : styles.chipOff]}
+              >
+                {a ? <View style={[styles.chipDot, { backgroundColor: a.tint.chart }]} /> : null}
+                <Text style={[styles.chipText, on && styles.chipTextOn]}>
+                  {a ? a.label : t('history.accounts.all')}
+                </Text>
+              </Press>
+            );
+          })}
+        </ScrollView>
+      ) : null}
     </View>
   );
 
@@ -87,7 +140,10 @@ export default function HistoryScreen() {
         </HeaderButton>
       </View>
 
-      {groups.length === 0 ? (
+      {/* One account with nothing in it yet: just the header and its chips. */}
+      {groups.length === 0 && account ? (
+        header
+      ) : groups.length === 0 ? (
         <>
           {header}
           <Rise style={styles.empty}>
@@ -130,14 +186,35 @@ export default function HistoryScreen() {
                   <Text accessibilityRole="header" style={styles.dayLabel}>
                     {label}
                   </Text>
-                  {/* A day of jar moves only spent nothing: no "₾0.00". */}
-                  {item.rows.every((row) => 'jarId' in row) ? null : (
+                  {/* A day of jar moves or transfers only spent nothing: no "₾0.00". */}
+                  {!dayHasTotal(item.rows) ? null : (
                     <Text style={styles.dayTotal}>{money(total)}</Text>
                   )}
                 </View>
                 <View style={styles.list}>
                   {item.rows.map((row) =>
-                    'jarId' in row ? (
+                    'flow' in row ? (
+                      <SwipeRow
+                        key={row.id}
+                        onEdit={() =>
+                          router.push({
+                            pathname: '/add-transaction',
+                            params: { transfer: row.id },
+                          })
+                        }
+                        onDelete={() =>
+                          router.push({ pathname: '/transfer-delete', params: { id: row.id } })
+                        }
+                      >
+                        <TransferRow
+                          move={row}
+                          accounts={accounts}
+                          onPress={() =>
+                            router.push({ pathname: '/transfer', params: { id: row.id } })
+                          }
+                        />
+                      </SwipeRow>
+                    ) : 'jarId' in row ? (
                       <JarMoveRow
                         key={row.id}
                         move={row}
@@ -166,6 +243,7 @@ export default function HistoryScreen() {
                         <TransactionRow
                           transaction={row}
                           variant="history"
+                          account={rowAccount(row.accountId)}
                           onPress={() =>
                             router.push({ pathname: '/transaction', params: { id: row.id } })
                           }
@@ -194,6 +272,22 @@ const styles = StyleSheet.create({
   header: { paddingTop: 12, paddingHorizontal: space.screen },
   title: { ...text.h1, color: color.ink },
   subtitle: { ...text.subtitle, marginTop: 2, color: color.muted, fontVariant: ['tabular-nums'] },
+  chips: { marginTop: 14, marginHorizontal: -space.screen, flexGrow: 0 },
+  chipsContent: { paddingHorizontal: space.screen, gap: 8 },
+  chip: {
+    height: 38,
+    paddingHorizontal: 14,
+    borderRadius: radius.pill,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+  },
+  chipDotted: { paddingLeft: 12 },
+  chipOn: { backgroundColor: color.ink },
+  chipOff: { backgroundColor: color.tileOff, boxShadow: shadow.accountChip },
+  chipDot: { width: 10, height: 10, borderRadius: 5 },
+  chipText: { fontFamily: fontFamily.bold, fontSize: 14, color: color.ink },
+  chipTextOn: { color: color.white },
   day: { marginTop: space.sectionGap, paddingHorizontal: space.screen, gap: 8 },
   dayHead: {
     paddingHorizontal: 4,

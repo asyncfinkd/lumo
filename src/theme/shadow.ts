@@ -11,6 +11,8 @@ export const shadow = {
   avatar: 'inset 0px 1px 0px 0px rgba(255,255,255,0.7), 0px 6px 14px -8px rgba(200,160,80,0.5)',
   sheet: 'inset 0px 1px 0px 0px rgba(255,255,255,0.9), 0px -12px 40px 0px rgba(200,145,106,0.14)',
   key: '0px 1px 0px 0px rgba(200,145,106,0.14), 0px 4px 12px -8px rgba(200,145,106,0.25)',
+  /** History's account chips, unpicked (HistoryAccounts). */
+  accountChip: '0px 4px 12px -8px rgba(200,145,106,0.4)',
   cta: '0px 10px 24px -12px rgba(43,37,34,0.5)',
   thumb: '0px 2px 8px 0px rgba(200,145,106,0.18)',
   field: '0px 8px 24px -14px rgba(200,145,106,0.35)',
