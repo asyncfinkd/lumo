@@ -9,6 +9,10 @@ import { Press } from '@/components/Press';
 import { Sheet } from '@/components/Sheet';
 import { db } from '@/db/client';
 import { currencies, formatMoney } from '@/domain/money';
+import { AccountPicker } from '@/features/accounts/AccountPicker';
+import { AccountRow } from '@/features/accounts/AccountRow';
+import { useAccountViews } from '@/features/accounts/accounts';
+import { lastJarAccount } from '@/features/accounts/lastUsed';
 import { useJarEntries, useJars, useMoneyMonth } from '@/features/live';
 import { useJarDrop } from '@/features/savings/dropStore';
 import { addToJar, takeFromJar } from '@/features/savings/repo';
@@ -24,7 +28,9 @@ import { color, fontFamily, radius, savingsColor, shadow, size, text } from '@/t
 
 // "Add to New laptop" (SavingsAdd): pick an amount, see where the jar lands,
 // drop it in. A drop that fills the jar opens "You did it" (SavingsDone).
-// With `mode=out` the same sheet takes money out, back to the balance.
+// With `mode=out` the same sheet takes money out, back to the balance. With two
+// or more accounts it says which account the money comes from or goes back to
+// (SavingsAdd-Accounts).
 export default function SavingsAddScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -32,7 +38,20 @@ export default function SavingsAddScreen() {
   const out = mode === 'out';
   const { today, summary } = useMoneyMonth();
   const jar = useJars().find((j) => j.id === jarId);
-  const savedMinor = savedByJar(useJarEntries()).get(jarId) ?? 0;
+  const entries = useJarEntries();
+  const savedMinor = savedByJar(entries).get(jarId) ?? 0;
+  const accounts = useAccountViews();
+  const [accountPick, setAccountPick] = useState<string>();
+  const [picking, setPicking] = useState(false);
+  const accountId =
+    accountPick ??
+    lastJarAccount(
+      entries,
+      jarId,
+      out,
+      accounts.map((a) => a.id),
+    );
+  const account = accounts.length > 1 ? accounts.find((a) => a.id === accountId) : undefined;
   const monthName = useMonthName(today);
   const showDrop = useJarDrop((s) => s.show);
   const [chosen, setAmountMinor] = useState<number | null>(null);
@@ -61,12 +80,12 @@ export default function SavingsAddScreen() {
   const dropIn = (close: () => void) => {
     if (amountMinor <= 0) return;
     if (out) {
-      takeFromJar(db, jar.id, amountMinor, today);
+      takeFromJar(db, jar.id, amountMinor, today, account?.id);
       showDrop({ jarId: jar.id, amountMinor, from: pct, to: afterPct, out: true });
       close();
       return;
     }
-    addToJar(db, jar.id, amountMinor, today);
+    addToJar(db, jar.id, amountMinor, today, account?.id);
     if (after >= jar.goalMinor) {
       filled.current = true;
     } else {
@@ -76,123 +95,147 @@ export default function SavingsAddScreen() {
   };
 
   return (
-    <Sheet
-      accessibilityLabel={t(out ? 'savings.outSheet.title' : 'savings.addSheet.title', {
-        name: jar.name,
-      })}
-      onDismissed={() =>
-        filled.current
-          ? router.replace({
-              pathname: '/savings-done',
-              params: {
-                jar: jar.id,
-                name: jar.name,
-                tone: jar.tone,
-                saved: String(after),
-                currency: jar.currency,
-                start: jar.startDate,
-              },
-            })
-          : router.back()
-      }
-    >
-      {(close) => (
-        <>
-          <View style={styles.header}>
-            <Jar pct={pct} size={40} tone={jar.tone} label={false} />
-            <View style={styles.headerText}>
-              <Text accessibilityRole="header" style={styles.title}>
-                {t(out ? 'savings.outSheet.title' : 'savings.addSheet.title', { name: jar.name })}
-              </Text>
-              <Text style={styles.sub}>
-                {t('savings.ofBoth', { saved: money(savedMinor), goal: money(jar.goalMinor) })}
-              </Text>
+    <>
+      <Sheet
+        accessibilityLabel={t(out ? 'savings.outSheet.title' : 'savings.addSheet.title', {
+          name: jar.name,
+        })}
+        onDismissed={() =>
+          filled.current
+            ? router.replace({
+                pathname: '/savings-done',
+                params: {
+                  jar: jar.id,
+                  name: jar.name,
+                  tone: jar.tone,
+                  saved: String(after),
+                  currency: jar.currency,
+                  start: jar.startDate,
+                },
+              })
+            : router.back()
+        }
+      >
+        {(close) => (
+          <>
+            <View style={styles.header}>
+              <Jar pct={pct} size={40} tone={jar.tone} label={false} />
+              <View style={styles.headerText}>
+                <Text accessibilityRole="header" style={styles.title}>
+                  {t(out ? 'savings.outSheet.title' : 'savings.addSheet.title', { name: jar.name })}
+                </Text>
+                <Text style={styles.sub}>
+                  {t('savings.ofBoth', { saved: money(savedMinor), goal: money(jar.goalMinor) })}
+                </Text>
+              </View>
+              <Press accessibilityLabel={t('common.close')} onPress={close} style={styles.close}>
+                <CloseIcon color={color.muted} />
+              </Press>
             </View>
-            <Press accessibilityLabel={t('common.close')} onPress={close} style={styles.close}>
-              <CloseIcon color={color.muted} />
-            </Press>
-          </View>
 
-          <View accessible accessibilityLabel={money(amountMinor)} style={styles.amount}>
-            <Text style={styles.symbol}>{symbol}</Text>
-            <Text style={styles.digits}>{amountText}</Text>
-          </View>
-
-          <View accessibilityRole="radiogroup" style={styles.chips}>
-            {chips.map((chip) => {
-              const on = chip.minor === amountMinor;
-              return (
-                <Press
-                  key={chip.minor}
-                  accessibilityRole="radio"
-                  accessibilityState={{ checked: on }}
-                  accessibilityLabel={
-                    chip.usual || chip.all
-                      ? `${money(chip.minor)}, ${t(chip.all ? 'savings.outSheet.all' : 'savings.addSheet.usual')}`
-                      : money(chip.minor)
-                  }
-                  onPress={() => setAmountMinor(chip.minor)}
-                  style={[styles.chip, on && styles.chipOn]}
-                >
-                  <Text style={styles.chipLabel}>{money(chip.minor)}</Text>
-                  <Text style={styles.chipNote}>
-                    {chip.all
-                      ? t('savings.outSheet.all')
-                      : chip.usual
-                        ? t('savings.addSheet.usual')
-                        : ''}
-                  </Text>
-                </Press>
-              );
-            })}
-          </View>
-
-          <View style={styles.after}>
-            <View style={styles.afterTop}>
-              <Text style={styles.afterLabel}>{t('savings.addSheet.after')}</Text>
-              <Text style={styles.afterValue}>
-                {t('savings.addSheet.afterValue', { percent: afterPct, left: money(left) })}
-              </Text>
+            <View accessible accessibilityLabel={money(amountMinor)} style={styles.amount}>
+              <Text style={styles.symbol}>{symbol}</Text>
+              <Text style={styles.digits}>{amountText}</Text>
             </View>
-            <View style={styles.track}>
-              {/* The lighter part is what this adds, or what it takes out. */}
-              <View
-                style={[styles.fill, styles.afterFill, { width: `${Math.max(pct, afterPct)}%` }]}
-              />
-              <View
-                style={[styles.fill, styles.nowFill, { width: `${Math.min(pct, afterPct)}%` }]}
-              />
-            </View>
-            <Text style={styles.pace}>
-              {pace.type === 'full'
-                ? t('savings.addSheet.fills')
-                : pace.type === 'ahead'
-                  ? t(`savings.paceAhead.${pace.by}`)
-                  : t(out ? 'savings.outSheet.readyBy' : 'savings.addSheet.onTrack', {
-                      month: monthName(pace.year, pace.month),
-                    })}
-            </Text>
-          </View>
 
-          {summary?.balanceMinor != null ? (
-            <Text style={styles.balance}>
-              {t(out ? 'savings.outSheet.toBalance' : 'savings.addSheet.fromBalance', {
-                amount: money(summary.balanceMinor),
+            <View accessibilityRole="radiogroup" style={styles.chips}>
+              {chips.map((chip) => {
+                const on = chip.minor === amountMinor;
+                return (
+                  <Press
+                    key={chip.minor}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: on }}
+                    accessibilityLabel={
+                      chip.usual || chip.all
+                        ? `${money(chip.minor)}, ${t(chip.all ? 'savings.outSheet.all' : 'savings.addSheet.usual')}`
+                        : money(chip.minor)
+                    }
+                    onPress={() => setAmountMinor(chip.minor)}
+                    style={[styles.chip, on && styles.chipOn]}
+                  >
+                    <Text style={styles.chipLabel}>{money(chip.minor)}</Text>
+                    <Text style={styles.chipNote}>
+                      {chip.all
+                        ? t('savings.outSheet.all')
+                        : chip.usual
+                          ? t('savings.addSheet.usual')
+                          : ''}
+                    </Text>
+                  </Press>
+                );
               })}
-            </Text>
-          ) : null}
+            </View>
 
-          <Button
-            label={t(out ? 'savings.outSheet.take' : 'savings.addSheet.drop', {
-              amount: money(amountMinor),
-            })}
-            disabled={amountMinor <= 0}
-            onPress={() => dropIn(close)}
-            style={styles.drop}
-          />
-        </>
-      )}
-    </Sheet>
+            <View style={styles.after}>
+              <View style={styles.afterTop}>
+                <Text style={styles.afterLabel}>{t('savings.addSheet.after')}</Text>
+                <Text style={styles.afterValue}>
+                  {t('savings.addSheet.afterValue', { percent: afterPct, left: money(left) })}
+                </Text>
+              </View>
+              <View style={styles.track}>
+                {/* The lighter part is what this adds, or what it takes out. */}
+                <View
+                  style={[styles.fill, styles.afterFill, { width: `${Math.max(pct, afterPct)}%` }]}
+                />
+                <View
+                  style={[styles.fill, styles.nowFill, { width: `${Math.min(pct, afterPct)}%` }]}
+                />
+              </View>
+              <Text style={styles.pace}>
+                {pace.type === 'full'
+                  ? t('savings.addSheet.fills')
+                  : pace.type === 'ahead'
+                    ? t(`savings.paceAhead.${pace.by}`)
+                    : t(out ? 'savings.outSheet.readyBy' : 'savings.addSheet.onTrack', {
+                        month: monthName(pace.year, pace.month),
+                      })}
+              </Text>
+            </View>
+
+            {account ? (
+              <AccountRow
+                compact
+                label={t(out ? 'savings.outSheet.goesTo' : 'savings.addSheet.comesFrom')}
+                a11y={t(out ? 'savings.outSheet.goesToLabel' : 'savings.addSheet.comesFromLabel', {
+                  name: account.label,
+                })}
+                account={account}
+                currency={jar.currency}
+                onPress={() => setPicking(true)}
+                style={styles.account}
+              />
+            ) : summary?.balanceMinor != null ? (
+              <Text style={styles.balance}>
+                {t(out ? 'savings.outSheet.toBalance' : 'savings.addSheet.fromBalance', {
+                  amount: money(summary.balanceMinor),
+                })}
+              </Text>
+            ) : null}
+
+            <Button
+              label={t(out ? 'savings.outSheet.take' : 'savings.addSheet.drop', {
+                amount: money(amountMinor),
+              })}
+              disabled={amountMinor <= 0}
+              onPress={() => dropIn(close)}
+              style={styles.drop}
+            />
+          </>
+        )}
+      </Sheet>
+      {picking && account ? (
+        <AccountPicker
+          title={t('accounts.which')}
+          accounts={accounts}
+          value={account.id}
+          currency={jar.currency}
+          onPick={setAccountPick}
+          onDismissed={() => setPicking(false)}
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -292,4 +335,5 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   drop: { marginTop: 14 },
+  account: { marginTop: 14 },
 });

@@ -25,3 +25,29 @@ export function lastUsedAccount(
   }
   return last?.accountId ?? accountIds[0];
 }
+
+/**
+ * Which account money for a jar comes from (or goes back to): the one used
+ * last for this jar in the same direction, if it's still there; otherwise
+ * the first account (SavingsAdd-Accounts).
+ */
+export function lastJarAccount(
+  entries: readonly {
+    jarId: string;
+    amountMinor: number;
+    accountId: string;
+    createdAt: string;
+  }[],
+  jarId: string,
+  out: boolean,
+  accountIds: readonly string[],
+): string | undefined {
+  let last: { accountId: string; createdAt: string } | undefined;
+  for (const e of entries) {
+    if (e.jarId !== jarId || e.amountMinor < 0 !== out || !accountIds.includes(e.accountId)) {
+      continue;
+    }
+    if (!last || e.createdAt > last.createdAt) last = e;
+  }
+  return last?.accountId ?? accountIds[0];
+}
