@@ -2,6 +2,7 @@
 // real migrations; screens use the live hooks in ../live.ts.
 
 import { and, desc, eq, gte, lt } from 'drizzle-orm';
+import type { AccountId } from '@/db/accounts';
 import type { CategoryId } from '@/db/categories';
 import { newId as defaultNewId } from '@/db/id';
 import {
@@ -26,6 +27,8 @@ export type TransactionInput = {
   date: CalendarDate;
   /** The moment it happened; defaults to now. */
   occurredAt?: Date;
+  /** Where the money came from or went; Main when left out (#21). */
+  accountId?: AccountId;
 };
 
 function currencyOf(db: Db) {
@@ -58,6 +61,7 @@ export function addTransaction(db: Db, input: TransactionInput, newId = defaultN
       date: input.date,
       occurredAt: (input.occurredAt ?? new Date()).toISOString(),
       source: 'manual',
+      accountId: input.accountId,
     })
     .returning()
     .get();
@@ -124,6 +128,7 @@ export function updateTransaction(
         note: input.note ?? null,
         date: input.date,
         occurredAt: (input.occurredAt ?? new Date(existing.occurredAt)).toISOString(),
+        accountId: input.accountId ?? existing.accountId,
       })
       .where(eq(transactions.id, id))
       .returning()

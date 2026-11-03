@@ -122,7 +122,7 @@ describe('jars in the database', () => {
   function withBalance() {
     const db = openTestDb();
     saveProfile(db, { name: 'Nika', currency: 'GEL', payday: 5 }, id);
-    adjustBalance(db, 1000000, '2026-10-01', id);
+    adjustBalance(db, 1000000, '2026-10-01', undefined, id);
     return db;
   }
 
@@ -141,8 +141,8 @@ describe('jars in the database', () => {
       '2026-10-27',
       id,
     );
-    addToJar(db, jar, 10000, '2026-10-27', id);
-    addToJar(db, jar, 5000, '2026-10-28', id);
+    addToJar(db, jar, 10000, '2026-10-27', undefined, id);
+    addToJar(db, jar, 5000, '2026-10-28', undefined, id);
 
     expect(jarSaved(db, jar)).toBe(15000);
     expect(currentBalance(db)).toBe(985000);
@@ -169,8 +169,8 @@ describe('jars in the database', () => {
       '2026-10-27',
       id,
     );
-    addToJar(db, jar, 64000, '2026-10-27', id);
-    adjustBalance(db, 1248050, '2026-10-27', id);
+    addToJar(db, jar, 64000, '2026-10-27', undefined, id);
+    adjustBalance(db, 1248050, '2026-10-27', undefined, id);
     expect(currentBalance(db)).toBe(1248050);
   });
 
@@ -186,7 +186,7 @@ describe('jars in the database', () => {
     };
     expect(() => createJar(db, input, '2026-10-27', id)).toThrow();
     const jar = createJar(db, { ...input, name: 'New bike' }, '2026-10-27', id);
-    expect(() => addToJar(db, jar, 0, '2026-10-27', id)).toThrow(RangeError);
+    expect(() => addToJar(db, jar, 0, '2026-10-27', undefined, id)).toThrow(RangeError);
   });
 });
 
@@ -214,10 +214,10 @@ describe('takeOutAmounts', () => {
       remindAt: null,
     };
     const jar = createJar(db, input, '2026-10-27', id);
-    addToJar(db, jar, 10000, '2026-10-27', id);
-    takeFromJar(db, jar, 4000, '2026-10-28', id);
+    addToJar(db, jar, 10000, '2026-10-27', undefined, id);
+    takeFromJar(db, jar, 4000, '2026-10-28', undefined, id);
     expect(jarSaved(db, jar)).toBe(6000);
-    expect(() => takeFromJar(db, jar, 6001, '2026-10-28', id)).toThrow(RangeError);
+    expect(() => takeFromJar(db, jar, 6001, '2026-10-28', undefined, id)).toThrow(RangeError);
   });
 });
 

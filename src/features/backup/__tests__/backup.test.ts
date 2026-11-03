@@ -31,6 +31,8 @@ const everything = (db: ReturnType<typeof openTestDb>) => ({
   bills: db.select().from(schema.recurringBills).all(),
   incomes: db.select().from(schema.incomes).all(),
   skipped: db.select().from(schema.skippedOccurrences).all(),
+  accounts: db.select().from(schema.accounts).all(),
+  transfers: db.select().from(schema.transfers).all(),
 });
 
 describe('Lumo backup', () => {
@@ -51,6 +53,26 @@ describe('Lumo backup', () => {
     });
     // A category deleted before the export stays deleted.
     expect(after.categories.some((c) => c.id === 'refund')).toBe(false);
+  });
+
+  it('puts a backup from before accounts into Main', () => {
+    const backup = buildBackup(filledDb(), null);
+    const old = JSON.parse(JSON.stringify(backup)) as {
+      data: Record<string, Record<string, unknown>[]>;
+    };
+    delete old.data.accounts;
+    delete old.data.transfers;
+    for (const name of ['transactions', 'recurringBills', 'incomes', 'jarEntries']) {
+      for (const row of old.data[name]!) delete row.accountId;
+    }
+
+    const target = openTestDb();
+    restoreBackup(target, parseBackup(JSON.stringify(old)), null);
+
+    expect(target.select().from(schema.accounts).all()).toMatchObject([{ id: 'main' }]);
+    const rows = target.select().from(schema.transactions).all();
+    expect(rows.length).toBe(backup.data.transactions.length);
+    expect(rows.every((r) => r.accountId === 'main')).toBe(true);
   });
 
   it('keeps the photo apart from its path on this phone', () => {

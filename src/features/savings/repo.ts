@@ -2,7 +2,8 @@
 // is a jar entry, not a transaction: it leaves the balance and shows in History
 // (HistoryJars), but never counts as spending or income.
 
-import { and, asc, eq, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, isNull, sql } from 'drizzle-orm';
+import { type AccountId, MAIN_ACCOUNT_ID } from '@/db/accounts';
 import { newId as defaultNewId } from '@/db/id';
 import { jarEntries, jars, profile } from '@/db/schema';
 import type { Db } from '@/db/types';
@@ -100,16 +101,20 @@ export function updateJar(db: Db, jarId: string, input: JarInput): void {
     .run();
 }
 
-/** "Drop ₾100 in the jar" (SavingsAdd): moves money from the balance into the jar. */
+/**
+ * "Drop ₾100 in the jar" (SavingsAdd): moves money from an account (Main when
+ * there's only one) into the jar.
+ */
 export function addToJar(
   db: Db,
   jarId: string,
   amountMinor: number,
   date: CalendarDate,
+  accountId: AccountId = MAIN_ACCOUNT_ID,
   newId = defaultNewId,
 ): void {
   assertPositive('amountMinor', amountMinor);
-  db.insert(jarEntries).values({ id: newId(), jarId, amountMinor, date }).run();
+  db.insert(jarEntries).values({ id: newId(), jarId, amountMinor, date, accountId }).run();
 }
 
 /** "Take money out": back from the jar to the balance, never more than is in it. */
@@ -118,11 +123,14 @@ export function takeFromJar(
   jarId: string,
   amountMinor: number,
   date: CalendarDate,
+  accountId: AccountId = MAIN_ACCOUNT_ID,
   newId = defaultNewId,
 ): void {
   assertPositive('amountMinor', amountMinor);
   if (amountMinor > jarSaved(db, jarId)) throw new RangeError('More than is in the jar');
-  db.insert(jarEntries).values({ id: newId(), jarId, amountMinor: -amountMinor, date }).run();
+  db.insert(jarEntries)
+    .values({ id: newId(), jarId, amountMinor: -amountMinor, date, accountId })
+    .run();
 }
 
 /**
@@ -133,7 +141,16 @@ export function closeJar(db: Db, jarId: string, date: CalendarDate, newId = defa
   db.transaction((tx) => {
     const saved = jarSaved(tx, jarId);
     if (saved !== 0) {
-      tx.insert(jarEntries).values({ id: newId(), jarId, amountMinor: -saved, date }).run();
+      // Back to the account the last drop came from (#21).
+      const last = tx
+        .select({ accountId: jarEntries.accountId })
+        .from(jarEntries)
+        .where(eq(jarEntries.jarId, jarId))
+        .orderBy(desc(jarEntries.createdAt))
+        .get();
+      tx.insert(jarEntries)
+        .values({ id: newId(), jarId, amountMinor: -saved, date, accountId: last?.accountId })
+        .run();
     }
     tx.update(jars)
       .set({ closedAt: new Date().toISOString() })

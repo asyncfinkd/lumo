@@ -1,4 +1,4 @@
-import { balanceAdjustment, totalBalance } from '../balance';
+import { accountBalances, balanceAdjustment, totalBalance } from '../balance';
 import { payPeriod } from '../dates';
 import { leftToSpend, type MoneyTransaction } from '../leftToSpend';
 
@@ -81,5 +81,26 @@ describe('balanceAdjustment', () => {
       transactions: [{ ...fix!, date: '2026-10-31', source: 'adjustment' }],
     });
     expect(after).toEqual(before);
+  });
+});
+
+describe('accountBalances', () => {
+  it('splits the total by account, with transfers moving money between them', () => {
+    const balances = accountBalances(
+      ['main', 'cash', 'empty'],
+      [
+        { kind: 'income', amountMinor: 100000, accountId: 'main' },
+        { kind: 'expense', amountMinor: 1150, accountId: 'cash' },
+      ],
+      [{ amountMinor: 5000, accountId: 'main' }],
+      [{ fromAccountId: 'main', toAccountId: 'cash', amountMinor: 20000 }],
+    );
+    expect(Object.fromEntries(balances)).toEqual({
+      main: 100000 - 5000 - 20000,
+      cash: 20000 - 1150,
+      empty: 0,
+    });
+    // Together they're the total: a transfer adds nothing and takes nothing.
+    expect([...balances.values()].reduce((a, b) => a + b, 0)).toBe(100000 - 1150 - 5000);
   });
 });

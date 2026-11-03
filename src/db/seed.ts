@@ -3,6 +3,7 @@
 
 import { count, sql } from 'drizzle-orm';
 import type { CalendarDate } from '@/domain/dates';
+import { MAIN_ACCOUNT } from './accounts';
 import { CATEGORY_ROWS } from './categories';
 import {
   buildSampleTransactions,
@@ -102,13 +103,14 @@ export function seedSampleData(db: Db, today: CalendarDate, newId: NewId): void 
   });
 }
 
-/** "Delete all data" in Profile: everything the user entered. Categories stay. */
+/** "Delete all data" in Profile: everything the user entered. Categories and Main start over. */
 export function deleteAllData(db: Db): void {
   // `WHERE 1` turns off SQLite's truncate shortcut, which skips the change hook
   // and would leave live queries showing the old rows.
   const all = sql`1`;
   db.transaction((tx) => {
     tx.delete(schema.transactions).where(all).run();
+    tx.delete(schema.transfers).where(all).run();
     tx.delete(schema.jarEntries).where(all).run();
     tx.delete(schema.jars).where(all).run();
     tx.delete(schema.skippedOccurrences).where(all).run();
@@ -116,6 +118,9 @@ export function deleteAllData(db: Db): void {
     tx.delete(schema.recurringBills).where(all).run();
     tx.delete(schema.incomes).where(all).run();
     tx.delete(schema.profile).where(all).run();
+    // Back to just Main, as on a new install.
+    tx.delete(schema.accounts).where(all).run();
+    tx.insert(schema.accounts).values(MAIN_ACCOUNT).run();
     // Back to the default categories, as on a new install.
     tx.delete(schema.categories).where(all).run();
     tx.insert(schema.categories).values(CATEGORY_ROWS).run();

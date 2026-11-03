@@ -163,6 +163,7 @@ export function syncDueTransactions(db: Db, today: CalendarDate, newId = default
           occurredAt: new Date(`${d.date}T09:00:00`).toISOString(),
           source: d.source,
           recurringId: d.recurringId,
+          accountId: bill?.accountId ?? income?.accountId,
         })
         .onConflictDoNothing()
         .run();

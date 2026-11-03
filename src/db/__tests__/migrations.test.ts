@@ -214,6 +214,22 @@ function expectDataKept(phone: Phone) {
   expect(coffee).toMatchObject({ icon: 'coffee', color: 'latte', renamed: false });
   ensureCategories(db);
   expect(counts(phone).categories).toBe(CATEGORY_ROWS.length);
+
+  // Everything from before accounts is Main's (0012, #21).
+  expect(db.select().from(schema.accounts).all()).toMatchObject([
+    { id: 'main', name: 'Main', kind: 'debit', renamed: false },
+  ]);
+  for (const table of [schema.transactions, schema.recurringBills, schema.incomes]) {
+    expect(
+      new Set(
+        db
+          .select()
+          .from(table)
+          .all()
+          .map((r) => r.accountId),
+      ),
+    ).toEqual(new Set(['main']));
+  }
 }
 
 describe('upgrading a phone', () => {
