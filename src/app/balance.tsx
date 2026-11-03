@@ -18,7 +18,7 @@ import { adjustBalance, currentAccountBalance, getProfile } from '@/features/pro
 import { color, fontFamily, radius, text } from '@/theme';
 
 // "Add your balance" / changing it from Home (#6): the user types what they
-// really have and Lumo stores the difference as an adjustment. With two or
+// really have and Kept stores the difference as an adjustment. With two or
 // more accounts it's one account at a time (Balance, #21); `account` picks
 // which one it opens on.
 export default function BalanceScreen() {

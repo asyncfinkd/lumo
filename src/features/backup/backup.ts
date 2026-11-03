@@ -1,4 +1,4 @@
-// The Lumo backup (.lumo): every row on this phone in one JSON file, so a
+// The Kept backup (.kept): every row on this phone in one JSON file, so a
 // restore picks up exactly where the export left off, on this phone or a new
 // one. Pure (no Expo modules), so it's tested against a real SQLite in Jest;
 // ./files.ts reads and writes the file itself.
@@ -8,8 +8,8 @@ import { MAIN_ACCOUNT } from '@/db/accounts';
 import * as schema from '@/db/schema';
 import type { Db } from '@/db/types';
 
-export const BACKUP_EXTENSION = 'lumo';
-/** Bumped only when an older Lumo couldn't read the file any more. */
+export const BACKUP_EXTENSION = 'kept';
+/** Bumped only when an older Kept couldn't read the file any more. */
 export const BACKUP_VERSION = 1;
 
 /** In the order they're restored: rows only point at rows above them. */
@@ -30,8 +30,11 @@ const TABLES = {
 type TableName = keyof typeof TABLES;
 type Rows = { [K in TableName]: (typeof TABLES)[K]['$inferSelect'][] };
 
+/** Backups made before the app was renamed say `lumo`; they still restore. */
+const BACKUP_APPS: readonly string[] = ['kept', 'lumo'];
+
 export type Backup = {
-  app: 'lumo';
+  app: 'kept';
   version: number;
   exportedAt: string;
   data: Rows;
@@ -47,7 +50,7 @@ export function buildBackup(db: Db, photo: string | null, now = new Date()): Bac
     Object.entries(TABLES).map(([name, table]) => [name, db.select().from(table).all()]),
   ) as Rows;
   data.profile = data.profile.map((p) => ({ ...p, photoUri: null }));
-  return { app: 'lumo', version: BACKUP_VERSION, exportedAt: now.toISOString(), data, photo };
+  return { app: 'kept', version: BACKUP_VERSION, exportedAt: now.toISOString(), data, photo };
 }
 
 export class BackupError extends Error {
@@ -56,7 +59,7 @@ export class BackupError extends Error {
   }
 }
 
-/** Reads a backup file's text; throws a BackupError when it isn't one Lumo can restore. */
+/** Reads a backup file's text; throws a BackupError when it isn't one Kept can restore. */
 export function parseBackup(text: string): Backup {
   let raw: unknown;
   try {
@@ -66,7 +69,7 @@ export function parseBackup(text: string): Backup {
   }
   if (!raw || typeof raw !== 'object') throw new BackupError('invalid');
   const backup = raw as Partial<Backup>;
-  if (backup.app !== 'lumo' || typeof backup.version !== 'number') {
+  if (!BACKUP_APPS.includes(backup.app as string) || typeof backup.version !== 'number') {
     throw new BackupError('invalid');
   }
   if (backup.version > BACKUP_VERSION) throw new BackupError('newer');
@@ -85,7 +88,7 @@ export function parseBackup(text: string): Backup {
   // no account, so they land in Main by the column's default.
   if (data.accounts!.length === 0) data.accounts = [{ ...MAIN_ACCOUNT }] as Rows['accounts'];
   return {
-    app: 'lumo',
+    app: 'kept',
     version: backup.version,
     exportedAt: typeof backup.exportedAt === 'string' ? backup.exportedAt : '',
     data: data as Rows,

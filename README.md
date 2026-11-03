@@ -1,6 +1,6 @@
-<p align="center"><img src="./docs/images/banner.gif" alt="Lumo – Money, but calmer." width="100%"></p>
+<p align="center"><img src="./docs/images/banner.gif" alt="Kept – Money, but calmer." width="100%"></p>
 
-<h1 align="center">Lumo</h1>
+<h1 align="center">Kept</h1>
 <p align="center"><b>Money, but calmer.</b><br>A cozy budget tracker that shows what's left to spend, gently. No spreadsheets, no guilt.</p>
 
 <p align="center">
@@ -11,9 +11,9 @@
 
 ---
 
-## Why Lumo?
+## Why Kept?
 
-Most finance apps feel like a bank form or a busy dashboard. Lumo is the opposite. Opening it should feel like exhaling.
+Most finance apps feel like a bank form or a busy dashboard. Kept is the opposite. Opening it should feel like exhaling.
 
 It answers one question first: **how much can I still spend this month?** Everything else steps back. The tone is warm and human, the numbers are clear, and nothing is shouting at you in red.
 
@@ -21,7 +21,7 @@ It answers one question first: **how much can I still spend this month?** Everyt
 
 <p align="center"><img src="./docs/images/privacy.png" alt="Your money never leaves your phone. No account, no servers, no cloud." width="100%"></p>
 
-No account. No servers. No cloud. Lumo keeps everything in one small SQLite file on your device, and nowhere else. It never asks for your email, a password or your bank login.
+No account. No servers. No cloud. Kept keeps everything in one small SQLite file on your device, and nowhere else. It never asks for your email, a password or your bank login.
 
 - **Works offline.** Airplane mode? Still all here.
 - **No ads, no trackers.** Nothing watches how you spend.
@@ -41,7 +41,7 @@ No account. No servers. No cloud. Lumo keeps everything in one small SQLite file
 
 <p align="center"><img src="./docs/images/onboarding.png" alt="Two minutes. Zero accounts. Onboarding: name, currency, income, bills, your month." width="100%"></p>
 
-No email, no password. Just your first name, and Lumo sets up your month:
+No email, no password. Just your first name, and Kept sets up your month:
 
 1. **Say hi:** first name only.
 2. **Currency:** lari, dollar, euro and more.
@@ -70,7 +70,7 @@ Everything lives on your phone, so you are the only one in control of it. These 
 
 ## Getting started
 
-> Lumo is in active development. You need Node 22+, and for simulators Xcode and/or Android Studio.
+> Kept is in active development. You need Node 22+, and for simulators Xcode and/or Android Studio.
 
 ```bash
 git clone https://github.com/asyncfinkd/lumo.git
@@ -97,7 +97,7 @@ Changing the database: edit `src/db/schema.ts`, run `npm run db:generate`, and c
 
 ### Install on an Android phone
 
-Lumo ships to a real phone as an APK built by [EAS](https://docs.expo.dev/eas/). Your data lives in a SQLite file inside the app, so installing a newer build over the old one, or receiving an update, keeps it. Uninstalling the app deletes it.
+Kept ships to a real phone as an APK built by [EAS](https://docs.expo.dev/eas/). Your data lives in a SQLite file inside the app, so installing a newer build over the old one, or receiving an update, keeps it. Uninstalling the app deletes it.
 
 One-time setup (writes `updates.url` and `extra.eas.projectId` to `app.json`; commit that change):
 

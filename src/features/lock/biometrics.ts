@@ -1,4 +1,4 @@
-// What the phone can unlock Lumo with, and the unlock prompt itself (#24).
+// What the phone can unlock Kept with, and the unlock prompt itself (#24).
 
 import { useEffect, useState } from 'react';
 import { AppState, Platform } from 'react-native';
@@ -32,7 +32,7 @@ export async function readBiometrics(): Promise<Biometrics> {
 }
 
 /**
- * The phone's biometrics, read again each time Lumo comes back: Face ID may
+ * The phone's biometrics, read again each time Kept comes back: Face ID may
  * have been set up (or removed) in Settings meanwhile. `null` until known.
  */
 export function useBiometrics(): Biometrics | null {

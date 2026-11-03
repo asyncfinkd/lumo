@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Lumo",
+    "name": "Kept",
     "slug": "lumo",
     "scheme": "lumo",
     "version": "1.0.0",
@@ -46,8 +46,8 @@
       [
         "expo-image-picker",
         {
-          "cameraPermission": "Lumo uses the camera only when you take a profile photo.",
-          "photosPermission": "Lumo shows your photos only so you can pick a profile photo.",
+          "cameraPermission": "Kept uses the camera only when you take a profile photo.",
+          "photosPermission": "Kept shows your photos only so you can pick a profile photo.",
           "microphonePermission": false
         }
       ],
@@ -55,7 +55,7 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Lumo uses Face ID to keep your money private."
+          "faceIDPermission": "Kept uses Face ID to keep your money private."
         }
       ],
       [

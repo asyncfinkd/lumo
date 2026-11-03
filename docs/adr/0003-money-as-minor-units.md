@@ -6,7 +6,7 @@
 
 ## Context
 
-Lumo is about one number people trust: what's left to spend. JavaScript numbers are binary floats, so `0.1 + 0.2 === 0.30000000000000004` and `1.005 * 100 === 100.49999999999999`. Summing hundreds of transactions as floats drifts by a tetri here and there, and a budget app that's off by ₾0.01 loses trust.
+Kept is about one number people trust: what's left to spend. JavaScript numbers are binary floats, so `0.1 + 0.2 === 0.30000000000000004` and `1.005 * 100 === 100.49999999999999`. Summing hundreds of transactions as floats drifts by a tetri here and there, and a budget app that's off by ₾0.01 loses trust.
 
 v1 has one currency per user, picked from 8 currencies in onboarding ([MVP scope](../mvp-scope.md)). The design shows amounts as `₾1,234.50`.
 

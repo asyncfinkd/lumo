@@ -15,7 +15,7 @@ export type Language = (typeof supportedLanguages)[number];
 const isSupported = (code: string | null | undefined): code is Language =>
   (supportedLanguages as readonly string[]).includes(code ?? '');
 
-/** The phone's language if Lumo has it, else English. */
+/** The phone's language if Kept has it, else English. */
 export function deviceLanguage(): Language {
   const code = getLocales()[0]?.languageCode;
   return isSupported(code) ? code : 'en';

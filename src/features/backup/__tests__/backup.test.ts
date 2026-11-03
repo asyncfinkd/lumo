@@ -35,7 +35,7 @@ const everything = (db: ReturnType<typeof openTestDb>) => ({
   transfers: db.select().from(schema.transfers).all(),
 });
 
-describe('Lumo backup', () => {
+describe('Kept backup', () => {
   it('restores exactly what was exported, on a phone with other data', () => {
     const source = filledDb();
     const file = JSON.stringify(buildBackup(source, 'cGhvdG8='));
@@ -93,7 +93,13 @@ describe('Lumo backup', () => {
     });
   });
 
-  it('turns away files that are not a Lumo backup', () => {
+  it('still restores a backup made while the app was called Kept', () => {
+    const backup = buildBackup(filledDb(), null);
+    const old = JSON.stringify({ ...backup, app: 'lumo' });
+    expect(summarize(parseBackup(old))).toEqual(summarize(backup));
+  });
+
+  it('turns away files that are not a Kept backup', () => {
     const reason = (text: string) => {
       try {
         parseBackup(text);
@@ -106,6 +112,7 @@ describe('Lumo backup', () => {
     expect(reason('{"app":"other","version":1}')).toBe('invalid');
     expect(reason('{"app":"lumo","version":1,"data":{"profile":[]}}')).toBe('invalid');
     expect(reason('{"app":"lumo","version":99,"data":{}}')).toBe('newer');
+    expect(reason('{"app":"kept","version":99,"data":{}}')).toBe('newer');
   });
 
   it('changes nothing when a row does not fit', () => {

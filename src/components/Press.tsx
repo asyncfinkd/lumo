@@ -20,7 +20,7 @@ type Props = Omit<PressableProps, 'style' | 'children'> & {
 };
 
 /**
- * Every tappable thing in Lumo. The design's ".press": shrink to 96% on touch,
+ * Every tappable thing in Kept. The design's ".press": shrink to 96% on touch,
  * spring back on release. No scaling with Reduce Motion.
  */
 export function Press({

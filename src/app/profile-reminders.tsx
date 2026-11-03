@@ -59,7 +59,7 @@ export default function ProfileRemindersScreen() {
   const screenTop = useScreenTop();
   const profile = useProfile();
   const bills = useBills();
-  // Whether the phone lets Lumo notify; checked again when you come back from Settings.
+  // Whether the phone lets Kept notify; checked again when you come back from Settings.
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [blocked, setBlocked] = useState(false);
 
