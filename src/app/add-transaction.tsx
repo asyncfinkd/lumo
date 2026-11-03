@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +28,7 @@ import type { TransactionKind } from '@/domain/leftToSpend';
 import { type CurrencyCode, currencies, formatMoney, parseAmount } from '@/domain/money';
 import { AccountPicker } from '@/features/accounts/AccountPicker';
 import { type AccountView, useAccountViews } from '@/features/accounts/accounts';
+import { lastUsedAccount } from '@/features/accounts/lastUsed';
 import { accountsQuery, addTransfer, updateTransfer } from '@/features/accounts/repo';
 import { useTransferView } from '@/features/accounts/useTransferView';
 import { useCategories } from '@/features/categories/categories';
@@ -58,7 +59,8 @@ import { color, fontFamily, radius, shadow, size, text } from '@/theme';
 // Save. `scope` is what EditScope chose for a bill or salary payment; `under`
 // counts the screens below (the details sheet) that close when it's deleted.
 // With two or more accounts it also moves money between them (#21);
-// `type=transfer` opens it there; `transfer=<id>` edits that move.
+// `type=transfer` opens it there; `transfer=<id>` edits that move. Expenses and
+// income then say which account paid or got it (AddTransaction-Account).
 export default function AddTransactionScreen() {
   const { id, scope, under, type, transfer } = useLocalSearchParams<{
     id?: string;
@@ -127,7 +129,9 @@ function TransactionForm({
   const to = toPick ?? accounts.find((a) => a.id !== from)?.id;
   const fromAccount = accounts.find((a) => a.id === from);
   const toAccount = accounts.find((a) => a.id === to);
-  const [pickingFor, setPickingFor] = useState<'from' | 'to' | null>(null);
+  const [pickingFor, setPickingFor] = useState<'from' | 'to' | 'pay' | null>(null);
+  // Per kind, so switching Expense ↔ Income keeps each one's own account.
+  const [payPick, setPayPick] = useState<Partial<Record<TransactionKind, string>>>({});
   const [typed, setTyped] = useState(() => {
     const start = existing ?? move;
     return start ? typedAmount(start.amountMinor, currency) : '0';
@@ -143,6 +147,25 @@ function TransactionForm({
 
   const categories = useCategories();
   const adjust = existing?.source === 'adjustment';
+  // "Paid from" / "Goes to": with two or more accounts, for what you add
+  // yourself. Bills and salary keep the account their bill or income has.
+  const showPay =
+    accounts.length > 1 && !moving && !adjust && (!existing || existing.source === 'manual');
+  const lastUsed = useMemo(
+    () =>
+      showPay && !existing
+        ? lastUsedAccount(
+            transactions,
+            kind,
+            accounts.map((a) => a.id),
+          )
+        : undefined,
+    [showPay, existing, transactions, kind, accounts],
+  );
+  const pay = payPick[kind] ?? existing?.accountId ?? lastUsed;
+  const payAccount = accounts.find((a) => a.id === pay);
+  // Room for the account rows: a tighter sheet and keypad.
+  const tight = multi || showPay;
   const options = categories.ofKind(kind);
   const category = adjust
     ? null
@@ -248,6 +271,7 @@ function TransactionForm({
           note: note.trim() || null,
           date: day,
           occurredAt: day === existing.date ? at : occurredAt(day, at),
+          accountId: showPay ? pay : undefined,
         },
         scope,
       );
@@ -262,6 +286,7 @@ function TransactionForm({
       note: note.trim() || null,
       date: day,
       occurredAt: occurredAt(day, new Date()),
+      accountId: showPay ? pay : undefined,
     });
     close();
   };
@@ -278,6 +303,20 @@ function TransactionForm({
           ? t('addTransaction.newExpense')
           : t('addTransaction.newIncome');
   const typedMoney = `${currencies[currency].symbol}${groupTyped(typed)}`;
+  // What AccountPicker shows and sets for each row that opens it.
+  const pickers = {
+    pay: {
+      title: t(kind === 'income' ? 'accounts.pickGets' : 'accounts.pickPaid'),
+      value: pay,
+      onPick: (id: string) => setPayPick((p) => ({ ...p, [kind]: id })),
+    },
+    from: {
+      title: t('accounts.pickFrom'),
+      value: from,
+      onPick: (id: string) => pickAccount('from', id),
+    },
+    to: { title: t('accounts.pickTo'), value: to, onPick: (id: string) => pickAccount('to', id) },
+  };
 
   // "Fresh Market · added today, 13:15"
   const editing = existing ?? move;
@@ -302,7 +341,7 @@ function TransactionForm({
 
   return (
     <>
-      <Sheet top={multi ? 72 : 96} accessibilityLabel={title} onDismissed={router.back}>
+      <Sheet top={tight ? 72 : 96} accessibilityLabel={title} onDismissed={router.back}>
         {(close) => (
           <>
             <View style={styles.header}>
@@ -355,7 +394,11 @@ function TransactionForm({
               </View>
             ) : moving ? null : message ? (
               <View style={styles.messageRow}>
-                <MessagePill message={message} currency={currency} />
+                <MessagePill
+                  message={message}
+                  currency={currency}
+                  account={showPay ? payAccount?.label : undefined}
+                />
               </View>
             ) : null}
 
@@ -418,6 +461,20 @@ function TransactionForm({
               </ScrollView>
             )}
 
+            {showPay && payAccount ? (
+              <AccountRow
+                compact
+                label={t(kind === 'income' ? 'addTransaction.goesTo' : 'addTransaction.paidFrom')}
+                a11y={t(
+                  kind === 'income' ? 'addTransaction.goesToLabel' : 'addTransaction.paidFromLabel',
+                  { name: payAccount.label },
+                )}
+                account={payAccount}
+                currency={currency}
+                onPress={() => setPickingFor('pay')}
+              />
+            ) : null}
+
             <View style={styles.extras}>
               <Press
                 accessibilityLabel={dayLabel}
@@ -456,12 +513,12 @@ function TransactionForm({
               )}
             </View>
 
-            <View style={[styles.keys, multi && styles.keysTight]}>
+            <View style={[styles.keys, tight && styles.keysTight]}>
               <Numpad
                 value={typed}
                 onChange={setTyped}
                 currency={currency}
-                keyHeight={multi ? 44 : undefined}
+                keyHeight={tight ? 44 : undefined}
               />
             </View>
 
@@ -507,11 +564,11 @@ function TransactionForm({
 
       {pickingFor ? (
         <AccountPicker
-          title={pickingFor === 'from' ? t('accounts.pickFrom') : t('accounts.pickTo')}
+          title={pickers[pickingFor].title}
           accounts={accounts}
-          value={(pickingFor === 'from' ? from : to) ?? ''}
+          value={pickers[pickingFor].value ?? ''}
           currency={currency}
-          onPick={(id) => pickAccount(pickingFor, id)}
+          onPick={pickers[pickingFor].onPick}
           onDismissed={() => setPickingFor(null)}
         />
       ) : null}
@@ -551,17 +608,20 @@ function TransactionForm({
   );
 }
 
+/** From / To on a move; `compact` is the one "Paid from" / "Goes to" row. */
 function AccountRow({
   label,
   a11y,
   account,
   currency,
+  compact = false,
   onPress,
 }: {
   label: string;
   a11y: string;
   account: AccountView;
   currency: CurrencyCode;
+  compact?: boolean;
   onPress: () => void;
 }) {
   return (
@@ -569,9 +629,15 @@ function AccountRow({
       accessibilityRole="button"
       accessibilityLabel={a11y}
       onPress={onPress}
-      style={styles.accountRow}
+      style={[styles.accountRow, compact && styles.payRow]}
     >
-      <View style={[styles.accountTile, { backgroundColor: account.tint.bg }]}>
+      <View
+        style={[
+          styles.accountTile,
+          compact && styles.payTile,
+          { backgroundColor: account.tint.bg },
+        ]}
+      >
         <AccountIcon kind={account.kind} size={20} width={1.9} color={account.tint.fg} />
       </View>
       <View style={styles.accountText}>
@@ -586,7 +652,16 @@ function AccountRow({
   );
 }
 
-function MessagePill({ message, currency }: { message: AddMessage; currency: CurrencyCode }) {
+function MessagePill({
+  message,
+  currency,
+  account,
+}: {
+  message: AddMessage;
+  currency: CurrencyCode;
+  /** With two or more accounts: where income goes. */
+  account?: string;
+}) {
   const { t, i18n } = useTranslation();
   const money = (minor: number) => formatMoney(minor, currency);
   const categories = useCategories();
@@ -596,7 +671,9 @@ function MessagePill({ message, currency }: { message: AddMessage; currency: Cur
 
   const line =
     message.type === 'income'
-      ? t('addTransaction.message.income')
+      ? account
+        ? t('addTransaction.message.incomeTo', { name: account })
+        : t('addTransaction.message.income')
       : message.type === 'covered'
         ? t('addTransaction.message.covered', {
             category: name(message.category),
@@ -714,6 +791,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  payRow: {
+    marginTop: 12,
+    height: 52,
+    paddingLeft: 8,
+    borderRadius: 18,
+    borderCurve: 'continuous',
+    backgroundColor: color.wash,
+  },
+  payTile: { width: 36, height: 36 },
   accountText: { flex: 1, minWidth: 0 },
   accountLabel: { fontFamily: fontFamily.bold, fontSize: 12, lineHeight: 15, color: color.muted },
   accountName: { fontFamily: fontFamily.extrabold, fontSize: 15, lineHeight: 19, color: color.ink },

@@ -118,7 +118,10 @@
       "remove": "Remove",
       "edit": "Edit",
       "amountPlus": "Plus {{amount}}",
-      "amountMinus": "Minus {{amount}}"
+      "amountMinus": "Minus {{amount}}",
+      "paidFrom": "Paid from",
+      "wentTo": "Went to",
+      "account": "Account"
     },
     "confirm": {
       "deleteExpense": "Delete this expense?",
@@ -222,7 +225,8 @@
       "over": "{{amount}} over on {{category}} — that's okay 🤍",
       "covered": "{{category}} already covered this month {{emoji}}",
       "stillLeftToSpend": "Nice! Still {{amount}} left to spend ✨",
-      "overMonth": "{{amount}} over this month — that's okay 🤍"
+      "overMonth": "{{amount}} over this month — that's okay 🤍",
+      "incomeTo": "Lovely! That goes to {{name}} 🌿"
     },
     "transfer": "Transfer",
     "moveMoney": "Move money",
@@ -232,7 +236,11 @@
     "toLabel": "To {{name}}. Change",
     "swap": "Swap From and To",
     "notSpending": "Not counted as spending.",
-    "moveAmount": "Move {{amount}}"
+    "moveAmount": "Move {{amount}}",
+    "paidFrom": "Paid from",
+    "goesTo": "Goes to",
+    "paidFromLabel": "Paid from {{name}}. Change account",
+    "goesToLabel": "Goes to {{name}}. Change account"
   },
   "budgets": {
     "title": "Budgets",
@@ -841,6 +849,8 @@
     "fix": "Fix",
     "pickFrom": "Move from",
     "pickTo": "Move to",
-    "which": "Which account"
+    "which": "Which account",
+    "pickPaid": "Which account paid?",
+    "pickGets": "Which account gets it?"
   }
 }
