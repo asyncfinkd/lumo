@@ -55,7 +55,10 @@
     "hideAmounts": "Hide amounts",
     "showAmounts": "Show amounts",
     "balanceHidden": "Balance hidden",
-    "amountHidden": "amount hidden"
+    "amountHidden": "amount hidden",
+    "inAccounts_one": "In {{count}} account",
+    "inAccounts_other": "In {{count}} accounts",
+    "seeAccounts": "See accounts"
   },
   "history": {
     "title": "History",

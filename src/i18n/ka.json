@@ -55,7 +55,10 @@
     "hideAmounts": "თანხების დამალვა",
     "showAmounts": "თანხების ჩვენება",
     "balanceHidden": "ბალანსი დამალულია",
-    "amountHidden": "თანხა დამალულია"
+    "amountHidden": "თანხა დამალულია",
+    "inAccounts_one": "{{count}} ანგარიშზე",
+    "inAccounts_other": "{{count}} ანგარიშზე",
+    "seeAccounts": "ანგარიშების ნახვა"
   },
   "history": {
     "title": "ისტორია",

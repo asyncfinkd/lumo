@@ -19,6 +19,8 @@ export const color = {
   // Surfaces
   card: 'rgba(255,255,255,0.75)',
   heroCard: 'rgba(255,255,255,0.7)',
+  /** The ring around Home's stacked account tiles (Main-Accounts). */
+  heroRing: '#FFFDFA',
   glass: 'rgba(255,255,255,0.72)',
   sheet: 'rgba(255,252,248,0.9)',
   key: 'rgba(255,255,255,0.95)',

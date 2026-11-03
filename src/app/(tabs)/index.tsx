@@ -9,6 +9,7 @@ import type { Transaction } from '@/db/schema';
 import { addDays } from '@/domain/dates';
 import { BUDGETING } from '@/features/flags';
 import { db } from '@/db/client';
+import { useAccountViews } from '@/features/accounts/accounts';
 import { BalanceCard } from '@/features/home/BalanceCard';
 import { setHideAmounts } from '@/features/profile/repo';
 import { FlowCard } from '@/features/home/FlowCard';
@@ -43,6 +44,7 @@ export default function HomeScreen() {
   const transactions = useAllTransactions();
   const jarEntries = useJarEntries();
   const jars = useJars();
+  const accounts = useAccountViews();
   const picked = usePickedJar((s) => s.id);
   // The jar up front on Savings.
   const jar = jars.find((j) => j.id === picked) ?? jars[0];
@@ -99,6 +101,7 @@ export default function HomeScreen() {
             currency={profile.currency}
             onBalance={() => router.push('/balance')}
             onToggleHidden={() => setHideAmounts(db, !profile.hideAmounts)}
+            accounts={accounts}
           />
         )}
       </Rise>

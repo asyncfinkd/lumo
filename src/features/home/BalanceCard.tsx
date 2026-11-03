@@ -5,9 +5,11 @@ import { ArrowUpIcon, EyeIcon, EyeOffIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
 import type { CalendarDate } from '@/domain/dates';
 import { type CurrencyCode, formatMoney } from '@/domain/money';
+import type { AccountView } from '@/features/accounts/accounts';
 import { maskAmount, useAmountsHidden } from '@/features/privacy/amounts';
 import { shortDate } from '@/features/transactions/addForm';
 import { color, fontFamily, gradient, radius, shadow, text } from '@/theme';
+import { AccountsSplit } from './AccountsSplit';
 
 type Props = {
   balanceMinor: number | null;
@@ -18,13 +20,22 @@ type Props = {
   onBalance: () => void;
   /** The eye: hide or show every amount (Main). */
   onToggleHidden: () => void;
+  /** With two or more accounts: the split under the total (Main-Accounts). */
+  accounts?: readonly AccountView[];
 };
 
 /**
  * Home's hero card in phase 1 (Main): your balance, and how it moved since the
  * 1st of the month. Tap it to correct the balance.
  */
-export function BalanceCard({ balanceMinor, change, currency, onBalance, onToggleHidden }: Props) {
+export function BalanceCard({
+  balanceMinor,
+  change,
+  currency,
+  onBalance,
+  onToggleHidden,
+  accounts,
+}: Props) {
   const { t, i18n } = useTranslation();
   const hidden = useAmountsHidden();
   const balance = balanceMinor === null ? null : formatMoney(balanceMinor, currency);
@@ -89,6 +100,9 @@ export function BalanceCard({ balanceMinor, change, currency, onBalance, onToggl
           </View>
           <Text style={styles.changeText}>{changeLine}</Text>
         </View>
+      ) : null}
+      {accounts && accounts.length > 1 ? (
+        <AccountsSplit accounts={accounts} currency={currency} />
       ) : null}
     </Press>
   );
