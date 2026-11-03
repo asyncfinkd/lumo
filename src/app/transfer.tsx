@@ -59,9 +59,9 @@ export default function TransferScreen() {
             <View style={styles.chip}>
               <Text style={styles.chipText}>{t('history.transfer.chip')}</Text>
             </View>
-            <View accessible accessibilityLabel={v.amount} style={styles.amount}>
+            <View accessible accessibilityLabel={money(v.amount)} style={styles.amount}>
               <Text style={styles.symbol}>{v.symbol}</Text>
-              <Text style={styles.digits}>{v.digits}</Text>
+              <Text style={styles.digits}>{money(v.digits)}</Text>
             </View>
           </View>
 

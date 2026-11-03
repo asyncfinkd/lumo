@@ -29,6 +29,7 @@ import { type CurrencyCode, currencies, formatMoney, parseAmount } from '@/domai
 import { AccountPicker } from '@/features/accounts/AccountPicker';
 import { type AccountView, useAccountViews } from '@/features/accounts/accounts';
 import { accountsQuery, addTransfer, updateTransfer } from '@/features/accounts/repo';
+import { useTransferView } from '@/features/accounts/useTransferView';
 import { useCategories } from '@/features/categories/categories';
 import { CATEGORY_EMOJI } from '@/features/categoryEmoji';
 import {
@@ -106,6 +107,7 @@ function TransactionForm({
 
   const currency: CurrencyCode = profile?.currency ?? existing?.currency ?? 'GEL';
   const accounts = useAccountViews();
+  const transferView = useTransferView();
   // Moving money needs somewhere to move it; editing a transaction never does.
   // Counted once up front too, so the sheet doesn't change shape when the live
   // list arrives a render later.
@@ -187,17 +189,17 @@ function TransactionForm({
     setToPick(nextTo);
   };
 
-  // Cash and debit accounts can't go below zero (#21). Editing a move counts
-  // what From holds without it.
-  const undo = !move
-    ? 0
-    : move.fromAccountId === from
-      ? move.amountMinor
-      : move.toAccountId === from
-        ? -move.amountMinor
-        : 0;
-  const held = (fromAccount?.balanceMinor ?? 0) + undo;
-  const canMove = !!fromAccount && !!toAccount && amountMinor <= held;
+  // Cash and debit accounts can't go below zero (#21): what each account holds
+  // after this move (and, editing one, without the old one) can't drop under
+  // zero, or under what it holds now if it's already there.
+  const after = (a: AccountView) =>
+    a.balanceMinor +
+    (move?.fromAccountId === a.id ? move.amountMinor : 0) -
+    (move?.toAccountId === a.id ? move.amountMinor : 0) -
+    (a.id === from ? amountMinor : 0) +
+    (a.id === to ? amountMinor : 0);
+  const canMove =
+    !!fromAccount && !!toAccount && accounts.every((a) => after(a) >= Math.min(0, a.balanceMinor));
   // A second tap while the sheet slides away would move the money twice.
   const moved = useRef(false);
 
@@ -288,10 +290,7 @@ function TransactionForm({
             : 'history.edit.addedOn',
         {
           name: move
-            ? t('history.transfer.between', {
-                from: accounts.find((a) => a.id === move.fromAccountId)?.label ?? '',
-                to: accounts.find((a) => a.id === move.toAccountId)?.label ?? '',
-              })
+            ? transferView(move).between
             : adjust
               ? t('history.adjusted')
               : existing!.title,

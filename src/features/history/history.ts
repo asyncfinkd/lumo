@@ -159,14 +159,7 @@ export function transferMoves(
   return transfers
     .filter((t) => !account || t.fromAccountId === account || t.toAccountId === account)
     .map((t) => ({
-      id: t.id,
-      fromAccountId: t.fromAccountId,
-      toAccountId: t.toAccountId,
-      amountMinor: t.amountMinor,
-      currency: t.currency,
-      date: t.date,
-      occurredAt: t.occurredAt,
-      createdAt: t.createdAt,
+      ...t,
       flow: !account ? 'between' : t.toAccountId === account ? 'in' : 'out',
     }));
 }
