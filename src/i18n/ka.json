@@ -326,7 +326,9 @@
       "onTrack": "გეგმით მზად იქნება: {{month}}",
       "fills": "ეს ქილას აავსებს!",
       "fromBalance": "გადადის ბალანსიდან · ახლა {{amount}}",
-      "drop": "ჩააგდე {{amount}} ქილაში"
+      "drop": "ჩააგდე {{amount}} ქილაში",
+      "comesFrom": "საიდან",
+      "comesFromLabel": "საიდან: {{name}}. ანგარიშის შეცვლა"
     },
     "done": {
       "title": "შენ შეძელი, {{name}}!",
@@ -345,7 +347,9 @@
       "all": "ყველა",
       "readyBy": "ახლა მზად იქნება: {{month}}",
       "toBalance": "ბრუნდება ბალანსზე · ახლა {{amount}}",
-      "take": "გამოიტანე {{amount}}"
+      "take": "გამოიტანე {{amount}}",
+      "goesTo": "სად",
+      "goesToLabel": "სად: {{name}}. ანგარიშის შეცვლა"
     },
     "new": {
       "namePlaceholder": "რისთვის ზოგავ?",

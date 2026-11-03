@@ -6,9 +6,7 @@ import { AmountDisplay, groupTyped } from '@/components/AmountDisplay';
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
 import {
-  AccountIcon,
   CalendarIcon,
-  ChevronDownIcon,
   ClockIcon,
   CloseIcon,
   InfoIcon,
@@ -27,7 +25,8 @@ import { addDays, type CalendarDate } from '@/domain/dates';
 import type { TransactionKind } from '@/domain/leftToSpend';
 import { type CurrencyCode, currencies, formatMoney, parseAmount } from '@/domain/money';
 import { AccountPicker } from '@/features/accounts/AccountPicker';
-import { type AccountView, useAccountViews } from '@/features/accounts/accounts';
+import { AccountRow } from '@/features/accounts/AccountRow';
+import { useAccountViews } from '@/features/accounts/accounts';
 import { lastUsedAccount } from '@/features/accounts/lastUsed';
 import { addTransfer, updateTransfer } from '@/features/accounts/repo';
 import { useCategories } from '@/features/categories/categories';
@@ -445,6 +444,7 @@ function TransactionForm({
             {showPay && payAccount ? (
               <AccountRow
                 compact
+                style={styles.payRow}
                 label={t(kind === 'income' ? 'addTransaction.goesTo' : 'addTransaction.paidFrom')}
                 a11y={t(
                   kind === 'income' ? 'addTransaction.goesToLabel' : 'addTransaction.paidFromLabel',
@@ -589,50 +589,6 @@ function TransactionForm({
   );
 }
 
-/** From / To on a move; `compact` is the one "Paid from" / "Goes to" row. */
-function AccountRow({
-  label,
-  a11y,
-  account,
-  currency,
-  compact = false,
-  onPress,
-}: {
-  label: string;
-  a11y: string;
-  account: AccountView;
-  currency: CurrencyCode;
-  compact?: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Press
-      accessibilityRole="button"
-      accessibilityLabel={a11y}
-      onPress={onPress}
-      style={[styles.accountRow, compact && styles.payRow]}
-    >
-      <View
-        style={[
-          styles.accountTile,
-          compact && styles.payTile,
-          { backgroundColor: account.tint.bg },
-        ]}
-      >
-        <AccountIcon kind={account.kind} size={20} width={1.9} color={account.tint.fg} />
-      </View>
-      <View style={styles.accountText}>
-        <Text style={styles.accountLabel}>{label}</Text>
-        <Text numberOfLines={1} style={styles.accountName}>
-          {account.label}
-        </Text>
-      </View>
-      <Text style={styles.accountAmount}>{formatMoney(account.balanceMinor, currency)}</Text>
-      <ChevronDownIcon color={color.muted} />
-    </Press>
-  );
-}
-
 function MessagePill({
   message,
   currency,
@@ -755,41 +711,8 @@ const styles = StyleSheet.create({
     borderCurve: 'continuous',
     backgroundColor: color.washSoft,
   },
+  payRow: { marginTop: 12 },
   transferLine: { marginHorizontal: 14, height: 1, backgroundColor: color.hairline },
-  accountRow: {
-    height: 62,
-    paddingLeft: 10,
-    paddingRight: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  accountTile: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    borderCurve: 'continuous',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  payRow: {
-    marginTop: 12,
-    height: 52,
-    paddingLeft: 8,
-    borderRadius: 18,
-    borderCurve: 'continuous',
-    backgroundColor: color.wash,
-  },
-  payTile: { width: 36, height: 36 },
-  accountText: { flex: 1, minWidth: 0 },
-  accountLabel: { fontFamily: fontFamily.bold, fontSize: 12, lineHeight: 15, color: color.muted },
-  accountName: { fontFamily: fontFamily.extrabold, fontSize: 15, lineHeight: 19, color: color.ink },
-  accountAmount: {
-    fontFamily: fontFamily.bold,
-    fontSize: 13,
-    fontVariant: ['tabular-nums'],
-    color: color.muted,
-  },
   swap: {
     position: 'absolute',
     left: '50%',

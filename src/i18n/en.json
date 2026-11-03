@@ -326,7 +326,9 @@
       "onTrack": "Still on track for {{month}}",
       "fills": "That fills the jar!",
       "fromBalance": "Moves from your balance · {{amount}} now",
-      "drop": "Drop {{amount}} in the jar"
+      "drop": "Drop {{amount}} in the jar",
+      "comesFrom": "Comes from",
+      "comesFromLabel": "Comes from {{name}}. Change account"
     },
     "done": {
       "title": "You did it, {{name}}!",
@@ -345,7 +347,9 @@
       "all": "ALL",
       "readyBy": "Now ready by {{month}}",
       "toBalance": "Goes back to your balance · {{amount}} now",
-      "take": "Take {{amount}} out"
+      "take": "Take {{amount}} out",
+      "goesTo": "Goes to",
+      "goesToLabel": "Goes to {{name}}. Change account"
     },
     "new": {
       "namePlaceholder": "What are you saving for?",
