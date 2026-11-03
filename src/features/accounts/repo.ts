@@ -2,7 +2,7 @@
 // AccountDelete and AddTransaction-Transfer boards. Takes a `Db` so tests run
 // it on the real migrations; screens use the live hooks in ../live.ts.
 
-import { and, asc, desc, eq, or } from 'drizzle-orm';
+import { and, asc, desc, eq, isNotNull, or, sum } from 'drizzle-orm';
 import { type AccountColor, type AccountId, type AccountKind, KIND_COLOR } from '@/db/accounts';
 import { newId as defaultNewId } from '@/db/id';
 import {
@@ -19,6 +19,7 @@ import {
 import type { Db } from '@/db/types';
 import type { CalendarDate } from '@/domain/dates';
 import { adjustBalance } from '../profile/repo';
+import { skip } from '../transactions/repo';
 
 export function accountsQuery(db: Db) {
   return db.select().from(accounts).orderBy(asc(accounts.sortOrder), asc(accounts.createdAt));
@@ -79,19 +80,30 @@ export function createAccount(
   });
 }
 
-/** "Save" (EditAccount). Renaming Main stops it following the app's language. */
-export function updateAccount(db: Db, id: AccountId, input: AccountInput): Account {
+/**
+ * "Save" (EditAccount). Renaming Main stops it following the app's language.
+ * The screen passes `renamed` by comparing with the name it showed, which for
+ * Main is the translated one (as ProfileCategory does); left out, it compares
+ * with the stored name.
+ */
+export function updateAccount(
+  db: Db,
+  id: AccountId,
+  input: AccountInput & { renamed?: boolean },
+): Account {
   const name = input.name.trim();
   if (!name) throw new Error('Name is required');
   const existing = db.select().from(accounts).where(eq(accounts.id, id)).get();
   if (!existing) throw new Error(`No account ${id}`);
+  const renamed = existing.renamed || (input.renamed ?? name !== existing.name);
   return db
     .update(accounts)
     .set({
-      name,
+      // Not renamed, Main keeps its stored name and goes on being translated.
+      name: renamed ? name : existing.name,
       kind: input.kind,
       color: input.color ?? existing.color,
-      renamed: existing.renamed || name !== existing.name,
+      renamed,
     })
     .where(eq(accounts.id, id))
     .returning()
@@ -109,7 +121,13 @@ export type AccountDeletion = { moveTo: AccountId } | 'delete';
  * incomes and jar money never vanish with it: they move to the first account
  * left. The last account can't be deleted.
  */
-export function deleteAccount(db: Db, id: AccountId, how: AccountDeletion): void {
+export function deleteAccount(
+  db: Db,
+  id: AccountId,
+  how: AccountDeletion,
+  today: CalendarDate,
+  newId = defaultNewId,
+): void {
   db.transaction((tx) => {
     const others = accountsQuery(tx)
       .all()
@@ -120,8 +138,42 @@ export function deleteAccount(db: Db, id: AccountId, how: AccountDeletion): void
 
     const touches = or(eq(transfers.fromAccountId, id), eq(transfers.toAccountId, id));
     if (how === 'delete') {
+      // Its bill and salary payments count as done, or the next sync would
+      // pay them again from the heir.
+      const payments = tx
+        .select({ recurringId: transactions.recurringId, date: transactions.date })
+        .from(transactions)
+        .where(and(eq(transactions.accountId, id), isNotNull(transactions.recurringId)))
+        .all();
+      for (const p of payments) skip(tx, p.recurringId!, p.date, newId);
       tx.delete(transactions).where(eq(transactions.accountId, id)).run();
       tx.delete(transfers).where(touches).run();
+      // Its jar money stays in the jars and moves to the heir below. The heir
+      // never put it in, so an adjustment gives it back what that takes away.
+      const jarred = Number(
+        tx
+          .select({ total: sum(jarEntries.amountMinor) })
+          .from(jarEntries)
+          .where(eq(jarEntries.accountId, id))
+          .get()?.total ?? 0,
+      );
+      const me = tx.select({ currency: profile.currency }).from(profile).get();
+      if (jarred !== 0 && me) {
+        tx.insert(transactions)
+          .values({
+            id: newId(),
+            kind: jarred > 0 ? 'income' : 'expense',
+            amountMinor: Math.abs(jarred),
+            currency: me.currency,
+            categoryId: null,
+            title: 'Balance adjusted',
+            date: today,
+            occurredAt: new Date().toISOString(),
+            source: 'adjustment',
+            accountId: heir,
+          })
+          .run();
+      }
     } else {
       tx.update(transactions).set({ accountId: heir }).where(eq(transactions.accountId, id)).run();
       tx.delete(transfers)
