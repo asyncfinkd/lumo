@@ -64,10 +64,10 @@ export function AmountDisplay({
 }
 
 /**
- * Android clips the top of a line shorter than the font's own height (Nunito
- * is about 1.37× its size), which cut off the digits and the ₾. There the line
- * is that tall and the pieces sit on the text baseline; iOS keeps the design's
- * tight lines.
+ * A line shorter than the font's own height (Nunito is about 1.37× its size)
+ * gets its top clipped: on Android the digits and the ₾, on iOS the big digits.
+ * On Android the line is that tall and the pieces sit on the text baseline;
+ * iOS keeps the design's 64pt row and gives only the amount the full line.
  */
 const ANDROID = Platform.OS === 'android';
 const fullLine = (fontSize: number) => Math.ceil(fontSize * 1.37);
@@ -86,7 +86,11 @@ const styles = StyleSheet.create({
   },
   amount: {
     ...text.amount,
-    ...(ANDROID ? { lineHeight: fullLine(text.amount.fontSize) } : null),
+    lineHeight: fullLine(text.amount.fontSize),
+    // iOS clipped the digits' tops too: the full line stops that, but sits
+    // them 13pt low. Lifted back onto the ₾'s line without changing layout,
+    // since a margin squeezes the text into the row and clips it again.
+    ...(ANDROID ? null : { transform: [{ translateY: -13 }] }),
     color: color.ink,
   },
   caret: {
