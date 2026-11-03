@@ -163,7 +163,28 @@
       "edit": "Edit",
       "delete": "Delete"
     },
-    "showDetails": "Shows the details"
+    "showDetails": "Shows the details",
+    "accounts": {
+      "show": "Show account",
+      "all": "All accounts",
+      "now": "{{name}} · {{amount}} now"
+    },
+    "transfer": {
+      "between": "{{from}} → {{to}}",
+      "fromName": "From {{name}}",
+      "toName": "To {{name}}",
+      "moved": "Moved · {{time}}",
+      "movedIn": "Moved in · {{time}}",
+      "movedOut": "Moved out · {{time}}",
+      "label": "{{title}}, moved {{amount}}. Not spending",
+      "title": "Moved to {{name}}",
+      "chip": "Transfer",
+      "now": "Now {{amount}}",
+      "note": "Not counted as spending. Your total stays the same.",
+      "edit": "Edit move",
+      "deleteTitle": "Delete this move?",
+      "deleteBody": "{{amount}} goes back to {{name}}."
+    }
   },
   "balance": {
     "title": "What's in your account?",

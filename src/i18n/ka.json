@@ -163,7 +163,28 @@
       "edit": "შეცვლა",
       "delete": "წაშლა"
     },
-    "showDetails": "აჩვენებს დეტალებს"
+    "showDetails": "აჩვენებს დეტალებს",
+    "accounts": {
+      "show": "ანგარიშის ჩვენება",
+      "all": "ყველა ანგარიში",
+      "now": "{{name}} · ახლა {{amount}}"
+    },
+    "transfer": {
+      "between": "{{from}} → {{to}}",
+      "fromName": "საიდან: {{name}}",
+      "toName": "სად: {{name}}",
+      "moved": "გადატანა · {{time}}",
+      "movedIn": "შემოვიდა · {{time}}",
+      "movedOut": "გავიდა · {{time}}",
+      "label": "{{title}}, გადატანილია {{amount}}. ხარჯად არ ითვლება",
+      "title": "გადატანა: {{name}}",
+      "chip": "გადატანა",
+      "now": "ახლა {{amount}}",
+      "note": "ხარჯად არ ითვლება. ჯამი იგივე რჩება.",
+      "edit": "გადატანის შეცვლა",
+      "deleteTitle": "წავშალო ეს გადატანა?",
+      "deleteBody": "{{amount}} დაბრუნდება ანგარიშზე: {{name}}."
+    }
   },
   "balance": {
     "title": "რამდენი გაქვს ანგარიშზე?",

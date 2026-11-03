@@ -30,6 +30,8 @@ export const color = {
   chipDot: 'rgba(255,255,255,0.75)',
   scrim: 'rgba(43,37,34,0.22)',
   track: '#F2EAE2',
+  /** A transfer's dot in History under All accounts: it belongs to neither. */
+  transferDot: '#C9BDB2',
   donutTrack: '#F5EEE6',
   grabber: '#E2D8CF',
   avatar: '#FFE7A6',

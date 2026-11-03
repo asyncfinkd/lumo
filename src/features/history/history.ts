@@ -65,6 +65,8 @@ export type JarMove = {
   date: CalendarDate;
   createdAt: string;
   move: 'in' | 'out' | 'done';
+  /** The account it came from or went back to. */
+  accountId?: string;
 };
 
 /**
@@ -78,6 +80,7 @@ export function jarMoves(
     amountMinor: number;
     date: CalendarDate;
     createdAt: string;
+    accountId?: string;
   }[],
   jars: readonly {
     id: string;
@@ -113,6 +116,7 @@ export function jarMoves(
           : jar.closedAt && lastOut.get(jar.id)?.id === e.id
             ? 'done'
             : 'out',
+      accountId: e.accountId,
     });
   }
   return moves;
@@ -127,13 +131,82 @@ export function withJarMoves<T extends { createdAt: string }>(
   groups: readonly DayGroup<T>[],
   moves: readonly JarMove[],
 ): DayGroup<T | JarMove>[] {
-  const byDate = new Map<CalendarDate, DayGroup<T | JarMove>>(
+  return mergeIntoDays(groups, moves, () => 0);
+}
+
+/**
+ * A move between two accounts as a History row (HistoryAccounts), seen from
+ * the account History shows: `between` under All accounts, `in` or `out`
+ * when it's filtered to one side.
+ */
+export type TransferMove = {
+  id: string;
+  fromAccountId: string;
+  toAccountId: string;
+  amountMinor: number;
+  currency: CurrencyCode;
+  date: CalendarDate;
+  occurredAt: string;
+  createdAt: string;
+  flow: 'between' | 'in' | 'out';
+};
+
+/** Every transfer as a History row; with `account`, only the ones it took part in. */
+export function transferMoves(
+  transfers: readonly Omit<TransferMove, 'flow'>[],
+  account: string | null,
+): TransferMove[] {
+  return transfers
+    .filter((t) => !account || t.fromAccountId === account || t.toAccountId === account)
+    .map((t) => ({
+      id: t.id,
+      fromAccountId: t.fromAccountId,
+      toAccountId: t.toAccountId,
+      amountMinor: t.amountMinor,
+      currency: t.currency,
+      date: t.date,
+      occurredAt: t.occurredAt,
+      createdAt: t.createdAt,
+      flow: !account ? 'between' : t.toAccountId === account ? 'in' : 'out',
+    }));
+}
+
+/**
+ * History's days with the transfers in among the rest. Under All accounts a
+ * move changes no day's total (the money stays yours); for one account,
+ * money moved in adds to the day and money moved out takes from it.
+ */
+export function withTransfers<T extends { createdAt: string }>(
+  groups: readonly DayGroup<T>[],
+  moves: readonly TransferMove[],
+): DayGroup<T | TransferMove>[] {
+  return mergeIntoDays(groups, moves, (m) =>
+    m.flow === 'in' ? m.amountMinor : m.flow === 'out' ? -m.amountMinor : 0,
+  );
+}
+
+/** Whether a day's total means anything: it holds a transaction or money in or out of the account. */
+export function dayHasTotal(rows: readonly object[]): boolean {
+  return rows.some((row) => !('jarId' in row) && !('flow' in row && row.flow === 'between'));
+}
+
+function mergeIntoDays<
+  T extends { createdAt: string },
+  M extends { date: CalendarDate; createdAt: string },
+>(
+  groups: readonly DayGroup<T>[],
+  moves: readonly M[],
+  totalOf: (move: M) => number,
+): DayGroup<T | M>[] {
+  const byDate = new Map<CalendarDate, DayGroup<T | M>>(
     groups.map((g) => [g.date, { ...g, rows: [...g.rows] }]),
   );
   for (const m of moves) {
     const day = byDate.get(m.date);
-    if (day) day.rows.push(m);
-    else byDate.set(m.date, { date: m.date, totalMinor: 0, rows: [m] });
+    if (day) {
+      day.rows.push(m);
+      day.totalMinor += totalOf(m);
+    } else byDate.set(m.date, { date: m.date, totalMinor: totalOf(m), rows: [m] });
   }
   return [...byDate.values()]
     .sort((a, b) => b.date.localeCompare(a.date))

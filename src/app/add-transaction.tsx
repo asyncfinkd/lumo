@@ -22,16 +22,22 @@ import { SegmentedControl } from '@/components/SegmentedControl';
 import { Sheet } from '@/components/Sheet';
 import type { CategoryId } from '@/db/categories';
 import { db } from '@/db/client';
-import type { Transaction } from '@/db/schema';
+import type { Transaction, Transfer } from '@/db/schema';
 import { addDays, type CalendarDate } from '@/domain/dates';
 import type { TransactionKind } from '@/domain/leftToSpend';
 import { type CurrencyCode, currencies, formatMoney, parseAmount } from '@/domain/money';
 import { AccountPicker } from '@/features/accounts/AccountPicker';
 import { type AccountView, useAccountViews } from '@/features/accounts/accounts';
-import { addTransfer } from '@/features/accounts/repo';
+import { addTransfer, updateTransfer } from '@/features/accounts/repo';
 import { useCategories } from '@/features/categories/categories';
 import { CATEGORY_EMOJI } from '@/features/categoryEmoji';
-import { useActiveBills, useAllTransactions, useBudgets, useMoneyMonth } from '@/features/live';
+import {
+  useActiveBills,
+  useAllTransactions,
+  useBudgets,
+  useMoneyMonth,
+  useTransfers,
+} from '@/features/live';
 import { type AddMessage, addMessage, messageTone } from '@/features/transactions/addMessage';
 import {
   editedTitle,
@@ -51,15 +57,23 @@ import { color, fontFamily, radius, shadow, size, text } from '@/theme';
 // Save. `scope` is what EditScope chose for a bill or salary payment; `under`
 // counts the screens below (the details sheet) that close when it's deleted.
 // With two or more accounts it also moves money between them (#21);
-// `type=transfer` opens it there.
+// `type=transfer` opens it there; `transfer=<id>` edits that move.
 export default function AddTransactionScreen() {
-  const { id, scope, under, type } = useLocalSearchParams<{
+  const { id, scope, under, type, transfer } = useLocalSearchParams<{
     id?: string;
     scope?: Scope;
     under?: string;
     type?: 'transfer';
+    transfer?: string;
   }>();
   const transactions = useAllTransactions();
+  const transfers = useTransfers();
+  if (transfer) {
+    const move = transfers.find((x) => x.id === transfer);
+    // Wait for the live query, as below.
+    if (!move) return null;
+    return <TransactionForm move={move} under={Number(under ?? 0)} />;
+  }
   if (!id) return <TransactionForm transfer={type === 'transfer'} />;
   const existing = transactions.find((x) => x.id === id);
   // Wait for the live query, so the form starts filled in.
@@ -74,11 +88,14 @@ function TransactionForm({
   scope = 'one',
   under = 0,
   transfer = false,
+  move,
 }: {
   existing?: Transaction;
   scope?: Scope;
   under?: number;
   transfer?: boolean;
+  /** The transfer being edited (TransactionDetail-Transfer → Edit). */
+  move?: Transfer;
 }) {
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -91,21 +108,26 @@ function TransactionForm({
   const accounts = useAccountViews();
   // Moving money needs somewhere to move it; editing a transaction never does.
   const multi = !existing && accounts.length > 1;
-  const [chosen, setMode] = useState<Mode>(existing?.kind ?? (transfer ? 'transfer' : 'expense'));
+  const [chosen, setMode] = useState<Mode>(
+    existing?.kind ?? (transfer || move ? 'transfer' : 'expense'),
+  );
   const mode: Mode = chosen === 'transfer' && !multi ? 'expense' : chosen;
   const moving = mode === 'transfer';
   const kind: TransactionKind = moving ? 'expense' : mode;
   // The live list can arrive after the first render: until one is picked,
   // money moves from the first account to the next.
-  const [fromPick, setFromPick] = useState<string>();
-  const [toPick, setToPick] = useState<string>();
+  const [fromPick, setFromPick] = useState(move?.fromAccountId);
+  const [toPick, setToPick] = useState(move?.toAccountId);
   const from = fromPick ?? accounts[0]?.id;
   const to = toPick ?? accounts.find((a) => a.id !== from)?.id;
   const [pickingFor, setPickingFor] = useState<'from' | 'to' | null>(null);
-  const [typed, setTyped] = useState(existing ? typedAmount(existing.amountMinor, currency) : '0');
+  const [typed, setTyped] = useState(() => {
+    const start = existing ?? move;
+    return start ? typedAmount(start.amountMinor, currency) : '0';
+  });
   const [picked, setPicked] = useState<CategoryId | null>(existing?.categoryId ?? null);
-  const [date, setDate] = useState<CalendarDate | null>(existing?.date ?? null);
-  const [note, setNote] = useState(existing?.note ?? '');
+  const [date, setDate] = useState<CalendarDate | null>(existing?.date ?? move?.date ?? null);
+  const [note, setNote] = useState(existing?.note ?? move?.note ?? '');
   const [writingNote, setWritingNote] = useState(false);
   const [pickingDay, setPickingDay] = useState(false);
   // Set on save: the sheet keeps showing what it said while it slides away,
@@ -164,14 +186,20 @@ function TransactionForm({
     if (amountMinor <= 0 || savedMessage) return;
     if (moving) {
       if (!from || !to) return;
-      addTransfer(db, {
+      const input = {
         fromAccountId: from,
         toAccountId: to,
         amountMinor,
         date: day,
         note: note.trim() || null,
-        occurredAt: occurredAt(day, new Date()),
-      });
+      };
+      if (move) {
+        const at = new Date(move.occurredAt);
+        updateTransfer(db, move.id, {
+          ...input,
+          occurredAt: day === move.date ? at : occurredAt(day, at),
+        });
+      } else addTransfer(db, { ...input, occurredAt: occurredAt(day, new Date()) });
       close();
       return;
     }
@@ -216,31 +244,41 @@ function TransactionForm({
     close();
   };
 
-  const title = existing
-    ? kind === 'expense'
-      ? t('history.edit.editExpense')
-      : t('history.edit.editIncome')
-    : moving
-      ? t('addTransaction.moveMoney')
-      : kind === 'expense'
-        ? t('addTransaction.newExpense')
-        : t('addTransaction.newIncome');
+  const title = move
+    ? t('history.transfer.edit')
+    : existing
+      ? kind === 'expense'
+        ? t('history.edit.editExpense')
+        : t('history.edit.editIncome')
+      : moving
+        ? t('addTransaction.moveMoney')
+        : kind === 'expense'
+          ? t('addTransaction.newExpense')
+          : t('addTransaction.newIncome');
   const typedMoney = `${currencies[currency].symbol}${groupTyped(typed)}`;
   const fromAccount = accounts.find((a) => a.id === from);
   const toAccount = accounts.find((a) => a.id === to);
 
   // "Fresh Market · added today, 13:15"
-  const added = existing
+  const editing = existing ?? move;
+  const added = editing
     ? t(
-        existing.date === today
+        editing.date === today
           ? 'history.edit.addedToday'
-          : existing.date === addDays(today, -1)
+          : editing.date === addDays(today, -1)
             ? 'history.edit.addedYesterday'
             : 'history.edit.addedOn',
         {
-          name: adjust ? t('history.adjusted') : existing.title,
-          date: shortDate(existing.date, i18n.language),
-          time: clockTime(existing.occurredAt),
+          name: move
+            ? t('history.transfer.between', {
+                from: accounts.find((a) => a.id === move.fromAccountId)?.label ?? '',
+                to: accounts.find((a) => a.id === move.toAccountId)?.label ?? '',
+              })
+            : adjust
+              ? t('history.adjusted')
+              : existing!.title,
+          date: shortDate(editing.date, i18n.language),
+          time: clockTime(editing.occurredAt),
         },
       )
     : null;
@@ -260,23 +298,26 @@ function TransactionForm({
               <View style={styles.spacer} />
             </View>
 
-            <View style={styles.type}>
-              <SegmentedControl
-                accessibilityLabel={t('addTransaction.type')}
-                options={[
-                  { value: 'expense' as Mode, label: t('addTransaction.expense') },
-                  { value: 'income' as Mode, label: t('addTransaction.income') },
-                  ...(multi
-                    ? [{ value: 'transfer' as Mode, label: t('addTransaction.transfer') }]
-                    : []),
-                ]}
-                value={mode}
-                onChange={(next) => {
-                  setMode(next);
-                  setPicked(null);
-                }}
-              />
-            </View>
+            {/* A move stays a move: it can't turn into spending. */}
+            {move ? null : (
+              <View style={styles.type}>
+                <SegmentedControl
+                  accessibilityLabel={t('addTransaction.type')}
+                  options={[
+                    { value: 'expense' as Mode, label: t('addTransaction.expense') },
+                    { value: 'income' as Mode, label: t('addTransaction.income') },
+                    ...(multi
+                      ? [{ value: 'transfer' as Mode, label: t('addTransaction.transfer') }]
+                      : []),
+                  ]}
+                  value={mode}
+                  onChange={(next) => {
+                    setMode(next);
+                    setPicked(null);
+                  }}
+                />
+              </View>
+            )}
 
             <View style={styles.amount}>
               <AmountDisplay
@@ -405,14 +446,14 @@ function TransactionForm({
               />
             </View>
 
-            {existing ? (
+            {editing ? (
               <View style={styles.editActions}>
                 <Press
                   accessibilityRole="button"
                   onPress={() =>
                     router.push({
-                      pathname: '/transaction-delete',
-                      params: { id: existing.id, close: String(2 + under) },
+                      pathname: move ? '/transfer-delete' : '/transaction-delete',
+                      params: { id: editing.id, close: String(2 + under) },
                     })
                   }
                   style={styles.delete}
@@ -422,7 +463,7 @@ function TransactionForm({
                 </Press>
                 <Button
                   label={t('history.edit.save')}
-                  disabled={amountMinor <= 0}
+                  disabled={amountMinor <= 0 || (moving && (!from || !to))}
                   onPress={() => save(close)}
                   style={styles.editSave}
                 />
