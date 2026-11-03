@@ -86,6 +86,10 @@ export default function HistoryScreen() {
       ? t('history.nothingYet', { month })
       : t('history.spent', { month, amount: money(formatMoney(spent, currency)) });
   const dotOf = new Map(accounts.map((a) => [a.id, a]));
+  const rowAccount = (id: string) => {
+    const a = multi ? dotOf.get(id) : undefined;
+    return a ? { label: a.label, dot: a.tint.chart, named: !account } : undefined;
+  };
 
   const header = (
     <View style={styles.header}>
@@ -136,7 +140,10 @@ export default function HistoryScreen() {
         </HeaderButton>
       </View>
 
-      {groups.length === 0 ? (
+      {/* One account with nothing in it yet: just the header and its chips. */}
+      {groups.length === 0 && account ? (
+        header
+      ) : groups.length === 0 ? (
         <>
           {header}
           <Rise style={styles.empty}>
@@ -236,15 +243,7 @@ export default function HistoryScreen() {
                         <TransactionRow
                           transaction={row}
                           variant="history"
-                          account={
-                            multi && dotOf.has(row.accountId)
-                              ? {
-                                  label: dotOf.get(row.accountId)!.label,
-                                  dot: dotOf.get(row.accountId)!.tint.chart,
-                                  named: !account,
-                                }
-                              : undefined
-                          }
+                          account={rowAccount(row.accountId)}
                           onPress={() =>
                             router.push({ pathname: '/transaction', params: { id: row.id } })
                           }
