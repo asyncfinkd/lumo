@@ -8,6 +8,7 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { db } from '@/db/client';
 import { categories, recurringBills } from '@/db/schema';
 import type { CalendarDate } from '@/domain/dates';
+import { accountsQuery, transfersQuery } from './accounts/repo';
 import { budgetsQuery } from './budgets/repo';
 import { summarizeMonth } from './money/summary';
 import { useToday } from './money/useToday';
@@ -30,6 +31,16 @@ export function useProfileStatus() {
 
 export function useCategories() {
   return useLiveQuery(db.select().from(categories).orderBy(categories.sortOrder)).data;
+}
+
+/** Accounts in their order; just Main until someone adds another (#21). */
+export function useAccounts() {
+  return useLiveQuery(accountsQuery(db)).data;
+}
+
+/** Money moved between accounts, newest first. */
+export function useTransfers() {
+  return useLiveQuery(transfersQuery(db)).data;
 }
 
 export function useBudgets() {

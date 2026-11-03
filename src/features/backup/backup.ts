@@ -4,6 +4,7 @@
 // ./files.ts reads and writes the file itself.
 
 import { sql } from 'drizzle-orm';
+import { MAIN_ACCOUNT } from '@/db/accounts';
 import * as schema from '@/db/schema';
 import type { Db } from '@/db/types';
 
@@ -14,11 +15,13 @@ export const BACKUP_VERSION = 1;
 /** In the order they're restored: rows only point at rows above them. */
 const TABLES = {
   categories: schema.categories,
+  accounts: schema.accounts,
   profile: schema.profile,
   recurringBills: schema.recurringBills,
   incomes: schema.incomes,
   budgets: schema.budgets,
   transactions: schema.transactions,
+  transfers: schema.transfers,
   skippedOccurrences: schema.skippedOccurrences,
   jars: schema.jars,
   jarEntries: schema.jarEntries,
@@ -78,6 +81,9 @@ export function parseBackup(text: string): Backup {
     }
   }
   if (data.profile!.length !== 1) throw new BackupError('invalid');
+  // From before accounts (#21): everything in it was Main's, and its rows have
+  // no account, so they land in Main by the column's default.
+  if (data.accounts!.length === 0) data.accounts = [{ ...MAIN_ACCOUNT }] as Rows['accounts'];
   return {
     app: 'lumo',
     version: backup.version,

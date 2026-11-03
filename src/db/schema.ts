@@ -5,6 +5,7 @@
 
 import { sql } from 'drizzle-orm';
 import { check, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { ACCOUNT_COLORS, ACCOUNT_KINDS, MAIN_ACCOUNT_ID } from './accounts';
 
 const currencyCodes = ['GEL', 'USD', 'EUR', 'GBP', 'TRY', 'AMD', 'AZN', 'UAH'] as const;
 const now = sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`;
@@ -72,12 +73,33 @@ export const categories = sqliteTable('categories', {
   renamed: integer('renamed', { mode: 'boolean' }).notNull().default(false),
 });
 
+/** Where money sits: Cash, a debit card (#21). See src/db/accounts.ts. */
+export const accounts = sqliteTable('accounts', {
+  ...base,
+  name: text('name').notNull(),
+  kind: text('kind', { enum: ACCOUNT_KINDS }).notNull(),
+  color: text('color', { enum: ACCOUNT_COLORS }).notNull(),
+  sortOrder: integer('sort_order').notNull(),
+  /** Main keeps its translated name until it's renamed, like a default category. */
+  renamed: integer('renamed', { mode: 'boolean' }).notNull().default(false),
+});
+
+/**
+ * The account a row's money is in. Rows from before accounts, and rows written
+ * without one, are Main's (#21).
+ */
+const accountId = text('account_id')
+  .notNull()
+  .default(MAIN_ACCOUNT_ID)
+  .references(() => accounts.id);
+
 export const transactions = sqliteTable(
   'transactions',
   {
     ...base,
     kind: text('kind', { enum: ['income', 'expense'] }).notNull(),
     ...money,
+    accountId,
     categoryId: text('category_id').references(() => categories.id),
     title: text('title').notNull(),
     note: text('note'),
@@ -131,6 +153,8 @@ export const recurringBills = sqliteTable(
     active: integer('active', { mode: 'boolean' }).notNull().default(true),
     /** "Remind me a day before" (ProfileBillEdit). */
     remind: integer('remind', { mode: 'boolean' }).notNull().default(true),
+    /** Where its payments come from. */
+    accountId,
   },
   (t) => [
     check('recurring_bills_day', sql`${t.day} BETWEEN 1 AND 31`),
@@ -146,6 +170,8 @@ export const incomes = sqliteTable(
     ...money,
     /** Payday, 1–31. */
     day: integer('day').notNull(),
+    /** Where it's paid in. */
+    accountId,
   },
   (t) => [
     check('incomes_day', sql`${t.day} BETWEEN 1 AND 31`),
@@ -213,8 +239,38 @@ export const jarEntries = sqliteTable(
     /** Positive into the jar, negative out of it. */
     amountMinor: integer('amount_minor').notNull(),
     date: text('date').notNull(),
+    /** The account it came out of, or went back into (SavingsAdd). */
+    accountId,
   },
   (t) => [index('jar_entries_jar_idx').on(t.jarId)],
+);
+
+/**
+ * Money moved between two accounts (AddTransaction-Transfer). Not spending and
+ * not income: it never reaches budgets, Insights or Came in / Went out, and the
+ * total balance stays the same.
+ */
+export const transfers = sqliteTable(
+  'transfers',
+  {
+    ...base,
+    fromAccountId: text('from_account_id')
+      .notNull()
+      .references(() => accounts.id),
+    toAccountId: text('to_account_id')
+      .notNull()
+      .references(() => accounts.id),
+    ...money,
+    date: text('date').notNull(),
+    /** The exact moment, ISO 8601, as on transactions. */
+    occurredAt: text('occurred_at').notNull(),
+    note: text('note'),
+  },
+  (t) => [
+    index('transfers_date_idx').on(t.date),
+    check('transfers_amount_positive', sql`${t.amountMinor} > 0`),
+    check('transfers_two_accounts', sql`${t.fromAccountId} <> ${t.toAccountId}`),
+  ],
 );
 
 export type Profile = typeof profile.$inferSelect;
@@ -226,3 +282,5 @@ export type RecurringBill = typeof recurringBills.$inferSelect;
 export type Income = typeof incomes.$inferSelect;
 export type Jar = typeof jars.$inferSelect;
 export type JarEntry = typeof jarEntries.$inferSelect;
+export type Account = typeof accounts.$inferSelect;
+export type Transfer = typeof transfers.$inferSelect;

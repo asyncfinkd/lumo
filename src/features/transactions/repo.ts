@@ -2,7 +2,9 @@
 // real migrations; screens use the live hooks in ../live.ts.
 
 import { and, desc, eq, gte, lt } from 'drizzle-orm';
+import type { AccountId } from '@/db/accounts';
 import type { CategoryId } from '@/db/categories';
+import { defaultAccountId } from '@/db/defaultAccount';
 import { newId as defaultNewId } from '@/db/id';
 import {
   incomes,
@@ -26,6 +28,8 @@ export type TransactionInput = {
   date: CalendarDate;
   /** The moment it happened; defaults to now. */
   occurredAt?: Date;
+  /** Where the money came from or went; Main when left out (#21). */
+  accountId?: AccountId;
 };
 
 function currencyOf(db: Db) {
@@ -58,6 +62,7 @@ export function addTransaction(db: Db, input: TransactionInput, newId = defaultN
       date: input.date,
       occurredAt: (input.occurredAt ?? new Date()).toISOString(),
       source: 'manual',
+      accountId: input.accountId ?? defaultAccountId(db),
     })
     .returning()
     .get();
@@ -70,7 +75,7 @@ export function addTransaction(db: Db, input: TransactionInput, newId = defaultN
 export type Scope = 'one' | 'future';
 
 /** Marks a bill or salary date as handled so `syncDueTransactions` never recreates it. */
-function skip(db: Db, recurringId: string, date: CalendarDate, newId: () => string) {
+export function skip(db: Db, recurringId: string, date: CalendarDate, newId: () => string) {
   db.insert(skippedOccurrences)
     .values({ id: newId(), recurringId, date })
     .onConflictDoNothing()
@@ -124,6 +129,7 @@ export function updateTransaction(
         note: input.note ?? null,
         date: input.date,
         occurredAt: (input.occurredAt ?? new Date(existing.occurredAt)).toISOString(),
+        accountId: input.accountId ?? existing.accountId,
       })
       .where(eq(transactions.id, id))
       .returning()

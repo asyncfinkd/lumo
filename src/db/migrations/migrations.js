@@ -13,6 +13,7 @@ import m0008 from './0008_clumsy_lord_tyger.sql';
 import m0009 from './0009_harsh_johnny_blaze.sql';
 import m0010 from './0010_chubby_leo.sql';
 import m0011 from './0011_flawless_ink.sql';
+import m0012 from './0012_warm_korg.sql';
 
   export default {
     journal,
@@ -28,7 +29,8 @@ m0007,
 m0008,
 m0009,
 m0010,
-m0011
+m0011,
+m0012
     }
   }
   

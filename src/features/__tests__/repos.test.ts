@@ -128,16 +128,16 @@ describe('balance', () => {
   it('starts with the typed balance and fixes it with the difference', () => {
     const db = withProfile();
     expect(currentBalance(db)).toBeNull();
-    adjustBalance(db, 1248050, '2026-10-01', id);
+    adjustBalance(db, 1248050, '2026-10-01', undefined, id);
     addTransaction(db, coffee, id);
     expect(totalBalance(db.select().from(transactions).all())).toBe(1248050 - 1150);
 
-    adjustBalance(db, 1250000, '2026-10-31', id);
+    adjustBalance(db, 1250000, '2026-10-31', undefined, id);
     expect(currentBalance(db)).toBe(1250000);
 
     // Already right: nothing new.
     const before = db.select().from(transactions).all().length;
-    adjustBalance(db, 1250000, '2026-10-31', id);
+    adjustBalance(db, 1250000, '2026-10-31', undefined, id);
     expect(db.select().from(transactions).all()).toHaveLength(before);
   });
 });

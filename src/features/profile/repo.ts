@@ -1,8 +1,10 @@
 import { eq } from 'drizzle-orm';
+import type { AccountId } from '@/db/accounts';
+import { defaultAccountId } from '@/db/defaultAccount';
 import { newId as defaultNewId } from '@/db/id';
-import { jarEntries, profile, transactions, type Profile } from '@/db/schema';
+import { jarEntries, profile, transactions, transfers, type Profile } from '@/db/schema';
 import type { Db } from '@/db/types';
-import { balanceAdjustment, totalBalance } from '@/domain/balance';
+import { accountBalances, balanceAdjustment, totalBalance } from '@/domain/balance';
 import type { CalendarDate } from '@/domain/dates';
 import type { CurrencyCode } from '@/domain/money';
 import type { AvatarColor } from '@/theme/color';
@@ -88,18 +90,36 @@ export function currentBalance(db: Db): number | null {
 }
 
 /**
- * Sets the total balance to what the user typed (#6) by storing the difference
- * as an adjustment. The first one is the starting balance.
+ * What one account holds right now (#21), or `null` before a starting balance
+ * is set, as for the total.
+ */
+export function currentAccountBalance(db: Db, accountId: AccountId): number | null {
+  if (currentBalance(db) === null) return null;
+  return (
+    accountBalances(
+      [accountId],
+      db.select().from(transactions).where(eq(transactions.accountId, accountId)).all(),
+      db.select().from(jarEntries).where(eq(jarEntries.accountId, accountId)).all(),
+      db.select().from(transfers).all(),
+    ).get(accountId) ?? 0
+  );
+}
+
+/**
+ * Sets an account's balance to what the user typed (#6, #21) by storing the
+ * difference as an adjustment in that account. The first one is the starting
+ * balance. With only Main, that's the total balance.
  */
 export function adjustBalance(
   db: Db,
   typedMinor: number,
   date: CalendarDate,
+  accountId: AccountId = defaultAccountId(db),
   newId = defaultNewId,
 ): void {
   const me = getProfile(db);
   if (!me) throw new Error('No profile yet');
-  const fix = balanceAdjustment(currentBalance(db), typedMinor);
+  const fix = balanceAdjustment(currentAccountBalance(db, accountId), typedMinor);
   if (!fix) return;
   db.insert(transactions)
     .values({
@@ -112,6 +132,7 @@ export function adjustBalance(
       date,
       occurredAt: new Date().toISOString(),
       source: 'adjustment',
+      accountId,
     })
     .run();
 }

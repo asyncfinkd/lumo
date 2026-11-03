@@ -79,6 +79,10 @@ describe('database', () => {
     const db = openDb();
     ensureCategories(db);
     seedSampleData(db, '2026-10-31', randomUUID);
+    db.insert(schema.accounts)
+      .values({ id: 'cash', name: 'Cash', kind: 'cash', color: 'sage', sortOrder: 1 })
+      .run();
+    db.update(schema.accounts).set({ name: 'Bank' }).run();
     deleteAllData(db);
 
     expect(hasProfile(db)).toBe(false);
@@ -87,5 +91,7 @@ describe('database', () => {
     expect(db.select().from(schema.recurringBills).all()).toHaveLength(0);
     expect(db.select().from(schema.incomes).all()).toHaveLength(0);
     expect(db.select().from(schema.categories).all()).toHaveLength(CATEGORY_ROWS.length);
+    // Back to just Main, under its own name.
+    expect(db.select().from(schema.accounts).all()).toMatchObject([{ id: 'main', name: 'Main' }]);
   });
 });

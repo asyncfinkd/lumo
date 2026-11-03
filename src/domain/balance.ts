@@ -22,6 +22,30 @@ export function totalBalance(
 }
 
 /**
+ * What each account holds (#21): its transactions, less what it put into jars,
+ * plus or minus the transfers in and out. Transfers move money between
+ * accounts, so the accounts always add up to `totalBalance`. Accounts with no
+ * rows yet hold 0.
+ */
+export function accountBalances(
+  accountIds: readonly string[],
+  transactions: readonly { kind: TransactionKind; amountMinor: number; accountId: string }[],
+  jarEntries: readonly { amountMinor: number; accountId: string }[] = [],
+  transfers: readonly { fromAccountId: string; toAccountId: string; amountMinor: number }[] = [],
+): Map<string, number> {
+  const balances = new Map(accountIds.map((id) => [id, 0]));
+  const add = (id: string, minor: number) => balances.set(id, (balances.get(id) ?? 0) + minor);
+  for (const t of transactions)
+    add(t.accountId, t.kind === 'income' ? t.amountMinor : -t.amountMinor);
+  for (const e of jarEntries) add(e.accountId, -e.amountMinor);
+  for (const t of transfers) {
+    add(t.fromAccountId, -t.amountMinor);
+    add(t.toAccountId, t.amountMinor);
+  }
+  return balances;
+}
+
+/**
  * The adjustment that makes the balance equal what the user typed. Returns
  * `null` when nothing needs to change. A balance that isn't set yet counts as 0,
  * so the starting balance becomes the first adjustment.

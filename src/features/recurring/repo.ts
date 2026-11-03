@@ -2,6 +2,7 @@
 
 import { and, eq, gte, isNotNull, lt } from 'drizzle-orm';
 import type { CategoryId } from '@/db/categories';
+import { defaultAccountId } from '@/db/defaultAccount';
 import { newId as defaultNewId } from '@/db/id';
 import { incomes, profile, recurringBills, skippedOccurrences, transactions } from '@/db/schema';
 import type { Db } from '@/db/types';
@@ -52,7 +53,7 @@ export function saveBill(db: Db, input: BillInput & { id?: string }, newId = def
   }
   return db
     .insert(recurringBills)
-    .values({ id: newId(), ...values })
+    .values({ id: newId(), ...values, accountId: defaultAccountId(db) })
     .returning()
     .get();
 }
@@ -93,7 +94,7 @@ export function saveIncome(db: Db, input: IncomeInput & { id?: string }, newId =
   }
   return db
     .insert(incomes)
-    .values({ id: newId(), ...values })
+    .values({ id: newId(), ...values, accountId: defaultAccountId(db) })
     .returning()
     .get();
 }
@@ -163,6 +164,7 @@ export function syncDueTransactions(db: Db, today: CalendarDate, newId = default
           occurredAt: new Date(`${d.date}T09:00:00`).toISOString(),
           source: d.source,
           recurringId: d.recurringId,
+          accountId: bill?.accountId ?? income?.accountId ?? defaultAccountId(tx),
         })
         .onConflictDoNothing()
         .run();
