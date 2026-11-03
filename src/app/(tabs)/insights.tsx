@@ -69,6 +69,15 @@ export default function InsightsScreen() {
     const previous = spendingByCategory(transactions, before.start, before.end);
     return { items, insight: biggestDrop(items, previous, before.start) };
   }, [view, today, profile, summary, transactions]);
+  // Memoized so the donut only redraws when the numbers change.
+  const chartItems = useMemo(
+    () =>
+      (data?.items ?? []).map((item) => {
+        const c = categories.get(item.category);
+        return { key: item.category, label: c.label, chart: c.tint.chart, minor: item.minor };
+      }),
+    [data, categories],
+  );
 
   if (!profile || !data) return null;
 
@@ -101,10 +110,7 @@ export default function InsightsScreen() {
 
       <Rise delay={80} style={styles.chartCard}>
         <Donut
-          items={data.items.map((item) => {
-            const c = categories.get(item.category);
-            return { key: item.category, label: c.label, chart: c.tint.chart, minor: item.minor };
-          })}
+          items={chartItems}
           currency={profile.currency}
           label={
             view === 'day'
