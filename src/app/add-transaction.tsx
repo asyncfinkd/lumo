@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -122,7 +122,8 @@ function TransactionForm({
   const from = fromPick ?? accounts[0]?.id;
   const to = toPick ?? accounts.find((a) => a.id !== from)?.id;
   const [pickingFor, setPickingFor] = useState<'from' | 'to' | 'pay' | null>(null);
-  const [payPick, setPayPick] = useState<string>();
+  // Per kind, so switching Expense ↔ Income keeps each one's own account.
+  const [payPick, setPayPick] = useState<Partial<Record<TransactionKind, string>>>({});
   const [typed, setTyped] = useState(() => {
     const start = existing ?? move;
     return start ? typedAmount(start.amountMinor, currency) : '0';
@@ -142,14 +143,18 @@ function TransactionForm({
   // yourself. Bills and salary keep the account their bill or income has.
   const showPay =
     accounts.length > 1 && !moving && !adjust && (!existing || existing.source === 'manual');
-  const pay =
-    payPick ??
-    existing?.accountId ??
-    lastUsedAccount(
-      transactions,
-      kind,
-      accounts.map((a) => a.id),
-    );
+  const lastUsed = useMemo(
+    () =>
+      showPay && !existing
+        ? lastUsedAccount(
+            transactions,
+            kind,
+            accounts.map((a) => a.id),
+          )
+        : undefined,
+    [showPay, existing, transactions, kind, accounts],
+  );
+  const pay = payPick[kind] ?? existing?.accountId ?? lastUsed;
   const payAccount = accounts.find((a) => a.id === pay);
   // Room for the account rows: a tighter sheet and keypad.
   const tight = multi || showPay;
@@ -277,6 +282,20 @@ function TransactionForm({
   const typedMoney = `${currencies[currency].symbol}${groupTyped(typed)}`;
   const fromAccount = accounts.find((a) => a.id === from);
   const toAccount = accounts.find((a) => a.id === to);
+  // What AccountPicker shows and sets for each row that opens it.
+  const pickers = {
+    pay: {
+      title: t(kind === 'income' ? 'accounts.pickGets' : 'accounts.pickPaid'),
+      value: pay,
+      onPick: (id: string) => setPayPick((p) => ({ ...p, [kind]: id })),
+    },
+    from: {
+      title: t('accounts.pickFrom'),
+      value: from,
+      onPick: (id: string) => pickAccount('from', id),
+    },
+    to: { title: t('accounts.pickTo'), value: to, onPick: (id: string) => pickAccount('to', id) },
+  };
 
   // "Fresh Market · added today, 13:15"
   const editing = existing ?? move;
@@ -526,17 +545,11 @@ function TransactionForm({
 
       {pickingFor ? (
         <AccountPicker
-          title={
-            pickingFor === 'pay'
-              ? t(kind === 'income' ? 'accounts.pickGets' : 'accounts.pickPaid')
-              : pickingFor === 'from'
-                ? t('accounts.pickFrom')
-                : t('accounts.pickTo')
-          }
+          title={pickers[pickingFor].title}
           accounts={accounts}
-          value={(pickingFor === 'pay' ? pay : pickingFor === 'from' ? from : to) ?? ''}
+          value={pickers[pickingFor].value ?? ''}
           currency={currency}
-          onPick={(id) => (pickingFor === 'pay' ? setPayPick(id) : pickAccount(pickingFor, id))}
+          onPick={pickers[pickingFor].onPick}
           onDismissed={() => setPickingFor(null)}
         />
       ) : null}
@@ -699,7 +712,7 @@ const styles = StyleSheet.create({
     backgroundColor: color.washSoft,
   },
   payRow: { marginTop: 12 },
-  transferLine: { marginHorizontal: 14, height: 1, backgroundColor: 'rgba(43,37,34,0.07)' },
+  transferLine: { marginHorizontal: 14, height: 1, backgroundColor: color.hairline },
   swap: {
     position: 'absolute',
     left: '50%',

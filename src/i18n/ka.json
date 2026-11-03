@@ -122,8 +122,8 @@
       "edit": "შეცვლა",
       "amountPlus": "პლუს {{amount}}",
       "amountMinus": "მინუს {{amount}}",
-      "paidFrom": "გადახდილია",
-      "wentTo": "შევიდა",
+      "paidFrom": "საიდან გადავიხადე",
+      "wentTo": "სად შევიდა",
       "account": "ანგარიში"
     },
     "confirm": {
