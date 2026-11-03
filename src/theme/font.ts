@@ -1,7 +1,7 @@
 // Nunito on both platforms (ADR 0002). Text styles are the sizes the design
 // uses; components pick one and add a color.
 
-import type { TextStyle } from 'react-native';
+import { Platform, type TextStyle } from 'react-native';
 
 export const fontFamily = {
   semibold: 'Nunito_600SemiBold',
@@ -16,6 +16,29 @@ const tabular: TextStyle['fontVariant'] = ['tabular-nums'];
  * of its glyphs clipped on iOS and Android, which shows on big digits.
  */
 export const fullLine = (fontSize: number) => Math.ceil(fontSize * 1.37);
+
+/**
+ * A big text's design line, made full: `lineHeight` grows to `fullLine` and
+ * margins give the extra back, so the box keeps its design height and the
+ * glyphs stay where the design has them. iOS puts the extra above the glyphs;
+ * Android splits it above and below (CSS half-leading). A symbol Nunito lacks
+ * (₾) comes from a fallback font and lands a few points higher, nearer the
+ * digits' baseline. `margins` are the style's own, added to.
+ */
+export function fullLineFit(
+  fontSize: number,
+  designLine: number,
+  margins: { top?: number; bottom?: number } = {},
+): TextStyle {
+  const extra = fullLine(fontSize) - designLine;
+  const above = Platform.OS === 'android' ? Math.ceil(extra / 2) : extra;
+  return {
+    fontSize,
+    lineHeight: fullLine(fontSize),
+    marginTop: (margins.top ?? 0) - above,
+    marginBottom: (margins.bottom ?? 0) - (extra - above),
+  };
+}
 
 export const text = {
   /** Left to spend digits. */
