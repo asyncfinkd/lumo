@@ -1,4 +1,4 @@
-<p align="center"><img src="./docs/images/banner.gif" alt="Kept – Your money. Kept. A calm budget tracker that lives on your phone." width="100%"></p>
+<p align="center"><img src="./docs/images/banner.png" alt="Kept – Your money. Kept. A calm budget tracker that lives on your phone." width="100%"></p>
 
 <h1 align="center">Kept</h1>
 <p align="center"><b>Money, but calmer.</b><br>A cozy budget tracker that lives on your phone. No spreadsheets, no guilt.</p>
