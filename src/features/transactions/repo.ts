@@ -4,6 +4,7 @@
 import { and, desc, eq, gte, lt } from 'drizzle-orm';
 import type { AccountId } from '@/db/accounts';
 import type { CategoryId } from '@/db/categories';
+import { defaultAccountId } from '@/db/defaultAccount';
 import { newId as defaultNewId } from '@/db/id';
 import {
   incomes,
@@ -61,7 +62,7 @@ export function addTransaction(db: Db, input: TransactionInput, newId = defaultN
       date: input.date,
       occurredAt: (input.occurredAt ?? new Date()).toISOString(),
       source: 'manual',
-      accountId: input.accountId,
+      accountId: input.accountId ?? defaultAccountId(db),
     })
     .returning()
     .get();

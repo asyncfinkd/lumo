@@ -253,6 +253,47 @@ describe('deleting an account', () => {
     expect(db.select().from(accounts).all()).toHaveLength(1);
   });
 
+  it('sends new money to the first account left once Main is gone', () => {
+    const { db, cash } = setUp();
+    deleteAccount(db, MAIN_ACCOUNT_ID, { moveTo: cash });
+    addTransaction(
+      db,
+      { kind: 'expense', amountMinor: 500, categoryId: 'coffee', title: 'Coffee', date: today },
+      id,
+    );
+    adjustBalance(db, 150000, today, undefined, id);
+    saveBill(db, { name: 'Gym', amountMinor: 3000, day: 2, categoryId: 'home' }, id);
+    const jar = createJar(
+      db,
+      {
+        name: 'Trip',
+        tone: 'gold',
+        goalMinor: 50000,
+        planMinor: 5000,
+        cadence: 'month',
+        remindAt: null,
+      },
+      today,
+      id,
+    );
+    addToJar(db, jar, 1000, today, undefined, id);
+    expect(
+      db
+        .select()
+        .from(transactions)
+        .all()
+        .every((t) => t.accountId === cash),
+    ).toBe(true);
+    expect(
+      db
+        .select()
+        .from(recurringBills)
+        .all()
+        .every((b) => b.accountId === cash),
+    ).toBe(true);
+    expect(db.select().from(jarEntries).all()).toMatchObject([{ accountId: cash }]);
+  });
+
   it('keeps jar money when its account goes', () => {
     const { db, cash } = setUp();
     const jar = createJar(

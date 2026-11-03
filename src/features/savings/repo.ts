@@ -3,7 +3,8 @@
 // (HistoryJars), but never counts as spending or income.
 
 import { and, asc, desc, eq, isNull, sql } from 'drizzle-orm';
-import { type AccountId, MAIN_ACCOUNT_ID } from '@/db/accounts';
+import type { AccountId } from '@/db/accounts';
+import { defaultAccountId } from '@/db/defaultAccount';
 import { newId as defaultNewId } from '@/db/id';
 import { jarEntries, jars, profile } from '@/db/schema';
 import type { Db } from '@/db/types';
@@ -102,15 +103,15 @@ export function updateJar(db: Db, jarId: string, input: JarInput): void {
 }
 
 /**
- * "Drop ₾100 in the jar" (SavingsAdd): moves money from an account (Main when
- * there's only one) into the jar.
+ * "Drop ₾100 in the jar" (SavingsAdd): moves money from an account (the first
+ * one when it doesn't say) into the jar.
  */
 export function addToJar(
   db: Db,
   jarId: string,
   amountMinor: number,
   date: CalendarDate,
-  accountId: AccountId = MAIN_ACCOUNT_ID,
+  accountId: AccountId = defaultAccountId(db),
   newId = defaultNewId,
 ): void {
   assertPositive('amountMinor', amountMinor);
@@ -123,7 +124,7 @@ export function takeFromJar(
   jarId: string,
   amountMinor: number,
   date: CalendarDate,
-  accountId: AccountId = MAIN_ACCOUNT_ID,
+  accountId: AccountId = defaultAccountId(db),
   newId = defaultNewId,
 ): void {
   assertPositive('amountMinor', amountMinor);

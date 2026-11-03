@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm';
-import { type AccountId, MAIN_ACCOUNT_ID } from '@/db/accounts';
+import type { AccountId } from '@/db/accounts';
+import { defaultAccountId } from '@/db/defaultAccount';
 import { newId as defaultNewId } from '@/db/id';
 import { jarEntries, profile, transactions, transfers, type Profile } from '@/db/schema';
 import type { Db } from '@/db/types';
@@ -113,7 +114,7 @@ export function adjustBalance(
   db: Db,
   typedMinor: number,
   date: CalendarDate,
-  accountId: AccountId = MAIN_ACCOUNT_ID,
+  accountId: AccountId = defaultAccountId(db),
   newId = defaultNewId,
 ): void {
   const me = getProfile(db);
