@@ -622,10 +622,10 @@ export function ChevronRightIcon({ color }: { color: string }) {
   );
 }
 
-export function CheckIcon({ color }: { color: string }) {
+export function CheckIcon({ size = 16, color, width = 3 }: IconProps & { width?: number }) {
   return (
-    <Svg width={16} height={16} viewBox="0 0 24 24" accessible={false}>
-      <Path {...line(color, 3)} d="m5.5 12.5 4 4 9-9" />
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
+      <Path {...line(color, width)} d="m5.5 12.5 4 4 9-9" />
     </Svg>
   );
 }
