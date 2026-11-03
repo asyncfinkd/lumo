@@ -4,7 +4,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '@/i18n';
 import { DigitRoll } from '../DigitRoll';
-import { Donut, slotLengths } from '../Donut';
+import { C, Donut, MIN_SLOT, slotLengths } from '../Donut';
 import { Sheet } from '../Sheet';
 import { Sparkline } from '../Sparkline';
 
@@ -48,11 +48,14 @@ describe('Donut', () => {
 
   it('keeps small shares from running into their neighbours', () => {
     const slots = slotLengths([96000, 1500, 1200, 800, 300, 200]);
-    const ring = 2 * Math.PI * 78;
-    expect(slots.reduce((a, b) => a + b, 0)).toBeCloseTo(ring);
-    // Round caps (22) plus the gap (6) must fit in every slot.
-    for (const slot of slots) expect(slot).toBeGreaterThanOrEqual(28);
+    expect(slots.reduce((a, b) => a + b, 0)).toBeCloseTo(C);
+    for (const slot of slots) expect(slot).toBeGreaterThanOrEqual(MIN_SLOT - 1e-9);
     expect(slots[0]).toBeGreaterThan(slots[1]!);
+  });
+
+  it('still fits the ring with more shares than minimum slots allow', () => {
+    const slots = slotLengths(Array.from({ length: 20 }, () => 1));
+    expect(slots.reduce((a, b) => a + b, 0)).toBeCloseTo(C);
   });
 
   it('splits by size when every share is large enough', () => {

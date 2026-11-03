@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Animated, {
@@ -20,11 +20,15 @@ const SIZE = 200;
 const R = 78;
 const STROKE = 22;
 const GAP = 6;
-const C = 2 * Math.PI * R;
+export const C = 2 * Math.PI * R;
 /** The design draws up to six categories. */
 const MAX_SEGMENTS = 6;
-/** Room a slot needs: both round caps, the gap and a sliver of arc. */
-const MIN_SLOT = STROKE + GAP + 4;
+/**
+ * Room a slot needs: both round caps, the gap and a sliver of arc. The larger
+ * slices give up that room, so with many tiny shares the biggest arc reads a
+ * little smaller than its percent — the list below keeps the exact numbers.
+ */
+export const MIN_SLOT = STROKE + GAP + 4;
 
 /**
  * How much of the ring each share gets. Round caps make every arc at least
@@ -32,16 +36,18 @@ const MIN_SLOT = STROKE + GAP + 4;
  * otherwise its cap spills into the next category.
  */
 export function slotLengths(values: readonly number[]): number[] {
+  // Never more than an even split, so the slots always fit the ring.
+  const min = Math.min(MIN_SLOT, C / Math.max(values.length, 1));
   const pinned = values.map(() => false);
   for (;;) {
-    const free = C - pinned.filter(Boolean).length * MIN_SLOT;
+    const free = C - pinned.filter(Boolean).length * min;
     const freeTotal = values.reduce((sum, v, i) => (pinned[i] ? sum : sum + v), 0);
     const slots = values.map((v, i) =>
-      pinned[i] ? MIN_SLOT : freeTotal > 0 ? (v / freeTotal) * free : 0,
+      pinned[i] ? min : freeTotal > 0 ? (v / freeTotal) * free : 0,
     );
     let changed = false;
     slots.forEach((slot, i) => {
-      if (!pinned[i] && slot < MIN_SLOT) {
+      if (!pinned[i] && slot < min) {
         pinned[i] = true;
         changed = true;
       }
@@ -96,8 +102,14 @@ type Props = {
 export function Donut({ items, currency, label, replayKey = 0 }: Props) {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
-  const shown = items.filter((item) => item.minor > 0).slice(0, MAX_SEGMENTS);
+  // Only spending draws an arc; a category refunded to zero or below has none.
+  const shown = useMemo(
+    () => items.filter((item) => item.minor > 0).slice(0, MAX_SEGMENTS),
+    [items],
+  );
   const total = shown.reduce((sum, item) => sum + item.minor, 0);
+  // Replay on new numbers, not on a new array holding the same ones.
+  const signature = shown.map((item) => `${item.key}:${item.minor}`).join('|');
 
   // A fixed number of hooks, one per possible segment.
   const p0 = useSharedValue(0);
@@ -122,7 +134,7 @@ export function Donut({ items, currency, label, replayKey = 0 }: Props) {
         ),
       );
     });
-  }, [items, replayKey, reduceMotion, p0, p1, p2, p3, p4, p5]);
+  }, [signature, replayKey, reduceMotion, p0, p1, p2, p3, p4, p5]);
 
   // Each arc starts where the previous one ended.
   const segments: {
@@ -132,7 +144,7 @@ export function Donut({ items, currency, label, replayKey = 0 }: Props) {
     startAngle: number;
     progress: SharedValue<number>;
   }[] = [];
-  const slots = slotLengths(shown.map((item) => item.minor));
+  const slots = useMemo(() => slotLengths(shown.map((item) => item.minor)), [shown]);
   let cum = 0;
   for (const [i, item] of shown.entries()) {
     const len = slots[i]!;
