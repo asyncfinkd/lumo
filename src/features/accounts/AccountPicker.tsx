@@ -1,8 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import Svg, { Path } from 'react-native-svg';
-import { AccountIcon, CloseIcon, PlusIcon } from '@/components/Icons';
+import { AccountIcon, CheckIcon, CloseIcon, PlusIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
 import { Sheet } from '@/components/Sheet';
 import { type CurrencyCode, formatMoney } from '@/domain/money';
@@ -63,18 +62,7 @@ export function AccountPicker({ title, accounts, value, currency, onPick, onDism
                     </Text>
                   </View>
                   <View style={[styles.dot, on ? styles.dotOn : styles.dotOff]}>
-                    {on ? (
-                      <Svg width={13} height={13} viewBox="0 0 24 24" accessible={false}>
-                        <Path
-                          d="m5.5 12.5 4 4 9-9"
-                          stroke={color.white}
-                          strokeWidth={3.4}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          fill="none"
-                        />
-                      </Svg>
-                    ) : null}
+                    {on ? <CheckIcon size={13} width={3.4} color={color.white} /> : null}
                   </View>
                 </Press>
               );
