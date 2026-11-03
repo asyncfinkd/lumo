@@ -710,3 +710,38 @@ export function AccountIcon({
     </Svg>
   );
 }
+
+/** Swap From and To (AddTransaction-Transfer). */
+export function SwapIcon({ color, size = 16 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
+      <Path
+        {...line(color, 2.4)}
+        d="M8 4.5v15M4.5 8 8 4.5 11.5 8M16 19.5v-15M12.5 16l3.5 3.5 3.5-3.5"
+      />
+    </Svg>
+  );
+}
+
+/** "Move money" (Accounts). */
+export function TransferIcon({ color, size = 18 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
+      <Path
+        {...line(color, 2.2)}
+        d="M5 8.5h13M14.5 5l3.5 3.5-3.5 3.5M19 15.5H6M9.5 12 6 15.5 9.5 19"
+      />
+    </Svg>
+  );
+}
+
+/** "Fix a balance" (Accounts). */
+export function SlidersIcon({ color, size = 18 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false}>
+      <Path {...line(color, 2.2)} d="M4 7.5h9M19 7.5h1M4 16.5h3M11 16.5h9" />
+      <Circle {...line(color, 2.2)} cx={16} cy={7.5} r={2.6} />
+      <Circle {...line(color, 2.2)} cx={9} cy={16.5} r={2.6} />
+    </Svg>
+  );
+}

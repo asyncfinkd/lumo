@@ -15,8 +15,8 @@ import {
 import { db } from '@/db/client';
 import { currencies, formatMoney, parseAmount } from '@/domain/money';
 import { accountLabel, useAccountViews } from '@/features/accounts/accounts';
-import { accountById, accountUsage, createAccount, updateAccount } from '@/features/accounts/repo';
-import { useProfile, useToday } from '@/features/live';
+import { accountById, createAccount, updateAccount } from '@/features/accounts/repo';
+import { useAllTransactions, useProfile, useToday } from '@/features/live';
 import { categoryPalette, color, fontFamily, radius, shadow, size, text } from '@/theme';
 
 const MAX_NAME = 24;
@@ -30,6 +30,7 @@ export default function AccountScreen() {
   const params = useLocalSearchParams<{ id?: string }>();
   const profile = useProfile();
   const views = useAccountViews();
+  const transactions = useAllTransactions();
   const currency = profile?.currency ?? 'GEL';
   const isNew = !params.id;
   // Read once, so the fields start filled in rather than waiting on the live query.
@@ -42,7 +43,8 @@ export default function AccountScreen() {
   // A new account's color follows its kind until one is picked.
   const [tint, setTint] = useState<AccountColor | null>(row?.color ?? null);
   const [start, setStart] = useState('');
-  const [usage] = useState(() => (params.id ? accountUsage(db, params.id) : 0));
+  // Live, so a Fix made from here shows up when it comes back.
+  const usage = transactions.filter((tx) => tx.accountId === params.id).length;
   const shown = tint ?? KIND_COLOR[kind];
   const palette = categoryPalette[shown];
   const trimmed = name.trim();
@@ -184,6 +186,19 @@ export default function AccountScreen() {
                 <View style={styles.fact}>
                   <Text style={styles.factLabel}>{t('accounts.balanceNow')}</Text>
                   <Text style={styles.factValue}>{formatMoney(balanceMinor, currency)}</Text>
+                  {views.length > 1 ? (
+                    <Press
+                      accessibilityRole="button"
+                      accessibilityLabel={`${t('accounts.fix')}, ${label}`}
+                      onPress={() =>
+                        router.push({ pathname: '/balance', params: { account: params.id! } })
+                      }
+                      hitSlop={5}
+                      style={styles.fix}
+                    >
+                      <Text style={styles.fixText}>{t('accounts.fix')}</Text>
+                    </Press>
+                  ) : null}
                 </View>
                 <View style={[styles.fact, styles.factLine]}>
                   <Text style={styles.factLabel}>{t('accounts.usedIn')}</Text>
@@ -326,6 +341,14 @@ const styles = StyleSheet.create({
     backgroundColor: color.washSoft,
   },
   fact: { height: 52, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  fix: {
+    height: 34,
+    paddingHorizontal: 12,
+    borderRadius: radius.pill,
+    backgroundColor: color.white,
+    justifyContent: 'center',
+  },
+  fixText: { fontFamily: fontFamily.extrabold, fontSize: 13, color: color.ink },
   factLine: { borderTopWidth: 1, borderTopColor: 'rgba(43,37,34,0.06)' },
   factLabel: { ...text.subtitle, flex: 1, color: color.muted },
   factValue: {

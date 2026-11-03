@@ -4,7 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useScreenTop } from '@/components/useScreenTop';
 import { BottomFade, Orbs } from '@/components/Backdrop';
-import { AccountIcon, ChevronRightIcon, PlusIcon } from '@/components/Icons';
+import {
+  AccountIcon,
+  ChevronRightIcon,
+  PlusIcon,
+  SlidersIcon,
+  TransferIcon,
+} from '@/components/Icons';
 import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
 import { currencies, formatMoney } from '@/domain/money';
@@ -14,7 +20,7 @@ import { HeaderButton, SettingsHeader } from '@/features/profile/SettingsHeader'
 import { color, fontFamily, radius, shadow, space, text } from '@/theme';
 
 // Accounts (#21): what's in each account and all together; tap one to edit
-// it, or add another.
+// it, move money between them, fix one's balance, or add another.
 export default function AccountsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -91,7 +97,30 @@ export default function AccountsScreen() {
           })}
         </Rise>
 
-        <Rise delay={120}>
+        {accounts.length > 1 ? (
+          <Rise delay={120} style={styles.actions}>
+            <Press
+              accessibilityRole="button"
+              onPress={() =>
+                router.push({ pathname: '/add-transaction', params: { type: 'transfer' } })
+              }
+              style={styles.action}
+            >
+              <TransferIcon color={color.ink} />
+              <Text style={styles.actionText}>{t('accounts.moveMoney')}</Text>
+            </Press>
+            <Press
+              accessibilityRole="button"
+              onPress={() => router.push('/balance')}
+              style={styles.action}
+            >
+              <SlidersIcon color={color.ink} />
+              <Text style={styles.actionText}>{t('accounts.fixBalance')}</Text>
+            </Press>
+          </Rise>
+        ) : null}
+
+        <Rise delay={160}>
           <Press accessibilityRole="button" onPress={() => open()} style={styles.addButton}>
             <View style={styles.addIcon}>
               <PlusIcon size={16} width={2.6} color={color.softInk} />
@@ -99,6 +128,8 @@ export default function AccountsScreen() {
             <Text style={styles.addText}>{t('accounts.add')}</Text>
           </Press>
         </Rise>
+
+        {accounts.length > 1 ? <Text style={styles.footer}>{t('accounts.movingNote')}</Text> : null}
       </ScrollView>
       <BottomFade />
     </View>
@@ -159,6 +190,28 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.extrabold,
     fontVariant: ['tabular-nums'],
     color: color.ink,
+  },
+  actions: { marginTop: 12, flexDirection: 'row', gap: 10 },
+  action: {
+    flex: 1,
+    height: 52,
+    borderRadius: radius.pill,
+    backgroundColor: color.card,
+    boxShadow: shadow.card,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  actionText: { ...text.rowTitle, fontSize: 15, color: color.ink },
+  footer: {
+    ...text.meta,
+    marginTop: 18,
+    marginHorizontal: 12,
+    fontFamily: fontFamily.semibold,
+    lineHeight: 19,
+    textAlign: 'center',
+    color: color.muted,
   },
   addButton: {
     marginTop: 12,
