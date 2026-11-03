@@ -12,7 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Ellipse, G, Path, Rect } from 'react-native-svg';
 import type { JarTone } from '@/features/savings/savings';
-import { color, fontFamily, jarColor } from '@/theme';
+import { color, fontFamily, fullLineFit, jarColor } from '@/theme';
 
 // The Jar board, drawn on its 200 × 240 grid and scaled to `size`. The liquid,
 // coin and lid move as separate views, so every animation is a transform.
@@ -336,7 +336,7 @@ export function Jar({
           accessible={false}
           style={[
             styles.percent,
-            { top: percentTop, fontSize: 38 * s, lineHeight: 38 * s, letterSpacing: -1 * s },
+            { top: percentTop, ...fullLineFit(38 * s, 38 * s), letterSpacing: -1 * s },
           ]}
         >
           {Math.round(pct)}

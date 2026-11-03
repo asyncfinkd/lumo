@@ -10,7 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { type CurrencyCode, currencies } from '@/domain/money';
-import { color, duration, text } from '@/theme';
+import { color, duration, fullLine, text } from '@/theme';
 
 /** Keypad text with thousands grouping: "3800.5" → "3,800.5". */
 export function groupTyped(typed: string): string {
@@ -70,7 +70,6 @@ export function AmountDisplay({
  * lined up when iOS or Android text is set larger.
  */
 const ANDROID = Platform.OS === 'android';
-const fullLine = (fontSize: number) => Math.ceil(fontSize * 1.37);
 const SYMBOL_SIZE = 30;
 /** The design's row; the amount's full line is taller. */
 const ROW = 64;

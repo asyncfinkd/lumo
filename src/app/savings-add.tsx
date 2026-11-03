@@ -24,7 +24,7 @@ import {
   takeOutAmounts,
 } from '@/features/savings/savings';
 import { useMonthName } from '@/features/savings/useMonthName';
-import { color, fontFamily, radius, savingsColor, shadow, size, text } from '@/theme';
+import { color, fontFamily, fullLineFit, radius, savingsColor, shadow, size, text } from '@/theme';
 
 // "Add to New laptop" (SavingsAdd): pick an amount, see where the jar lands,
 // drop it in. A drop that fills the jar opens "You did it" (SavingsDone).
@@ -260,10 +260,8 @@ const styles = StyleSheet.create({
   },
   symbol: {
     marginRight: 4,
-    marginBottom: 9,
     fontFamily: fontFamily.extrabold,
-    fontSize: 30,
-    lineHeight: 30,
+    ...fullLineFit(30, 30, { bottom: 9 }),
     color: color.placeholder,
   },
   digits: {

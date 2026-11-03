@@ -12,7 +12,16 @@ import { finishOnboarding } from '@/features/onboarding/finish';
 import { chosenBills } from '@/features/onboarding/save';
 import { useOnboarding } from '@/features/onboarding/store';
 import { useCountUp } from '@/features/onboarding/useCountUp';
-import { categoryPalette, color, gradient, radius, shadow, space, text } from '@/theme';
+import {
+  categoryPalette,
+  color,
+  fullLineFit,
+  gradient,
+  radius,
+  shadow,
+  space,
+  text,
+} from '@/theme';
 
 // OBReveal: income − bills = yours to spend, then save everything.
 export default function YourMonthScreen() {
@@ -183,16 +192,13 @@ const styles = StyleSheet.create({
   spendRow: { marginTop: 2, height: 54, flexDirection: 'row', alignItems: 'flex-end' },
   spendSymbol: {
     fontFamily: text.subtitle.fontFamily,
-    fontSize: 28,
-    lineHeight: 28,
+    ...fullLineFit(28, 28, { bottom: 6 }),
     color: color.subtle,
     marginRight: 4,
-    marginBottom: 6,
   },
   spend: {
     fontFamily: text.h1.fontFamily,
-    fontSize: 52,
-    lineHeight: 52,
+    ...fullLineFit(52, 52),
     letterSpacing: -1,
     color: color.ink,
     fontVariant: ['tabular-nums'],
