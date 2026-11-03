@@ -9,6 +9,7 @@ import type { Transaction } from '@/db/schema';
 import { addDays } from '@/domain/dates';
 import { BUDGETING } from '@/features/flags';
 import { db } from '@/db/client';
+import { AccountsSplit } from '@/features/home/AccountsSplit';
 import { BalanceCard } from '@/features/home/BalanceCard';
 import { setHideAmounts } from '@/features/profile/repo';
 import { FlowCard } from '@/features/home/FlowCard';
@@ -17,6 +18,7 @@ import { LeftToSpendCard } from '@/features/home/LeftToSpendCard';
 import { useHour } from '@/features/home/useHour';
 import { Avatar } from '@/features/profile/Avatar';
 import {
+  useAccounts,
   useAllTransactions,
   useJarEntries,
   useJars,
@@ -43,6 +45,7 @@ export default function HomeScreen() {
   const transactions = useAllTransactions();
   const jarEntries = useJarEntries();
   const jars = useJars();
+  const accountCount = useAccounts().length;
   const picked = usePickedJar((s) => s.id);
   // The jar up front on Savings.
   const jar = jars.find((j) => j.id === picked) ?? jars[0];
@@ -99,6 +102,7 @@ export default function HomeScreen() {
             currency={profile.currency}
             onBalance={() => router.push('/balance')}
             onToggleHidden={() => setHideAmounts(db, !profile.hideAmounts)}
+            split={accountCount > 1 ? <AccountsSplit currency={profile.currency} /> : null}
           />
         )}
       </Rise>

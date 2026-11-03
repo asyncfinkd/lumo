@@ -5,6 +5,7 @@ import { AccountIcon, CheckIcon, CloseIcon, PlusIcon } from '@/components/Icons'
 import { Press } from '@/components/Press';
 import { Sheet } from '@/components/Sheet';
 import { type CurrencyCode, formatMoney } from '@/domain/money';
+import { useMoneyText } from '@/features/privacy/amounts';
 import { color, fontFamily, radius, size, text } from '@/theme';
 import type { AccountView } from './accounts';
 
@@ -22,6 +23,7 @@ type Props = {
 export function AccountPicker({ title, accounts, value, currency, onPick, onDismissed }: Props) {
   const { t } = useTranslation();
   const router = useRouter();
+  const money = useMoneyText();
   return (
     <Sheet accessibilityLabel={title} onDismissed={onDismissed}>
       {(close) => (
@@ -37,7 +39,7 @@ export function AccountPicker({ title, accounts, value, currency, onPick, onDism
           <View accessibilityRole="radiogroup" style={styles.rows}>
             {accounts.map((a) => {
               const on = a.id === value;
-              const amount = formatMoney(a.balanceMinor, currency);
+              const amount = money(formatMoney(a.balanceMinor, currency));
               return (
                 <Press
                   key={a.id}
