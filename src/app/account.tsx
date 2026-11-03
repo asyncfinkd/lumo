@@ -58,9 +58,10 @@ export default function AccountScreen() {
     } else if (row) {
       // Main's translated name, left as it was, isn't a rename.
       updateAccount(db, row.id, {
-        name: trimmed === label ? row.name : trimmed,
+        name: trimmed,
         kind,
         color: shown,
+        renamed: trimmed !== label,
       });
     }
     close();

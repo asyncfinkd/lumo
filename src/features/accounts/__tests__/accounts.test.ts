@@ -21,7 +21,7 @@ import {
   markOnboarded,
   saveProfile,
 } from '../../profile/repo';
-import { saveBill, syncDueTransactions } from '../../recurring/repo';
+import { saveBill, saveIncome, syncDueTransactions } from '../../recurring/repo';
 import { addToJar, closeJar, createJar } from '../../savings/repo';
 import { addTransaction } from '../../transactions/repo';
 import {
@@ -87,6 +87,9 @@ describe('accounts', () => {
     const { db } = setUp();
     updateAccount(db, MAIN_ACCOUNT_ID, { name: 'Main', kind: 'cash' });
     expect(accountsQuery(db).all()[0]).toMatchObject({ kind: 'cash', renamed: false });
+    // Saved as shown in Georgian, unchanged: still Main, still translated.
+    updateAccount(db, MAIN_ACCOUNT_ID, { name: 'მთავარი', kind: 'cash', renamed: false });
+    expect(accountsQuery(db).all()[0]).toMatchObject({ name: 'Main', renamed: false });
     updateAccount(db, MAIN_ACCOUNT_ID, { name: 'TBC card', kind: 'debit', color: 'sky' });
     expect(accountsQuery(db).all()[0]).toMatchObject({
       name: 'TBC card',
@@ -212,7 +215,7 @@ describe('deleting an account', () => {
     const mainBefore = balanceOf(db, MAIN_ACCOUNT_ID)!;
     const cashBefore = balanceOf(db, cash)!;
 
-    deleteAccount(db, cash, { moveTo: MAIN_ACCOUNT_ID });
+    deleteAccount(db, cash, { moveTo: MAIN_ACCOUNT_ID }, today, id);
 
     expect(
       accountsQuery(db)
@@ -229,7 +232,7 @@ describe('deleting an account', () => {
 
   it('deletes its transactions and both sides of its moves', () => {
     const { db, cash, card } = withMoves();
-    deleteAccount(db, cash, 'delete');
+    deleteAccount(db, cash, 'delete', today, id);
 
     expect(db.select().from(transactions).where(eq(transactions.accountId, cash)).all()).toEqual(
       [],
@@ -249,13 +252,13 @@ describe('deleting an account', () => {
 
   it('never deletes the last account', () => {
     const db = openTestDb();
-    expect(() => deleteAccount(db, MAIN_ACCOUNT_ID, 'delete')).toThrow();
+    expect(() => deleteAccount(db, MAIN_ACCOUNT_ID, 'delete', today, id)).toThrow();
     expect(db.select().from(accounts).all()).toHaveLength(1);
   });
 
   it('sends new money to the first account left once Main is gone', () => {
     const { db, cash } = setUp();
-    deleteAccount(db, MAIN_ACCOUNT_ID, { moveTo: cash });
+    deleteAccount(db, MAIN_ACCOUNT_ID, { moveTo: cash }, today, id);
     addTransaction(
       db,
       { kind: 'expense', amountMinor: 500, categoryId: 'coffee', title: 'Coffee', date: today },
@@ -310,9 +313,24 @@ describe('deleting an account', () => {
       id,
     );
     addToJar(db, jar, 5000, today, cash, id);
-    deleteAccount(db, cash, 'delete');
+    deleteAccount(db, cash, 'delete', today, id);
     expect(db.select().from(jarEntries).all()).toMatchObject([
       { amountMinor: 5000, accountId: MAIN_ACCOUNT_ID },
     ]);
+    // Main never put that money in, so its balance stays the same.
+    expect(balanceOf(db, MAIN_ACCOUNT_ID)).toBe(100000);
+  });
+
+  it('never pays its bills and salary again from the next account', () => {
+    const { db, cash } = setUp();
+    saveIncome(db, { name: 'Salary', amountMinor: 300000, day: 10 }, id);
+    db.update(incomes).set({ accountId: cash }).run();
+    syncDueTransactions(db, today, id);
+    deleteAccount(db, cash, 'delete', today, id);
+    syncDueTransactions(db, today, id);
+    expect(db.select().from(transactions).where(eq(transactions.title, 'Salary')).all()).toEqual(
+      [],
+    );
+    expect(balanceOf(db, MAIN_ACCOUNT_ID)).toBe(100000);
   });
 });
