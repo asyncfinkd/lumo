@@ -11,6 +11,12 @@ export const fontFamily = {
 
 const tabular: TextStyle['fontVariant'] = ['tabular-nums'];
 
+/**
+ * Nunito's own line height, about 1.37× its size. A shorter line gets the top
+ * of its glyphs clipped on iOS and Android, which shows on big digits.
+ */
+export const fullLine = (fontSize: number) => Math.ceil(fontSize * 1.37);
+
 export const text = {
   /** Left to spend digits. */
   hero: {

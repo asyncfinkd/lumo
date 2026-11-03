@@ -17,7 +17,7 @@ import { currencies, formatMoney } from '@/domain/money';
 import { useAccountViews } from '@/features/accounts/accounts';
 import { useProfile } from '@/features/live';
 import { HeaderButton, SettingsHeader } from '@/features/profile/SettingsHeader';
-import { color, fontFamily, radius, shadow, space, text } from '@/theme';
+import { color, fontFamily, fullLine, radius, shadow, space, text } from '@/theme';
 
 // Accounts (#21): what's in each account and all together; tap one to edit
 // it, move money between them, fix one's balance, or add another.
@@ -147,11 +147,18 @@ const styles = StyleSheet.create({
     boxShadow: shadow.card,
   },
   togetherLabel: { ...text.label, color: color.muted },
-  totalRow: { marginTop: 4, flexDirection: 'row', alignItems: 'flex-end' },
+  // Full lines so the digits' tops aren't clipped, on one baseline; the row
+  // reaches up by the extra so the design's 48pt row and the note stay put.
+  totalRow: {
+    minHeight: fullLine(44),
+    marginTop: 4 + 48 - fullLine(44),
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
   total: {
     fontFamily: fontFamily.extrabold,
     fontSize: 44,
-    lineHeight: 48,
+    lineHeight: fullLine(44),
     letterSpacing: -1,
     fontVariant: ['tabular-nums'],
     color: color.ink,
@@ -159,7 +166,7 @@ const styles = StyleSheet.create({
   totalSmall: {
     fontFamily: fontFamily.bold,
     fontSize: 24,
-    lineHeight: 34,
+    lineHeight: fullLine(24),
     color: color.subtle,
     marginHorizontal: 2,
   },
