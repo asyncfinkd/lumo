@@ -55,6 +55,12 @@ describe('lastJarAccount', () => {
     expect(lastJarAccount(entries, 'trip', true, ids)).toBe('main');
   });
 
+  it('takes out to where the money came from the first time', () => {
+    expect(
+      lastJarAccount([entry('car', 10000, 'cash', '2026-11-01T10:00:00Z')], 'car', true, ids),
+    ).toBe('cash');
+  });
+
   it('falls back to the first account', () => {
     expect(lastJarAccount(entries, 'new', false, ids)).toBe('main');
     expect(lastJarAccount(entries, 'trip', false, ['main'])).toBe('main');
