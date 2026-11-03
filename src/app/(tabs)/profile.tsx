@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useScreenTop } from '@/components/useScreenTop';
 import {
+  AccountIcon,
   BellIcon,
   CameraIcon,
   ChevronRightIcon,
@@ -25,6 +26,7 @@ import { Press } from '@/components/Press';
 import { Switch } from '@/components/Switch';
 import { db } from '@/db/client';
 import { currencies, formatMoney } from '@/domain/money';
+import { useAccountViews } from '@/features/accounts/accounts';
 import { useBills, useCategories, useIncomes, useProfile } from '@/features/live';
 import { useRestoreBackup } from '@/features/backup/useRestoreBackup';
 import { BUDGETING } from '@/features/flags';
@@ -55,6 +57,7 @@ export default function ProfileScreen() {
   const incomes = useIncomes();
   const bills = useBills();
   const categories = useCategories();
+  const accounts = useAccountViews();
   const restoreBackup = useRestoreBackup();
   const biometrics = useBiometrics();
   if (!profile) return null;
@@ -129,6 +132,19 @@ export default function ProfileScreen() {
               label={t('profile.currency')}
               value={currency}
               onPress={() => router.push('/profile-currency')}
+            />
+            <Row
+              tile={categoryPalette.sky}
+              icon={
+                <AccountIcon kind="debit" size={20} width={1.9} color={categoryPalette.sky.fg} />
+              }
+              label={t('profile.accounts')}
+              value={
+                accounts.length === 1
+                  ? accounts[0]!.label
+                  : t('profile.accountsCount', { count: accounts.length })
+              }
+              onPress={() => router.push('/accounts')}
             />
             <Row
               tile={categoryPalette.sage}

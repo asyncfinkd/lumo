@@ -513,7 +513,10 @@
     "preview": "Preview",
     "friend": "friend",
     "remindersSubNoBudgets": "Bills and payday",
-    "restore": "Restore from backup"
+    "restore": "Restore from backup",
+    "accounts": "Accounts",
+    "accountsCount_one": "{{count}} account",
+    "accountsCount_other": "{{count}} accounts"
   },
   "categories": {
     "coffee": "Coffee",
@@ -746,5 +749,54 @@
     },
     "passcodeHint": "After a few tries, your phone will ask for its passcode instead.",
     "prompt": "Unlock Lumo"
+  },
+  "accounts": {
+    "main": "Main",
+    "title": "Accounts",
+    "add": "Add account",
+    "together": "All together",
+    "togetherNote": "The total on your Home screen. Jars are kept apart.",
+    "kinds": {
+      "cash": "Cash",
+      "debit": "Debit card"
+    },
+    "colors": {
+      "sage": "Sage",
+      "sky": "Sky",
+      "blush": "Blush",
+      "lilac": "Lilac",
+      "butter": "Butter",
+      "latte": "Latte"
+    },
+    "rowLabel": "{{name}}, {{amount}}. Edit",
+    "new": "New account",
+    "edit": "Edit account",
+    "nameLabel": "Account name",
+    "namePlaceholder": "Name it, like Cash",
+    "kind": "Kind",
+    "color": "Color",
+    "startTitle": "What’s in it now",
+    "startLabel": "Amount in it now",
+    "balanceNow": "Balance now",
+    "usedIn": "Used in",
+    "usedCount_one": "{{count}} transaction",
+    "usedCount_other": "{{count}} transactions",
+    "save": "Save",
+    "delete": "Delete",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteBody_one": "{{count}} transaction uses it. What should happen to it?",
+    "deleteBody_other": "{{count}} transactions use it. What should happen to them?",
+    "moveOption": "Move them to another account",
+    "moveSub": "Its {{amount}} goes along. Your total stays {{total}}.",
+    "deleteOption": "Delete them too",
+    "deleteSub": "Your total becomes {{total}}. Budgets and Insights update.",
+    "moveTo": "Move them to",
+    "moveAndDelete": "Move and delete",
+    "deleteEverything": "Delete everything",
+    "keep": "Keep it",
+    "lastTitle": "{{name}} is your only account",
+    "lastBody": "Lumo needs one place to keep your money. Add another account first, then you can delete this one.",
+    "addAnother": "Add an account",
+    "okay": "Okay"
   }
 }

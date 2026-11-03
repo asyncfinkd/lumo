@@ -512,7 +512,10 @@
     "preview": "წინასწარი ხედი",
     "friend": "მეგობარო",
     "remindersSubNoBudgets": "გადასახადები და ხელფასი",
-    "restore": "რეზერვიდან აღდგენა"
+    "restore": "რეზერვიდან აღდგენა",
+    "accounts": "ანგარიშები",
+    "accountsCount_one": "{{count}} ანგარიში",
+    "accountsCount_other": "{{count}} ანგარიში"
   },
   "categories": {
     "coffee": "ყავა",
@@ -745,5 +748,54 @@
     },
     "passcodeHint": "რამდენიმე ცდის შემდეგ ტელეფონი პაროლს მოგთხოვს.",
     "prompt": "Lumo-ს განბლოკვა"
+  },
+  "accounts": {
+    "main": "მთავარი",
+    "title": "ანგარიშები",
+    "add": "ანგარიშის დამატება",
+    "together": "სულ ერთად",
+    "togetherNote": "ჯამი, რომელსაც მთავარ ეკრანზე ხედავ. ქილები ცალკეა.",
+    "kinds": {
+      "cash": "ნაღდი",
+      "debit": "სადებეტო ბარათი"
+    },
+    "colors": {
+      "sage": "სალბი",
+      "sky": "ცა",
+      "blush": "ვარდისფერი",
+      "lilac": "იასამნისფერი",
+      "butter": "კარაქისფერი",
+      "latte": "ლატე"
+    },
+    "rowLabel": "{{name}}, {{amount}}. რედაქტირება",
+    "new": "ახალი ანგარიში",
+    "edit": "ანგარიშის რედაქტირება",
+    "nameLabel": "ანგარიშის სახელი",
+    "namePlaceholder": "მაგ. ნაღდი",
+    "kind": "ტიპი",
+    "color": "ფერი",
+    "startTitle": "რა არის მასზე ახლა",
+    "startLabel": "ახლანდელი თანხა",
+    "balanceNow": "ბალანსი ახლა",
+    "usedIn": "ტრანზაქციები",
+    "usedCount_one": "{{count}} ტრანზაქცია",
+    "usedCount_other": "{{count}} ტრანზაქცია",
+    "save": "შენახვა",
+    "delete": "წაშლა",
+    "deleteTitle": "წავშალოთ {{name}}?",
+    "deleteBody_one": "მას {{count}} ტრანზაქცია იყენებს. რა ვუყოთ?",
+    "deleteBody_other": "მას {{count}} ტრანზაქცია იყენებს. რა ვუყოთ?",
+    "moveOption": "სხვა ანგარიშზე გადატანა",
+    "moveSub": "მისი {{amount}} თან გადაჰყვება. ჯამი დარჩება {{total}}.",
+    "deleteOption": "მათი წაშლაც",
+    "deleteSub": "ჯამი გახდება {{total}}. ბიუჯეტები და Insights განახლდება.",
+    "moveTo": "სად გადავიტანოთ",
+    "moveAndDelete": "გადატანა და წაშლა",
+    "deleteEverything": "ყველაფრის წაშლა",
+    "keep": "დატოვება",
+    "lastTitle": "{{name}} შენი ერთადერთი ანგარიშია",
+    "lastBody": "ფულისთვის Lumo-ს ერთი ადგილი მაინც სჭირდება. ჯერ სხვა ანგარიში დაამატე და მერე წაშალე ეს.",
+    "addAnother": "ანგარიშის დამატება",
+    "okay": "კარგი"
   }
 }
