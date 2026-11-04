@@ -9,28 +9,26 @@ const t = i18n.t.bind(i18n);
 describe('i18n', () => {
   it('starts in English', () => {
     expect(i18n.language).toBe('en');
-    expect(t('home.leftToSpend')).toBe('Left to spend');
+    expect(t('home.yourBalance')).toBe('Your balance');
   });
 
   it('fills in values', () => {
     expect(t('home.greeting.evening', { name: 'Nika' })).toBe('Good evening, Nika 🌙');
-    expect(t('home.ofAvailable', { amount: '₾2,650' })).toBe('of ₾2,650');
-    expect(
-      t('addTransaction.message.stillLeft', { amount: '₾46.90', category: 'coffee', emoji: '☕' }),
-    ).toBe('Nice! Still ₾46.90 left for coffee ☕');
-  });
-
-  it('does not escape text (React already does)', () => {
-    expect(t('onboarding.reveal.title', { name: 'Ana & Nika' })).toBe(
-      "Ana & Nika, here's your month ✨",
+    expect(t('home.moreThan', { date: 'Oct 1' })).toBe('more than on Oct 1');
+    expect(t('addTransaction.message.incomeTo', { name: 'Cash' })).toBe(
+      'Lovely! That goes to Cash 🌿',
     );
   });
 
+  it('does not escape text (React already does)', () => {
+    expect(t('home.greeting.evening', { name: 'Ana & Nika' })).toBe('Good evening, Ana & Nika 🌙');
+  });
+
   it('uses plurals', () => {
-    expect(t('home.daysLeft', { count: 1 })).toBe('1 day left');
-    expect(t('home.daysLeft', { count: 5 })).toBe('5 days left');
-    expect(t('budgets.note.left', { amount: '₾87.60', count: 5 })).toBe(
-      '₾87.60 left · 5 days to go',
+    expect(t('home.inAccounts', { count: 1 })).toBe('In 1 account');
+    expect(t('home.inAccounts', { count: 3 })).toBe('In 3 accounts');
+    expect(t('language.previewLeft', { amount: '₾87.60', count: 5 })).toBe(
+      '₾87.60 left to spend · 5 days to go',
     );
   });
 
@@ -99,8 +97,8 @@ describe('i18n', () => {
 
     it('fills in values, plurals and paydays', () => {
       expect(tka('home.greeting.evening', { name: 'ნიკა' })).toBe('საღამო მშვიდობისა, ნიკა 🌙');
-      expect(tka('home.daysLeft', { count: 1 })).toBe('დარჩა 1 დღე');
-      expect(tka('home.daysLeft', { count: 5 })).toBe('დარჩა 5 დღე');
+      expect(tka('home.inAccounts', { count: 1 })).toBe('1 ანგარიშზე');
+      expect(tka('home.inAccounts', { count: 5 })).toBe('5 ანგარიშზე');
       const due = (day: number) =>
         tka('billsManage.due', {
           day: tka('onboarding.income.paydayValue', { count: day, ordinal: true }),

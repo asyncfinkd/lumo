@@ -8,7 +8,6 @@ import { budgets, categories, recurringBills, transactions } from '@/db/schema';
 import { deleteAllData, ensureCategories } from '@/db/seed';
 import { openTestDb } from '@/db/testing';
 import { categoryPalette } from '@/theme';
-import { saveBudget } from '../../budgets/repo';
 import { saveProfile } from '../../profile/repo';
 import { saveBill } from '../../recurring/repo';
 import { addTransaction } from '../../transactions/repo';
@@ -132,11 +131,10 @@ describe('managing categories', () => {
       { kind: 'expense', amountMinor: 900, categoryId: 'coffee', title: 'Cup', date: '2026-10-30' },
       randomUUID,
     );
-    saveBudget(
-      db,
-      { categoryId: 'coffee', limitMinor: 32000, nudgeEnabled: true, nudgeAtMinor: null },
-      randomUUID,
-    );
+    // Budgets are gone from the app, but a restored backup can still hold one.
+    db.insert(budgets)
+      .values({ id: randomUUID(), categoryId: 'coffee', limitMinor: 32000, currency: 'GEL' })
+      .run();
     saveBill(
       db,
       { name: 'Coffee club', amountMinor: 2000, day: 10, categoryId: 'coffee' },

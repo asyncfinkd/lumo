@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { BillIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
 import { currencies, formatMoney } from '@/domain/money';
-import { BUDGETING } from '@/features/flags';
 import { BILL_KEYS, type BillKey, cleanAmount } from '@/features/onboarding/bills';
 import { finishOnboarding } from '@/features/onboarding/finish';
 import { OnboardingStep } from '@/features/onboarding/OnboardingStep';
@@ -22,13 +21,8 @@ export default function BillsScreen() {
   const [saving, setSaving] = useState(false);
 
   const totalMinor = chosenBills({ bills, currency }).reduce((sum, b) => sum + b.amountMinor, 0);
-  // "Your month" shows Left to spend, which is off in phase 1: bills is the last
-  // step, and the root guard opens Home once the profile is saved.
+  // Bills is the last step: the root guard opens Home once the profile is saved.
   const next = () => {
-    if (BUDGETING) {
-      router.push('/your-month');
-      return;
-    }
     if (saving) return;
     setSaving(true);
     finishOnboarding(answers);

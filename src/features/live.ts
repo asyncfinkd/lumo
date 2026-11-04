@@ -9,7 +9,6 @@ import { db } from '@/db/client';
 import { categories, recurringBills } from '@/db/schema';
 import type { CalendarDate } from '@/domain/dates';
 import { accountsQuery, transfersQuery } from './accounts/repo';
-import { budgetsQuery } from './budgets/repo';
 import { summarizeMonth } from './money/summary';
 import { useToday } from './money/useToday';
 import { profileQuery } from './profile/repo';
@@ -41,10 +40,6 @@ export function useAccounts() {
 /** Money moved between accounts, newest first. */
 export function useTransfers() {
   return useLiveQuery(transfersQuery(db)).data;
-}
-
-export function useBudgets() {
-  return useLiveQuery(budgetsQuery(db)).data;
 }
 
 export function useBills() {

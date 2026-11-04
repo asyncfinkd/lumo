@@ -20,7 +20,7 @@ import { useMoneyText } from '@/features/privacy/amounts';
 import { color, fontFamily, radius, shadow, size, text } from '@/theme';
 
 // TransactionDetail-Transfer (#21): where the money went, what each account
-// holds now, and Delete / Edit. Never spending, so no budget card.
+// holds now, and Delete / Edit.
 export default function TransferScreen() {
   const { t } = useTranslation();
   const router = useRouter();

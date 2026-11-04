@@ -1,10 +1,4 @@
-import {
-  MAX_SCHEDULED,
-  newlyLow,
-  outsideQuietHours,
-  planReminders,
-  type ReminderWords,
-} from '../plan';
+import { MAX_SCHEDULED, planReminders, type ReminderWords } from '../plan';
 
 const words: ReminderWords = {
   billTitle: (name) => `${name} is due tomorrow`,
@@ -91,30 +85,5 @@ describe('planReminders', () => {
     );
     const many = Array.from({ length: 80 }, (_, i) => ({ ...telasi, id: `b${i}` }));
     expect(plan({ bills: many }).length).toBe(MAX_SCHEDULED);
-  });
-});
-
-describe('quiet hours', () => {
-  it('waits for 8:00 between 22:00 and 8:00', () => {
-    expect(outsideQuietHours(new Date(2026, 9, 27, 14))).toBeNull();
-    expect(local(outsideQuietHours(new Date(2026, 9, 27, 23))!)).toBe('2026-10-28 8:00');
-    expect(local(outsideQuietHours(new Date(2026, 9, 28, 6))!)).toBe('2026-10-28 8:00');
-  });
-});
-
-describe('newlyLow', () => {
-  it('only reports a budget the moment it drops to 15% or less', () => {
-    const before = new Map([
-      ['groceries', 20],
-      ['coffee', 10],
-    ]);
-    const after = new Map([
-      ['groceries', 12],
-      ['coffee', 5],
-      ['treats', 50],
-    ]);
-    expect(newlyLow(before, after)).toEqual(['groceries']);
-    // On start there's nothing to compare with, so nothing is sent.
-    expect(newlyLow(null, after)).toEqual([]);
   });
 });

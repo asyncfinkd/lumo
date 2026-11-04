@@ -23,7 +23,7 @@ import { db } from '@/db/client';
 import type { Transaction, Transfer } from '@/db/schema';
 import { addDays, type CalendarDate } from '@/domain/dates';
 import type { TransactionKind } from '@/domain/leftToSpend';
-import { type CurrencyCode, currencies, formatMoney, parseAmount } from '@/domain/money';
+import { type CurrencyCode, currencies, parseAmount } from '@/domain/money';
 import { AccountPicker } from '@/features/accounts/AccountPicker';
 import { AccountRow } from '@/features/accounts/AccountRow';
 import { type AccountView, useAccountViews } from '@/features/accounts/accounts';
@@ -31,15 +31,7 @@ import { lastUsedAccount } from '@/features/accounts/lastUsed';
 import { accountsQuery, addTransfer, updateTransfer } from '@/features/accounts/repo';
 import { useTransferView } from '@/features/accounts/useTransferView';
 import { useCategories } from '@/features/categories/categories';
-import { CATEGORY_EMOJI } from '@/features/categoryEmoji';
-import {
-  useActiveBills,
-  useAllTransactions,
-  useBudgets,
-  useMoneyMonth,
-  useTransfers,
-} from '@/features/live';
-import { type AddMessage, addMessage, messageTone } from '@/features/transactions/addMessage';
+import { useAllTransactions, useMoneyMonth, useTransfers } from '@/features/live';
 import {
   editedTitle,
   occurredAt,
@@ -49,11 +41,10 @@ import {
 } from '@/features/transactions/addForm';
 import { clockTime } from '@/features/home/home';
 import { addTransaction, type Scope, updateTransaction } from '@/features/transactions/repo';
-import { BUDGETING } from '@/features/flags';
 import { color, fontFamily, radius, shadow, size, text } from '@/theme';
 
 // AddTransaction: type, amount, a line on how it lands, category, date, note.
-// Saves a `manual` transaction; Home and budgets update through live queries.
+// Saves a `manual` transaction; Home updates through live queries.
 // With `id` it's EditTransaction: the same sheet, filled in, with Delete and
 // Save. `scope` is what EditScope chose for a bill or salary payment; `under`
 // counts the screens below (the details sheet) that close when it's deleted.
@@ -102,8 +93,6 @@ function TransactionForm({
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const { today, profile, summary } = useMoneyMonth();
-  const budgets = useBudgets();
-  const bills = useActiveBills();
   const transactions = useAllTransactions();
 
   const currency: CurrencyCode = profile?.currency ?? existing?.currency ?? 'GEL';
@@ -142,7 +131,7 @@ function TransactionForm({
   const [pickingDay, setPickingDay] = useState(false);
   // Set on save: the sheet keeps showing what it said while it slides away,
   // instead of the line recomputed with the new transaction.
-  const [savedMessage, setSavedMessage] = useState<AddMessage | null>(null);
+  const [saved, setSaved] = useState<{ income: boolean } | null>(null);
 
   const categories = useCategories();
   const adjust = existing?.source === 'adjustment';
@@ -175,24 +164,8 @@ function TransactionForm({
   const amountMinor = parseAmount(typed, currency) ?? 0;
   const categoryName = (id: CategoryId | null) => categories.get(id).label;
 
-  // Without budgeting there's nothing to measure an expense against.
-  const live: AddMessage | null = !BUDGETING
-    ? kind === 'income'
-      ? { type: 'income' }
-      : null
-    : summary
-      ? addMessage({
-          kind,
-          category,
-          amountMinor,
-          budgets,
-          bills,
-          transactions,
-          period: summary.period,
-          left: summary.left,
-        })
-      : null;
-  const message = savedMessage ?? live;
+  // Income says where it lands; an expense has nothing to be measured against.
+  const incomeLine = saved ? saved.income : kind === 'income';
 
   const dayLabel =
     day === today
@@ -226,7 +199,7 @@ function TransactionForm({
   const moved = useRef(false);
 
   const save = (close: () => void) => {
-    if (amountMinor <= 0 || savedMessage) return;
+    if (amountMinor <= 0 || saved) return;
     if (moving) {
       if (!from || !to || !canMove || moved.current) return;
       moved.current = true;
@@ -247,7 +220,7 @@ function TransactionForm({
       close();
       return;
     }
-    setSavedMessage(live);
+    setSaved({ income: kind === 'income' });
     if (existing) {
       const at = new Date(existing.occurredAt);
       updateTransaction(
@@ -391,13 +364,9 @@ function TransactionForm({
                   </Text>
                 </View>
               </View>
-            ) : moving ? null : message ? (
+            ) : moving ? null : incomeLine ? (
               <View style={styles.messageRow}>
-                <MessagePill
-                  message={message}
-                  currency={currency}
-                  account={showPay ? payAccount?.label : undefined}
-                />
+                <IncomePill account={showPay ? payAccount?.label : undefined} />
               </View>
             ) : null}
 
@@ -608,55 +577,24 @@ function TransactionForm({
   );
 }
 
-function MessagePill({
-  message,
-  currency,
+/** Under the amount while adding income: where it lands. */
+function IncomePill({
   account,
 }: {
-  message: AddMessage;
-  currency: CurrencyCode;
   /** With two or more accounts: where income goes. */
   account?: string;
 }) {
-  const { t, i18n } = useTranslation();
-  const money = (minor: number) => formatMoney(minor, currency);
-  const categories = useCategories();
-  const name = (id: CategoryId) => categories.get(id).label;
-  const word = (id: CategoryId) => name(id).toLocaleLowerCase(i18n.language);
-  const emoji = (id: CategoryId) => CATEGORY_EMOJI[id] ?? '';
-
-  const line =
-    message.type === 'income'
-      ? account
-        ? t('addTransaction.message.incomeTo', { name: account })
-        : t('addTransaction.message.income')
-      : message.type === 'covered'
-        ? t('addTransaction.message.covered', {
-            category: name(message.category),
-            emoji: emoji(message.category),
-          })
-        : message.type === 'stillLeft'
-          ? t('addTransaction.message.stillLeft', {
-              amount: money(message.amountMinor),
-              category: word(message.category),
-              emoji: emoji(message.category),
-            })
-          : message.type === 'over'
-            ? t('addTransaction.message.over', {
-                amount: money(message.amountMinor),
-                category: word(message.category),
-              })
-            : message.type === 'stillLeftToSpend'
-              ? t('addTransaction.message.stillLeftToSpend', { amount: money(message.amountMinor) })
-              : t('addTransaction.message.overMonth', { amount: money(message.amountMinor) });
-
-  const good = messageTone(message) === 'good';
+  const { t } = useTranslation();
   return (
     <View
       accessibilityLiveRegion="polite"
-      style={[styles.message, { backgroundColor: good ? color.goodSoft : color.calmSoft }]}
+      style={[styles.message, { backgroundColor: color.goodSoft }]}
     >
-      <Text style={[styles.messageText, { color: good ? color.good : color.muted }]}>{line}</Text>
+      <Text style={[styles.messageText, { color: color.good }]}>
+        {account
+          ? t('addTransaction.message.incomeTo', { name: account })
+          : t('addTransaction.message.income')}
+      </Text>
     </View>
   );
 }

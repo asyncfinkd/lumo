@@ -1,4 +1,4 @@
-// Everything Home and Budgets show about the current pay period, from plain
+// Everything Home shows about the current pay period, from plain
 // rows. Pure, so it's tested without a database or React.
 
 import { totalBalance } from '@/domain/balance';

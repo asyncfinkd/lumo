@@ -72,7 +72,7 @@ export const shadow = {
     'inset 0px 0px 0px 1px rgba(255,255,255,0.85), 0px 10px 30px -14px rgba(200,145,106,0.3)',
   /** A History row while it's swiped open: its right edge lifts. */
   rowOpen: '6px 0px 18px -8px rgba(43,37,34,0.18)',
-  /** Budget and "no budget" cards on the details sheet. */
+  /** Cards on the transfer details sheet. */
   detailCard: '0px 6px 18px -12px rgba(200,145,106,0.35)',
   /** The empty History illustration's tile. */
   emptyTile: '0px 10px 30px -14px rgba(200,145,106,0.4)',
