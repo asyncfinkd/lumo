@@ -329,6 +329,51 @@ describe('HistorySearch in SQL', () => {
     expect(likePattern('100%_')).toBe('%100\\%\\_%');
   });
 
+  it('lets non-ASCII cased letters match either case, and keeps Georgian as typed', () => {
+    expect(likePattern('café')).toBe('%caf_%');
+    expect(likePattern('ყავა')).toBe('%ყავა%');
+  });
+
+  // What the screen shows: SQL's candidates, narrowed by searchTransactions.
+  const shown = (db: ReturnType<typeof openTestDb>, query: string) =>
+    searchTransactions(run(db, query), query, 'all', (tx) => ({
+      category: categories.find((c) => c.id === tx.categoryId)?.label ?? '',
+      amount: (tx.amountMinor / 100).toFixed(2),
+    }));
+
+  it('finds amounts under one unit by their leading zero', () => {
+    const { db } = sampleDb();
+    const small = addTransaction(db, { ...coffee, amountMinor: 50 }, id);
+    expect(searchTerms('0.5', categories, '').words[0]!.digits).toBe('5');
+    expect(shown(db, '0.5').map((r) => r.id)).toContain(small.id);
+    expect(shown(db, '0.0').map((r) => r.id)).not.toContain(small.id);
+  });
+
+  it('finds a query that runs across the name, the category and the amount', () => {
+    const { db } = sampleDb();
+    const added = addTransaction(db, { ...coffee, categoryId: 'coffee' }, id);
+    expect(shown(db, `${coffee.title} Coffee`).map((r) => r.id)).toContain(added.id);
+    const amount = (coffee.amountMinor / 100).toFixed(2);
+    expect(shown(db, `Coffee ${amount}`).map((r) => r.id)).toContain(added.id);
+  });
+
+  it('ignores case for letters beyond ASCII', () => {
+    const { db } = sampleDb();
+    const added = addTransaction(db, { ...coffee, title: 'Café Lumière' }, id);
+    expect(shown(db, 'café lumière').map((r) => r.id)).toEqual([added.id]);
+  });
+
+  it('returns every match, not only the newest', () => {
+    const { db } = sampleDb();
+    for (let i = 0; i < 600; i++) {
+      addTransaction(db, { ...coffee, title: `Snack ${i}`, date: '2020-01-01' }, id);
+    }
+    expect(run(db, 'snack')).toHaveLength(600);
+    expect(searchQuery(db, { query: '', words: [], filter: 'all', limit: 100 }).all()).toHaveLength(
+      100,
+    );
+  });
+
   it('finds by name or note, ignoring ASCII case', () => {
     const { db } = sampleDb();
     const added = addTransaction(db, coffee, id);
@@ -353,14 +398,7 @@ describe('HistorySearch in SQL', () => {
     const { rows } = everything(db);
     const describe = () => ({ category: '', amount: '' });
     for (const filter of ['all', 'spending', 'income', 'auto'] as const) {
-      const fromSql = searchQuery(db, {
-        query: '',
-        filter,
-        categoryIds: [],
-        adjustments: false,
-        digits: '',
-        limit: 10000,
-      }).all();
+      const fromSql = searchQuery(db, { query: '', words: [], filter }).all();
       expect(fromSql.map((r) => r.id).sort()).toEqual(
         searchTransactions(rows, '', filter, describe)
           .map((r) => r.id)

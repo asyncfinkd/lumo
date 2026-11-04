@@ -145,7 +145,9 @@ function TransactionForm({
   // yourself. Bills and salary keep the account their bill or income has.
   const showPay =
     accounts.length > 1 && !moving && !adjust && (!existing || existing.source === 'manual');
-  const ids = useMemo(() => accounts.map((a) => a.id), [accounts]);
+  // By value: the views are new on every balance change, the ids aren't.
+  const idList = accounts.map((a) => a.id).join(',');
+  const ids = useMemo(() => (idList ? idList.split(',') : []), [idList]);
   const lastUsed = useMemo(
     () =>
       showPay && !existing

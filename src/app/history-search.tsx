@@ -47,7 +47,8 @@ export default function HistorySearchScreen() {
       ),
     [query, categories, adjustmentLabel],
   );
-  const transactions = useSearch({ ...terms, filter, limit: terms.query ? 500 : 100 });
+  // Nothing typed: the most recent ("Recent"). A search returns every match.
+  const transactions = useSearch({ ...terms, filter, limit: 100 });
 
   const results = useMemo(
     () =>

@@ -10,9 +10,16 @@ import { db } from '@/db/client';
 import { type Profile, recurringBills } from '@/db/schema';
 import { type CalendarDate, payPeriod } from '@/domain/dates';
 import { monthChangeFromTotals, monthChangeSince } from '../home/home';
-import { profileQuery } from '../profile/repo';
 import { billsQuery, incomesQuery } from '../recurring/repo';
-import { jarBalanceQuery, periodFlowQuery, toBalanceTotals, transactionBalanceQuery } from './repo';
+import {
+  accountTotalsQuery,
+  jarBalanceQuery,
+  jarTotalsByAccountQuery,
+  periodFlowQuery,
+  toBalanceTotals,
+  transactionBalanceQuery,
+  transferTotalsQuery,
+} from './repo';
 import { type MonthSummary, summarizePeriod } from './summary';
 import { useToday } from './useToday';
 
@@ -23,13 +30,27 @@ export type Money = {
   summary: MonthSummary | undefined;
   /** How the balance moved since the 1st ("₾800 more than on Oct 1", Main). */
   monthChange: { since: CalendarDate; deltaMinor: number } | null;
+  /** What each account's balance is made of (`useAccountTotals`, `useAccountViews`). */
+  accountTotals: AccountTotals;
+};
+
+export type AccountTotals = {
+  transactions: ReturnType<ReturnType<typeof accountTotalsQuery>['all']>;
+  jarEntries: ReturnType<ReturnType<typeof jarTotalsByAccountQuery>['all']>;
+  transfers: ReturnType<ReturnType<typeof transferTotalsQuery>['all']>;
 };
 
 const MoneyContext = createContext<Money | null>(null);
 
-export function MoneyProvider({ children }: { children: ReactNode }) {
+/** `profile`: the one AppStack already reads, so it isn't queried twice. */
+export function MoneyProvider({
+  profile,
+  children,
+}: {
+  profile: Profile | undefined;
+  children: ReactNode;
+}) {
   const today = useToday();
-  const profile = useLiveQuery(profileQuery(db)).data[0];
   const incomes = useLiveQuery(incomesQuery(db)).data;
   const bills = useLiveQuery(billsQuery(db).where(eq(recurringBills.active, true))).data;
 
@@ -41,6 +62,19 @@ export function MoneyProvider({ children }: { children: ReactNode }) {
   const since = monthChangeSince(today);
   const txBalance = useLiveQuery(transactionBalanceQuery(db, since), [since]).data[0];
   const jarBalance = useLiveQuery(jarBalanceQuery(db, since), [since]).data[0];
+
+  // Every account's sums, once for all the screens that show balances.
+  const accountTransactions = useLiveQuery(accountTotalsQuery(db)).data;
+  const accountJarEntries = useLiveQuery(jarTotalsByAccountQuery(db)).data;
+  const accountTransfers = useLiveQuery(transferTotalsQuery(db)).data;
+  const accountTotals = useMemo(
+    () => ({
+      transactions: accountTransactions,
+      jarEntries: accountJarEntries,
+      transfers: accountTransfers,
+    }),
+    [accountTransactions, accountJarEntries, accountTransfers],
+  );
 
   const value = useMemo<Money>(() => {
     const balance = toBalanceTotals(txBalance, jarBalance);
@@ -58,8 +92,9 @@ export function MoneyProvider({ children }: { children: ReactNode }) {
           })
         : undefined,
       monthChange: monthChangeFromTotals(since, balance.before, balance.now),
+      accountTotals,
     };
-  }, [today, profile, incomes, bills, flow, since, txBalance, jarBalance]);
+  }, [today, profile, incomes, bills, flow, since, txBalance, jarBalance, accountTotals]);
 
   return <MoneyContext.Provider value={value}>{children}</MoneyContext.Provider>;
 }

@@ -10,7 +10,6 @@ import { categories, recurringBills } from '@/db/schema';
 import type { CalendarDate } from '@/domain/dates';
 import { accountsQuery, transferById, transfersQuery } from './accounts/repo';
 import { useMoney } from './money/MoneyProvider';
-import { accountTotalsQuery, jarTotalsByAccountQuery, transferTotalsQuery } from './money/repo';
 import { useToday } from './money/useToday';
 import { profileQuery } from './profile/repo';
 import { allJarsQuery, jarEntriesQuery, openJarsQuery } from './savings/repo';
@@ -54,10 +53,8 @@ export function useAccounts() {
  * transfers per pair of accounts.
  */
 export function useAccountTotals() {
-  const transactions = useLiveQuery(accountTotalsQuery(db)).data;
-  const jarEntries = useLiveQuery(jarTotalsByAccountQuery(db)).data;
-  const transfers = useLiveQuery(transferTotalsQuery(db)).data;
-  return { transactions, jarEntries, transfers };
+  // Queried once, in MoneyProvider: a dozen mounted screens show balances.
+  return useMoney().accountTotals;
 }
 
 /** Money moved between accounts, newest first. */
@@ -146,15 +143,7 @@ export function useExportCount(start: CalendarDate | null, end: CalendarDate) {
 
 /** HistorySearch's matches, found in SQL. */
 export function useSearch(input: SearchInput) {
-  const { query, filter, categoryIds, adjustments, digits, limit } = input;
-  return useLiveQuery(searchQuery(db, input), [
-    query,
-    filter,
-    categoryIds.join(','),
-    adjustments,
-    digits,
-    limit,
-  ]).data;
+  return useLiveQuery(searchQuery(db, input), [JSON.stringify(input)]).data;
 }
 
 /**

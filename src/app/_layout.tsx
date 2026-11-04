@@ -121,7 +121,7 @@ function AppStack({ onLoaded }: { onLoaded: () => void }) {
 
   return (
     <CategoriesProvider>
-      <MoneyProvider>
+      <MoneyProvider profile={profile}>
         <AmountsHiddenContext.Provider value={profile?.hideAmounts ?? false}>
           {onboarded ? <RemindersSync /> : null}
           {onboarded ? <JarRemindersSync /> : null}

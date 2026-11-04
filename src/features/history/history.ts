@@ -223,27 +223,49 @@ export function monthSpent(transactions: readonly Listed[], today: CalendarDate)
 
 export type HistoryFilter = 'all' | 'spending' | 'income' | 'auto';
 
+/** One word of the query, and what it matches that SQL can't work out itself. */
+export type SearchWord = {
+  text: string;
+  /** Categories whose shown (translated) name holds the word. */
+  categoryIds: string[];
+  /** Whether "Balance adjusted" holds it, likewise. */
+  adjustments: boolean;
+  /**
+   * The word's digits without leading zeros, when it looks like an amount:
+   * "0.5" finds ₾0.50 by its 50 minor units, "64.2" ₾64.20 by its 6420. `'0'`
+   * for zeros only. Empty when it isn't an amount.
+   */
+  digits: string;
+};
+
 /**
- * What HistorySearch asks SQL for (`searchQuery`): the trimmed text, the
- * categories and whether "Balance adjusted" match it by their shown (translated)
- * name, and the typed digits for the amount. SQL can't see translations or
- * formatted amounts, so those are worked out here.
+ * What HistorySearch asks SQL for (`searchQuery`), word by word: a query can
+ * run across the name, the category and the amount ("Coffee Food 4.50"), and
+ * each word sits in one of them. SQL can't see translations or formatted
+ * amounts, so those are worked out here; `searchTransactions` then checks the
+ * whole query on what SQL found.
  */
 export function searchTerms(
   query: string,
   categories: readonly { id: string; label: string }[],
   adjustmentLabel: string,
-): { query: string; categoryIds: string[]; adjustments: boolean; digits: string } {
+): { query: string; words: SearchWord[] } {
   const q = query.trim();
-  const lower = q.toLowerCase();
-  const matches = (label: string) => !!lower && label.toLowerCase().includes(lower);
-  // "64.20", "1,248": only an amount-looking query is matched on amounts.
-  const digits = /^[\d.,\s]+$/.test(q) ? q.replace(/\D/g, '') : '';
+  const words = q ? q.split(/\s+/) : [];
   return {
     query: q,
-    categoryIds: categories.filter((c) => matches(c.label)).map((c) => c.id),
-    adjustments: matches(adjustmentLabel),
-    digits,
+    words: words.map((text) => {
+      const lower = text.toLowerCase();
+      const matches = (label: string) => label.toLowerCase().includes(lower);
+      // "64.20", "1,248": only an amount-looking word is matched on amounts.
+      const typed = /^[\d.,]+$/.test(text) ? text.replace(/\D/g, '') : '';
+      return {
+        text,
+        categoryIds: categories.filter((c) => matches(c.label)).map((c) => c.id),
+        adjustments: matches(adjustmentLabel),
+        digits: typed && (typed.replace(/^0+/, '') || '0'),
+      };
+    }),
   };
 }
 

@@ -60,7 +60,11 @@ export default function InsightsScreen() {
         : (summary?.period ?? { start: today, end: today });
   const before = previousWindow(today, profile?.payday ?? 1);
   const current = useCategoryTotals(range.start, range.end);
-  const previous = useCategoryTotals(before.start, before.end);
+  // Only Month compares with last period; an empty range reads nothing.
+  const previous = useCategoryTotals(
+    view === 'month' ? before.start : '',
+    view === 'month' ? before.end : '',
+  );
 
   const data = useMemo(() => {
     if (!profile || !summary) return null;

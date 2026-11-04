@@ -30,7 +30,7 @@ import {
 import type { Db } from '@/db/types';
 import type { CalendarDate } from '@/domain/dates';
 import type { TransactionKind } from '@/domain/leftToSpend';
-import type { HistoryFilter } from '../history/history';
+import type { HistoryFilter, SearchWord } from '../history/history';
 
 export type TransactionInput = {
   kind: TransactionKind;
@@ -201,11 +201,6 @@ export function transactionsList(db: Db, accountId: string | null = null) {
     .orderBy(desc(transactions.date), desc(transactions.createdAt));
 }
 
-/** Every transaction, newest day first. */
-export function allTransactions(db: Db) {
-  return transactionsList(db);
-}
-
 /** One transaction (TransactionDetail, EditTransaction, the delete dialog). */
 export function transactionById(db: Db, id: string) {
   return db.select().from(transactions).where(eq(transactions.id, id)).limit(1);
@@ -290,29 +285,55 @@ export function lastUsedQuery(db: Db, kind: TransactionKind, accountIds: readonl
     .limit(1);
 }
 
-/** `%` and `_` match themselves in a LIKE pattern. */
+/** Georgian has a capital script (Mtavruli) nobody types in names; its letters match as typed. */
+const GEORGIAN = /[\u10a0-\u10ff\u1c90-\u1cbf\u2d00-\u2d2f]/;
+
+/**
+ * `text` anywhere, `%` and `_` matching themselves. SQLite's LIKE ignores case
+ * for ASCII only, so any other letter that has a case matches any one
+ * character; `searchTransactions` then checks the case-folded text exactly.
+ */
 export function likePattern(text: string): string {
-  return `%${text.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+  const pattern = [...text]
+    .map((c) => {
+      if (c === '\\' || c === '%' || c === '_') return `\\${c}`;
+      const cased = c > '\x7f' && c.toLowerCase() !== c.toUpperCase() && !GEORGIAN.test(c);
+      return cased ? '_' : c;
+    })
+    .join('');
+  return `%${pattern}%`;
 }
 
 export type SearchInput = {
-  /** What was typed, trimmed. Empty lists everything the chip allows. */
+  /** What was typed, trimmed. Empty lists the most recent the chip allows. */
   query: string;
+  /** The query word by word (`searchTerms`); every word has to match somewhere. */
+  words: readonly SearchWord[];
   filter: HistoryFilter;
-  /** Categories whose shown name matches (names are translated, so the screen finds them). */
-  categoryIds: readonly string[];
-  /** Whether "Balance adjusted" matches, likewise. */
-  adjustments: boolean;
-  /** The typed digits, when there are any: "64.2" finds ₾64.20 by its 6420 minor units. */
-  digits: string;
-  /** Results shown at most, newest first. */
+  /** At most this many, newest first. Only for the empty query: a search returns every match. */
   limit?: number;
 };
 
+/** One word in the name, the note, the category or the amount. */
+function wordMatches(word: SearchWord): SQL | undefined {
+  const pattern = likePattern(word.text);
+  const amount = sql`cast(${transactions.amountMinor} as text)`;
+  return or(
+    sql`${transactions.title} like ${pattern} escape '\\'`,
+    sql`${transactions.note} like ${pattern} escape '\\'`,
+    word.categoryIds.length > 0 ? inArray(transactions.categoryId, word.categoryIds) : undefined,
+    word.adjustments ? eq(transactions.source, 'adjustment') : undefined,
+    word.digits ? sql`${amount} like ${likePattern(word.digits)} escape '\\'` : undefined,
+    // "0", "0.0": amounts under one unit show a leading zero ("0.05").
+    word.digits === '0' ? lt(transactions.amountMinor, 100) : undefined,
+  );
+}
+
 /**
- * HistorySearch in SQL (issue 111): the chip, then the name or note (`LIKE`), the
- * category or the amount. ASCII matches ignore case; the screen narrows the
- * rest with `searchTransactions`.
+ * HistorySearch in SQL (issue 111): the chip, then each word in the name or
+ * note (`LIKE`), the category or the amount. Finds everything
+ * `searchTransactions` would and a little more (case, words in other order),
+ * which the screen narrows away.
  */
 export function searchQuery(db: Db, input: SearchInput) {
   const conditions: (SQL | undefined)[] = [];
@@ -322,28 +343,13 @@ export function searchQuery(db: Db, input: SearchInput) {
   if (input.filter === 'auto') {
     conditions.push(inArray(transactions.source, ['bill', 'recurring_income']));
   }
-  if (input.query) {
-    const pattern = likePattern(input.query);
-    conditions.push(
-      or(
-        sql`${transactions.title} like ${pattern} escape '\\'`,
-        sql`${transactions.note} like ${pattern} escape '\\'`,
-        input.categoryIds.length > 0
-          ? inArray(transactions.categoryId, [...input.categoryIds])
-          : undefined,
-        input.adjustments ? eq(transactions.source, 'adjustment') : undefined,
-        input.digits
-          ? sql`cast(${transactions.amountMinor} as text) like ${likePattern(input.digits)} escape '\\'`
-          : undefined,
-      ),
-    );
-  }
-  return db
+  conditions.push(...input.words.map(wordMatches));
+  const query = db
     .select()
     .from(transactions)
     .where(and(...conditions))
-    .orderBy(desc(transactions.date), desc(transactions.createdAt))
-    .limit(input.limit ?? 500);
+    .orderBy(desc(transactions.date), desc(transactions.createdAt));
+  return input.query || input.limit === undefined ? query : query.limit(input.limit);
 }
 
 /** For the export: `start <= date < end` (`null`: from the first), oldest first. */
