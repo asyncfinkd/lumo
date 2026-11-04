@@ -2,7 +2,7 @@
 // AccountDelete and AddTransaction-Transfer boards. Takes a `Db` so tests run
 // it on the real migrations; screens use the live hooks in ../live.ts.
 
-import { and, asc, desc, eq, isNotNull, or, sum } from 'drizzle-orm';
+import { and, asc, desc, eq, isNotNull, or, sql, sum } from 'drizzle-orm';
 import { type AccountColor, type AccountId, type AccountKind, KIND_COLOR } from '@/db/accounts';
 import { newId as defaultNewId } from '@/db/id';
 import {
@@ -28,6 +28,11 @@ export function accountsQuery(db: Db) {
 /** Newest first, as History lists them. */
 export function transfersQuery(db: Db) {
   return db.select().from(transfers).orderBy(desc(transfers.date), desc(transfers.occurredAt));
+}
+
+/** One transfer (TransactionDetail-Transfer, editing it). */
+export function transferById(db: Db, id: string) {
+  return db.select().from(transfers).where(eq(transfers.id, id)).limit(1);
 }
 
 /** One account, read once when its sheet opens (EditAccount). */
@@ -202,11 +207,13 @@ export function deleteAccount(
 
 /** How many transactions an account holds ("Used in", AccountDelete). */
 export function accountUsage(db: Db, id: AccountId): number {
-  return db
-    .select({ id: transactions.id })
-    .from(transactions)
-    .where(eq(transactions.accountId, id))
-    .all().length;
+  return (
+    db
+      .select({ count: sql<number>`count(*)`.mapWith(Number) })
+      .from(transactions)
+      .where(eq(transactions.accountId, id))
+      .get()?.count ?? 0
+  );
 }
 
 export type TransferInput = {

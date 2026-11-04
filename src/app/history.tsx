@@ -9,6 +9,7 @@ import { ChevronLeftIcon, PlusIcon, SearchIcon } from '@/components/Icons';
 import { EmptyClipboard } from '@/components/illustrations/EmptyClipboard';
 import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
+import { calendarMonth } from '@/domain/dates';
 import { formatMoney } from '@/domain/money';
 import { useAccountViews } from '@/features/accounts/accounts';
 import { TransferRow } from '@/features/accounts/TransferRow';
@@ -17,7 +18,6 @@ import {
   dayHasTotal,
   isAutomatic,
   jarMoves,
-  monthSpent,
   transferMoves,
   withJarMoves,
   withTransfers,
@@ -27,10 +27,11 @@ import { useDayLabel } from '@/features/history/useDayLabel';
 import { useMoneyText } from '@/features/privacy/amounts';
 import {
   useAllJars,
-  useAllTransactions,
+  useFlowTotals,
   useJarEntries,
   useProfile,
   useToday,
+  useTransactionList,
   useTransfers,
 } from '@/features/live';
 import { usePullToRefresh } from '@/features/money/usePullToRefresh';
@@ -53,7 +54,6 @@ export default function HistoryScreen() {
   const refreshControl = usePullToRefresh();
   const today = useToday();
   const profile = useProfile();
-  const transactions = useAllTransactions();
   const jars = useAllJars();
   const jarEntries = useJarEntries();
   const transfers = useTransfers();
@@ -65,17 +65,22 @@ export default function HistoryScreen() {
   const pickJar = usePickedJar((s) => s.pick);
   const dayLabel = useDayLabel();
   const money = useMoneyText();
+  // History lists every row, so it reads them all; one account's come filtered in SQL.
+  const transactions = useTransactionList(account);
+  const thisMonth = calendarMonth(today);
+  const spent = useFlowTotals(thisMonth.start, thisMonth.end).wentOutMinor;
   const groups = useMemo(() => {
-    const mine = account ? transactions.filter((tx) => tx.accountId === account) : transactions;
     const jarRows = jarMoves(jarEntries, jars).filter((m) => !account || m.accountId === account);
-    return withTransfers(withJarMoves(dayGroups(mine), jarRows), transferMoves(transfers, account));
+    return withTransfers(
+      withJarMoves(dayGroups(transactions), jarRows),
+      transferMoves(transfers, account),
+    );
   }, [transactions, jarEntries, jars, transfers, account]);
   if (!profile) return null;
 
   const currency = profile.currency;
   const [y, m] = today.split('-').map(Number);
   const month = new Date(y!, m! - 1, 1).toLocaleDateString(i18n.language, { month: 'long' });
-  const spent = monthSpent(transactions, today);
   const shown = accounts.find((a) => a.id === account);
   const subtitle = shown
     ? t('history.accounts.now', {

@@ -6,7 +6,7 @@ import { Donut } from '@/components/Donut';
 import { CategoryIcon, SparkleIcon } from '@/components/Icons';
 import { Fill, Rise } from '@/components/motion';
 import { SegmentedControl } from '@/components/SegmentedControl';
-import { addDays } from '@/domain/dates';
+import { addDays, calendarMonth } from '@/domain/dates';
 import { type CurrencyCode, formatMoney, percent } from '@/domain/money';
 import { useCategories } from '@/features/categories/categories';
 import { CATEGORY_EMOJI } from '@/features/categoryEmoji';
@@ -15,11 +15,17 @@ import {
   type CategoryTotal,
   type Insight,
   previousWindow,
-  spendingByCategory,
+  rankSpending,
   weekRange,
 } from '@/features/insights/insights';
 import { useRouter } from 'expo-router';
-import { useAllTransactions, useJarEntries, useJars, useMoneyMonth } from '@/features/live';
+import {
+  useCategoryTotals,
+  useFlowTotals,
+  useJarEntries,
+  useJars,
+  useMoneyMonth,
+} from '@/features/live';
 import { InsightsSavingsCard } from '@/features/savings/InsightsSavingsCard';
 import { savedByJar } from '@/features/savings/savings';
 import { usePullToRefresh } from '@/features/money/usePullToRefresh';
@@ -35,40 +41,45 @@ export default function InsightsScreen() {
   const refreshControl = usePullToRefresh(screenTop);
   const [view, setView] = useState<Range>('day');
   const { today, profile, summary } = useMoneyMonth();
-  const transactions = useAllTransactions();
   const categories = useCategories();
   const router = useRouter();
   const jars = useJars();
   const jarEntries = useJarEntries();
   const saved = useMemo(() => savedByJar(jarEntries), [jarEntries]);
   // "8% of what came in": this calendar month, as the bars count it.
-  const cameInThisMonth = useMemo(() => {
-    const month = today.slice(0, 7);
-    return transactions
-      .filter((tx) => tx.kind === 'income' && tx.source !== 'adjustment')
-      .filter((tx) => tx.date.startsWith(month))
-      .reduce((sum, tx) => sum + tx.amountMinor, 0);
-  }, [transactions, today]);
+  const month = calendarMonth(today);
+  const cameInThisMonth = useFlowTotals(month.start, month.end).cameInMinor;
+
+  // The range on show and the stretch of last period it's compared with, each
+  // summed per category in SQL.
+  const range =
+    view === 'day'
+      ? { start: today, end: addDays(today, 1) }
+      : view === 'week'
+        ? weekRange(today)
+        : (summary?.period ?? { start: today, end: today });
+  const before = previousWindow(today, profile?.payday ?? 1);
+  const current = useCategoryTotals(range.start, range.end);
+  // Only Month compares with last period; an empty range reads nothing.
+  const previous = useCategoryTotals(
+    view === 'month' ? before.start : '',
+    view === 'month' ? before.end : '',
+  );
 
   const data = useMemo(() => {
     if (!profile || !summary) return null;
+    const items = rankSpending(current);
     if (view === 'day') {
       // No sentence for a single day: the design only words week and month.
-      return { items: spendingByCategory(transactions, today, addDays(today, 1)), insight: null };
+      return { items, insight: null };
     }
     if (view === 'week') {
-      const { start, end } = weekRange(today);
-      const items = spendingByCategory(transactions, start, end);
       const top = items[0];
       const insight: Insight | null = top ? { type: 'led', category: top.category } : null;
       return { items, insight };
     }
-    const { start, end } = summary.period;
-    const items = spendingByCategory(transactions, start, end);
-    const before = previousWindow(today, profile.payday);
-    const previous = spendingByCategory(transactions, before.start, before.end);
-    return { items, insight: biggestDrop(items, previous, before.start) };
-  }, [view, today, profile, summary, transactions]);
+    return { items, insight: biggestDrop(items, rankSpending(previous), before.start) };
+  }, [view, profile, summary, current, previous, before.start]);
   // Memoized so the donut only redraws when the numbers change.
   const chartItems = useMemo(
     () =>

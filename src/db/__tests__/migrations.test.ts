@@ -17,7 +17,7 @@ import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import { totalBalance } from '@/domain/balance';
-import { allTransactions } from '@/features/transactions/repo';
+import { transactionsList } from '@/features/transactions/repo';
 import { getProfile } from '@/features/profile/repo';
 import { CATEGORY_ROWS } from '../categories';
 import * as schema from '../schema';
@@ -182,7 +182,7 @@ function expectDataKept(phone: Phone) {
   // Columns added later get their defaults.
   expect(me).toMatchObject({ avatarColor: 'butter', photoUri: null, reminders: true });
 
-  const rows = allTransactions(db).all();
+  const rows = transactionsList(db).all();
   expect(rows.map((r) => r.id).sort()).toEqual(['market', 'rent-oct', 'salary-oct', 'start']);
   expect(totalBalance(rows)).toBe(1200000 - 6420 - 80000 + 380000);
   expect(rows.find((r) => r.id === 'market')).toMatchObject({

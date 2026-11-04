@@ -85,6 +85,14 @@ export function payPeriod(today: CalendarDate, payday: number): PayPeriod {
   return { start, end, days: diffDays(start, end) };
 }
 
+/** The calendar month `date` is in: its 1st, inclusive, to the next 1st, exclusive. */
+export function calendarMonth(date: CalendarDate): { start: CalendarDate; end: CalendarDate } {
+  const year = Number(date.slice(0, 4));
+  const month = Number(date.slice(5, 7));
+  const [nextYear, nextMonth] = shiftMonth(year, month, 1);
+  return { start: ymd(year, month, 1), end: ymd(nextYear, nextMonth, 1) };
+}
+
 export function isInPeriod(date: CalendarDate, period: PayPeriod): boolean {
   return diffDays(period.start, date) >= 0 && diffDays(date, period.end) > 0;
 }

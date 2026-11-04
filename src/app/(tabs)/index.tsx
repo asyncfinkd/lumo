@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -12,12 +11,11 @@ import { AccountsSplit } from '@/features/home/AccountsSplit';
 import { BalanceCard } from '@/features/home/BalanceCard';
 import { setHideAmounts } from '@/features/profile/repo';
 import { FlowCard } from '@/features/home/FlowCard';
-import { greetingKey, monthChange, recentDays } from '@/features/home/home';
+import { greetingKey, recentDays } from '@/features/home/home';
 import { useHour } from '@/features/home/useHour';
 import { Avatar } from '@/features/profile/Avatar';
 import {
   useAccounts,
-  useAllTransactions,
   useJarEntries,
   useJars,
   useMoneyMonth,
@@ -39,19 +37,14 @@ export default function HomeScreen() {
   const screenTop = useScreenTop();
   const refreshControl = usePullToRefresh(screenTop);
   const hour = useHour();
-  const { today, profile, summary } = useMoneyMonth();
+  const { today, profile, summary, monthChange: change } = useMoneyMonth();
   const recent = recentDays(useTransactionsBetween(addDays(today, -1), addDays(today, 1)), today);
-  const transactions = useAllTransactions();
   const jarEntries = useJarEntries();
   const jars = useJars();
   const accountCount = useAccounts().length;
   const picked = usePickedJar((s) => s.id);
   // The jar up front on Savings.
   const jar = jars.find((j) => j.id === picked) ?? jars[0];
-  const change = useMemo(
-    () => monthChange(transactions, today, jarEntries),
-    [transactions, today, jarEntries],
-  );
 
   if (!profile || !summary) return null;
   const name = profile.name.trim();

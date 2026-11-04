@@ -8,7 +8,7 @@ import { db } from '@/db/client';
 import { formatMoney } from '@/domain/money';
 import { deleteTransfer } from '@/features/accounts/repo';
 import { useTransferView } from '@/features/accounts/useTransferView';
-import { useTransfers } from '@/features/live';
+import { useTransfer } from '@/features/live';
 import { useMoneyText } from '@/features/privacy/amounts';
 import { runWrite } from '@/features/runWrite';
 import { color, fontFamily, radius, text } from '@/theme';
@@ -23,10 +23,9 @@ export default function TransferDeleteScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { id, close } = useLocalSearchParams<{ id: string; close?: string }>();
-  const transfers = useTransfers();
   const view = useTransferView();
   const money = useMoneyText();
-  const transfer = transfers.find((x) => x.id === id);
+  const transfer = useTransfer(id);
   if (!transfer) return null;
 
   const v = view(transfer);

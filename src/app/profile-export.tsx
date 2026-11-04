@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,10 +16,12 @@ import {
   type ExportFormat,
   type ExportRange,
   type ExportWords,
-  inRange,
   rangeStart,
 } from '@/features/export/export';
-import { useAllTransactions, useBills, useIncomes, useProfile, useToday } from '@/features/live';
+import { db } from '@/db/client';
+import { addDays } from '@/domain/dates';
+import { useBills, useExportCount, useIncomes, useProfile, useToday } from '@/features/live';
+import { exportQuery } from '@/features/transactions/repo';
 import { writeBackupFile } from '@/features/backup/files';
 import { SettingsHeader } from '@/features/profile/SettingsHeader';
 import { color, fontFamily, radius, shadow, size, space, text } from '@/theme';
@@ -33,6 +35,8 @@ const SHARE: Record<Format, { mimeType: string; UTI: string }> = {
 const RANGES: ExportRange[] = ['month', 'three', 'year', 'all'];
 /** CSV and PDF are to read; the backup is everything, to restore in Kept. */
 type Format = ExportFormat | 'backup';
+/** After any date a transaction can have: a backup has no end. */
+const FAR_FUTURE = '9999-12-31';
 const FORMATS: Format[] = ['csv', 'pdf', 'backup'];
 
 // ProfileExport: pick a time and CSV or PDF; Kept makes the file on the phone
@@ -44,7 +48,6 @@ export default function ProfileExportScreen() {
   const screenTop = useScreenTop();
   const today = useToday();
   const profile = useProfile();
-  const transactions = useAllTransactions();
   const bills = useBills();
   const incomes = useIncomes();
   const categories = useCategories();
@@ -54,10 +57,11 @@ export default function ProfileExportScreen() {
   const [failed, setFailed] = useState(false);
 
   const backup = format === 'backup';
-  const chosen = useMemo(
-    () => (backup ? transactions : inRange(transactions, range, today)),
-    [backup, transactions, range, today],
-  );
+  // A backup holds everything; a file, the months picked up to today. Only
+  // counted here; the rows are read when the file is made.
+  const start = backup ? null : rangeStart(range, today);
+  const end = backup ? FAR_FUTURE : addDays(today, 1);
+  const count = useExportCount(start, end);
   if (!profile) return null;
 
   const words: ExportWords = {
@@ -89,7 +93,7 @@ export default function ProfileExportScreen() {
     setBusy(true);
     setFailed(false);
     try {
-      const data = { transactions: chosen, bills, incomes };
+      const data = { transactions: exportQuery(db, start, end).all(), bills, incomes };
       const name = `Kept ${today}`;
       let target: File;
       if (format === 'backup') {
@@ -128,7 +132,7 @@ export default function ProfileExportScreen() {
   };
 
   const included = [
-    { label: t('exportData.transactions'), count: chosen.length },
+    { label: t('exportData.transactions'), count },
     { label: t('exportData.billsAndIncome'), count: bills.length + incomes.length },
     ...(backup ? [{ label: t('exportData.categories'), count: categories.list.length }] : []),
   ];

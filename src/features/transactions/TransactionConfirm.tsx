@@ -7,7 +7,7 @@ import { CategoryIcon, RepeatIcon, TrashIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
 import { db } from '@/db/client';
 import { formatMoney } from '@/domain/money';
-import { useAllTransactions } from '@/features/live';
+import { useTransaction } from '@/features/live';
 import { runWrite } from '@/features/runWrite';
 import { deleteTransaction, type Scope } from '@/features/transactions/repo';
 import { useTransactionView } from '@/features/transactions/useTransactionView';
@@ -34,9 +34,8 @@ export function TransactionConfirm({
 }) {
   const { t } = useTranslation();
   const router = useRouter();
-  const transactions = useAllTransactions();
   const view = useTransactionView();
-  const tx = transactions.find((x) => x.id === id);
+  const tx = useTransaction(id);
   if (!tx) return null;
 
   const v = view(tx);

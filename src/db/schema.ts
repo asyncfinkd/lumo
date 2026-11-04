@@ -116,6 +116,10 @@ export const transactions = sqliteTable(
   },
   (t) => [
     index('transactions_date_idx').on(t.date),
+    // Balances per account, totals per category, came in / went out (issue 111).
+    index('transactions_account_idx').on(t.accountId),
+    index('transactions_category_idx').on(t.categoryId),
+    index('transactions_kind_date_idx').on(t.kind, t.date),
     uniqueIndex('transactions_recurring_date_idx').on(t.recurringId, t.date),
     check('transactions_amount_positive', sql`${t.amountMinor} >= 0`),
   ],
@@ -242,7 +246,10 @@ export const jarEntries = sqliteTable(
     /** The account it came out of, or went back into (SavingsAdd). */
     accountId,
   },
-  (t) => [index('jar_entries_jar_idx').on(t.jarId)],
+  (t) => [
+    index('jar_entries_jar_idx').on(t.jarId),
+    index('jar_entries_account_idx').on(t.accountId),
+  ],
 );
 
 /**

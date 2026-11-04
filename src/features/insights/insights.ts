@@ -25,10 +25,27 @@ export function spendingByCategory(
   start: CalendarDate,
   end: CalendarDate,
 ): CategoryTotal[] {
+  return rankSpending(
+    transactions.filter(
+      (t) => t.source !== 'adjustment' && diffDays(start, t.date) >= 0 && diffDays(t.date, end) > 0,
+    ),
+  );
+}
+
+/**
+ * Expenses per category, largest first, from rows already in range and free
+ * of adjustments: plain transactions, or the sums `categoryTotalsQuery` returns.
+ */
+export function rankSpending(
+  rows: readonly {
+    kind: MoneyTransaction['kind'];
+    categoryId: string | null;
+    amountMinor: number;
+  }[],
+): CategoryTotal[] {
   const totals = new Map<string, number>();
-  for (const t of transactions) {
-    if (t.kind !== 'expense' || t.source === 'adjustment' || !t.categoryId) continue;
-    if (diffDays(start, t.date) < 0 || diffDays(t.date, end) <= 0) continue;
+  for (const t of rows) {
+    if (t.kind !== 'expense' || !t.categoryId) continue;
     totals.set(t.categoryId, (totals.get(t.categoryId) ?? 0) + t.amountMinor);
   }
   return [...totals.entries()]

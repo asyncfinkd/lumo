@@ -1,7 +1,8 @@
-// Everything Home shows about the current pay period, from plain
-// rows. Pure, so it's tested without a database or React.
+// Everything Home shows about the current pay period. Pure, so it's tested
+// without a database or React. The app feeds `summarizePeriod` with the sums
+// from ./repo.ts (MoneyProvider); `summarizeMonth` does the same from plain rows.
 
-import { totalBalance } from '@/domain/balance';
+import { type BalanceTotals, balanceFromTotals, balanceTotals } from '@/domain/balance';
 import {
   type CalendarDate,
   daysLeft,
@@ -48,6 +49,37 @@ export function summarizeMonth({
   /** Money moved into savings jars comes off the balance. */
   jarEntries?: readonly { amountMinor: number }[];
 }): MonthSummary {
+  return summarizePeriod({
+    today,
+    payday,
+    incomes,
+    bills,
+    periodTransactions: transactions,
+    balance: balanceTotals(transactions, jarEntries),
+  });
+}
+
+/**
+ * The summary from this period's transactions and the balance's parts.
+ * `periodTransactions` may hold rows from other periods (they're skipped) and
+ * may be sums already, one per day, kind and source (`periodFlowQuery`).
+ */
+export function summarizePeriod({
+  today,
+  payday,
+  incomes,
+  bills,
+  periodTransactions,
+  balance,
+}: {
+  today: CalendarDate;
+  payday: number;
+  incomes: readonly { amountMinor: number }[];
+  /** Active bills only. */
+  bills: readonly { amountMinor: number }[];
+  periodTransactions: readonly MoneyTransaction[];
+  balance: BalanceTotals;
+}): MonthSummary {
   const period = payPeriod(today, payday);
   const sum = (rows: readonly { amountMinor: number }[]) =>
     rows.reduce((total, row) => total + row.amountMinor, 0);
@@ -57,7 +89,7 @@ export function summarizeMonth({
   const days = Math.max(1, diffDays(period.start, today) + 1);
   const cameInByDay = new Array<number>(days).fill(0);
   const wentOutByDay = new Array<number>(days).fill(0);
-  for (const t of transactions) {
+  for (const t of periodTransactions) {
     if (t.source === 'adjustment' || !isInPeriod(t.date, period)) continue;
     // Something dated later this period (a bill added ahead) counts on today.
     const day = Math.min(days - 1, diffDays(period.start, t.date));
@@ -80,13 +112,13 @@ export function summarizeMonth({
     left: leftToSpend({
       plannedIncomeMinor: sum(incomes),
       billsMinor: sum(bills),
-      transactions,
+      transactions: periodTransactions,
       period,
     }),
     cameInMinor,
     wentOutMinor,
     cameInByDay,
     wentOutByDay,
-    balanceMinor: totalBalance(transactions, jarEntries),
+    balanceMinor: balanceFromTotals(balance),
   };
 }

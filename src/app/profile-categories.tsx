@@ -8,11 +8,9 @@ import { BottomFade, Orbs } from '@/components/Backdrop';
 import { CategoryIcon, ChevronRightIcon, PlusIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
 import type { CategoryKind } from '@/db/categories';
-import { categorySpent } from '@/domain/budgets';
-import { isInPeriod } from '@/domain/dates';
 import { formatMoney } from '@/domain/money';
 import { type CategoryView, useCategories } from '@/features/categories/categories';
-import { useAllTransactions, useMoneyMonth } from '@/features/live';
+import { useCategoryTotals, useMoneyMonth } from '@/features/live';
 import { HeaderButton, SettingsHeader } from '@/features/profile/SettingsHeader';
 import { color, fontFamily, radius, shadow, space, text } from '@/theme';
 
@@ -25,30 +23,21 @@ export default function ProfileCategoriesScreen() {
   const screenTop = useScreenTop();
   const categories = useCategories();
   const { profile, summary } = useMoneyMonth();
-  const transactions = useAllTransactions();
+  // This period's totals per category and kind, bills included, summed in SQL.
+  const period = summary?.period;
+  const totals = useCategoryTotals(period?.start ?? '', period?.end ?? '');
 
   const detail = useMemo(() => {
     const currency = profile?.currency ?? 'GEL';
     const money = (minor: number) => formatMoney(minor, currency, { decimals: 'auto' });
+    const byCategory = new Map(totals.map((row) => [`${row.kind}:${row.categoryId}`, row]));
     return (c: CategoryView) => {
       if (!summary || !c.id) return '';
-      if (c.kind === 'income') {
-        const earned = transactions
-          .filter(
-            (tx) =>
-              tx.kind === 'income' &&
-              tx.source !== 'adjustment' &&
-              tx.categoryId === c.id &&
-              isInPeriod(tx.date, summary.period),
-          )
-          .reduce((sum, tx) => sum + tx.amountMinor, 0);
-        return t('categoryManage.earned', { amount: money(earned) });
-      }
-      // What went out this month.
-      const spent = money(categorySpent(transactions, c.id, summary.period));
-      return t('categoryManage.earned', { amount: spent });
+      // What came in, or what went out, this period.
+      const minor = byCategory.get(`${c.kind}:${c.id}`)?.amountMinor ?? 0;
+      return t('categoryManage.earned', { amount: money(minor) });
     };
-  }, [profile, summary, transactions, t]);
+  }, [profile, summary, totals, t]);
 
   const open = (id?: string | null) =>
     router.push(id ? { pathname: '/profile-category', params: { id } } : '/profile-category');

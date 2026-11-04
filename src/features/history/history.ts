@@ -223,11 +223,58 @@ export function monthSpent(transactions: readonly Listed[], today: CalendarDate)
 
 export type HistoryFilter = 'all' | 'spending' | 'income' | 'auto';
 
+/** One word of the query, and what it matches that SQL can't work out itself. */
+export type SearchWord = {
+  text: string;
+  /** Categories whose shown (translated) name holds the word. */
+  categoryIds: string[];
+  /** Whether "Balance adjusted" holds it, likewise. */
+  adjustments: boolean;
+  /**
+   * The word's digits without leading zeros, when it looks like an amount:
+   * "0.5" finds ₾0.50 by its 50 minor units, "64.2" ₾64.20 by its 6420. `'0'`
+   * for zeros only. Empty when it isn't an amount.
+   */
+  digits: string;
+};
+
 /**
- * HistorySearch: matches the name, the category or the amount ("coffee",
- * "Fresh", "64.2"), then the chip. Adjustments only show under All.
+ * What HistorySearch asks SQL for (`searchQuery`), word by word: a query can
+ * run across the name, the category and the amount ("Coffee Food 4.50"), and
+ * each word sits in one of them. SQL can't see translations or formatted
+ * amounts, so those are worked out here; `searchTransactions` then checks the
+ * whole query on what SQL found.
  */
-export function searchTransactions<T extends Listed & { title: string }>(
+export function searchTerms(
+  query: string,
+  categories: readonly { id: string; label: string }[],
+  adjustmentLabel: string,
+): { query: string; words: SearchWord[] } {
+  const q = query.trim();
+  const words = q ? q.split(/\s+/) : [];
+  return {
+    query: q,
+    words: words.map((text) => {
+      const lower = text.toLowerCase();
+      const matches = (label: string) => label.toLowerCase().includes(lower);
+      // "64.20", "1,248": only an amount-looking word is matched on amounts.
+      const typed = /^[\d.,]+$/.test(text) ? text.replace(/\D/g, '') : '';
+      return {
+        text,
+        categoryIds: categories.filter((c) => matches(c.label)).map((c) => c.id),
+        adjustments: matches(adjustmentLabel),
+        digits: typed && (typed.replace(/^0+/, '') || '0'),
+      };
+    }),
+  };
+}
+
+/**
+ * HistorySearch: matches the name, the note, the category or the amount
+ * ("coffee", "Fresh", "64.2"), then the chip. Runs on what `searchQuery` found,
+ * so the result is exactly this, whatever SQL's LIKE does with case. Adjustments only show under All.
+ */
+export function searchTransactions<T extends Listed & { title: string; note?: string | null }>(
   transactions: readonly T[],
   query: string,
   filter: HistoryFilter,
@@ -240,6 +287,8 @@ export function searchTransactions<T extends Listed & { title: string }>(
     if (filter === 'auto' && !isAutomatic(t)) return false;
     if (!q) return true;
     const { category, amount } = describe(t);
-    return `${t.title} ${category} ${amount}`.toLowerCase().includes(q);
+    return [t.title, t.note ?? '', `${t.title} ${category} ${amount}`].some((text) =>
+      text.toLowerCase().includes(q),
+    );
   });
 }

@@ -7,7 +7,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import { Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { formatMoney } from '@/domain/money';
-import { useAllTransactions, useBills, useIncomes, useMoneyMonth } from '@/features/live';
+import { addDays } from '@/domain/dates';
+import { useBills, useIncomes, useManualDates, useMoneyMonth } from '@/features/live';
 import { JAR_REMINDER_PREFIX } from '@/features/savings/reminders';
 import { Notifications } from './notifications';
 import { planReminders } from './plan';
@@ -68,10 +69,9 @@ export async function ensureChannel(name: string) {
 
 export function RemindersSync() {
   const { t } = useTranslation();
-  const { profile } = useMoneyMonth();
+  const { profile, today } = useMoneyMonth();
   const bills = useBills();
   const incomes = useIncomes();
-  const transactions = useAllTransactions();
 
   const currency = profile?.currency ?? 'GEL';
   const reminders = profile?.reminders ?? false;
@@ -79,10 +79,9 @@ export function RemindersSync() {
   const remindPayday = profile?.remindPayday ?? false;
   const remindEvening = profile?.remindEvening ?? false;
 
-  const addedDates = useMemo(
-    () => new Set(transactions.filter((tx) => tx.source === 'manual').map((tx) => tx.date)),
-    [transactions],
-  );
+  // Evening check-ins look a week ahead; the day before too, in case "now" is
+  // still yesterday's evening when the date has just turned.
+  const addedDates = useManualDates(addDays(today, -1), addDays(today, 8));
 
   // Planned from "now" each time something changes; the key skips rescheduling
   // when the plan comes out the same.

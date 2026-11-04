@@ -15,7 +15,7 @@ import { Sheet } from '@/components/Sheet';
 import { formatMoney } from '@/domain/money';
 import type { AccountView } from '@/features/accounts/accounts';
 import { useTransferView } from '@/features/accounts/useTransferView';
-import { useTransfers } from '@/features/live';
+import { useTransfer } from '@/features/live';
 import { useMoneyText } from '@/features/privacy/amounts';
 import { color, fontFamily, radius, shadow, size, text } from '@/theme';
 
@@ -28,10 +28,9 @@ export default function TransferScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const transfers = useTransfers();
   const view = useTransferView();
   const money = useMoneyText();
-  const transfer = transfers.find((x) => x.id === id);
+  const transfer = useTransfer(id);
 
   if (!transfer) return null;
   const v = view(transfer);
