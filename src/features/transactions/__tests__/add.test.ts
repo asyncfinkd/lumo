@@ -1,28 +1,12 @@
-import {
-  buildSampleTransactions,
-  SAMPLE_PAYDAY,
-  sampleBills,
-  sampleBudgets,
-  sampleIncomes,
-} from '@/db/sampleData';
+import { buildSampleTransactions, SAMPLE_PAYDAY } from '@/db/sampleData';
 import { categorySpent } from '@/domain/budgets';
 import { payPeriod } from '@/domain/dates';
-import { summarizeMonth } from '../../money/summary';
 import { editedTitle, occurredAt, pickableDays, shortDate, transactionTitle } from '../addForm';
-import { addMessage, messageTone } from '../addMessage';
 
 // docs/sample-data.md on Oct 31.
 const today = '2026-10-31';
 const period = payPeriod(today, SAMPLE_PAYDAY);
 const transactions = buildSampleTransactions(today);
-const { left } = summarizeMonth({
-  today,
-  payday: SAMPLE_PAYDAY,
-  incomes: sampleIncomes,
-  bills: sampleBills,
-  transactions,
-});
-const base = { budgets: sampleBudgets, bills: sampleBills, transactions, period, left };
 
 describe('categorySpent', () => {
   it('matches the budgets table, bills included', () => {
@@ -57,54 +41,6 @@ describe('categorySpent', () => {
       },
     ];
     expect(categorySpent([...transactions, ...extra], 'coffee', period)).toBe(24860);
-  });
-});
-
-describe('addMessage', () => {
-  it('shows what stays in the budget: ₾24.50 coffee leaves ₾46.90 (design)', () => {
-    const message = addMessage({ ...base, kind: 'expense', category: 'coffee', amountMinor: 2450 });
-    expect(message).toEqual({ type: 'stillLeft', category: 'coffee', amountMinor: 4690 });
-    expect(messageTone(message)).toBe('good');
-  });
-
-  it('says how far over, calmly', () => {
-    const message = addMessage({
-      ...base,
-      kind: 'expense',
-      category: 'groceries',
-      amountMinor: 10000,
-    });
-    expect(message).toEqual({ type: 'over', category: 'groceries', amountMinor: 1240 });
-    expect(messageTone(message)).toBe('calm');
-  });
-
-  it('calls categories with a bill covered', () => {
-    expect(addMessage({ ...base, kind: 'expense', category: 'home', amountMinor: 500 })).toEqual({
-      type: 'covered',
-      category: 'home',
-    });
-  });
-
-  it('falls back to Left to spend without a budget', () => {
-    const noBudgets = { ...base, budgets: [] };
-    expect(
-      addMessage({ ...noBudgets, kind: 'expense', category: 'treats', amountMinor: 970 }),
-    ).toEqual({
-      type: 'stillLeftToSpend',
-      amountMinor: 79000,
-    });
-    expect(
-      addMessage({ ...noBudgets, kind: 'expense', category: 'treats', amountMinor: 80000 }),
-    ).toEqual({
-      type: 'overMonth',
-      amountMinor: 30,
-    });
-  });
-
-  it('cheers income', () => {
-    expect(addMessage({ ...base, kind: 'income', category: 'gift', amountMinor: 5000 })).toEqual({
-      type: 'income',
-    });
   });
 });
 

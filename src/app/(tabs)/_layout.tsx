@@ -8,10 +8,9 @@ import { GlassTabBar, type Tab } from '@/components/GlassTabBar';
 import { WelcomeToast } from '@/features/onboarding/welcomeToast';
 import { color } from '@/theme';
 
-const PATHS: Record<Tab, '/' | '/insights' | '/budgets' | '/savings' | '/profile'> = {
+const PATHS: Record<Tab, '/' | '/insights' | '/savings' | '/profile'> = {
   home: '/',
   insights: '/insights',
-  budgets: '/budgets',
   savings: '/savings',
   profile: '/profile',
 };
@@ -40,7 +39,6 @@ export default function TabsLayout() {
           <Tabs.Screen name="index" options={{ title: t('tabs.home') }} />
           <Tabs.Screen name="insights" options={{ title: t('tabs.insights') }} />
           <Tabs.Screen name="savings" options={{ title: t('tabs.savings') }} />
-          <Tabs.Screen name="budgets" options={{ title: t('tabs.budgets') }} />
           <Tabs.Screen name="profile" options={{ title: t('tabs.profile') }} />
         </Tabs>
         <BottomFade />

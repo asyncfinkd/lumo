@@ -129,24 +129,3 @@ export function planReminders({
     .sort((a, b) => a.at.getTime() - b.at.getTime())
     .slice(0, MAX_SCHEDULED);
 }
-
-/** A "budget running low" note that happens now waits for 8:00 in quiet hours. */
-export function outsideQuietHours(now: Date): Date | null {
-  const hour = now.getHours();
-  if (hour >= QUIET_UNTIL && hour < QUIET_FROM) return null;
-  const morning = new Date(now);
-  if (hour >= QUIET_FROM) morning.setDate(morning.getDate() + 1);
-  morning.setHours(QUIET_UNTIL, 0, 0, 0);
-  return morning;
-}
-
-/** Categories that just went from more than 15% left to 15% or less. */
-export function newlyLow(
-  before: ReadonlyMap<string, number> | null,
-  after: ReadonlyMap<string, number>,
-): string[] {
-  if (!before) return [];
-  return [...after.entries()]
-    .filter(([id, left]) => left <= 15 && (before.get(id) ?? 100) > 15)
-    .map(([id]) => id);
-}

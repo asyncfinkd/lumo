@@ -10,43 +10,29 @@ import {
   RepeatIcon,
   TrashIcon,
 } from '@/components/Icons';
-import { Fill } from '@/components/motion';
 import { Press } from '@/components/Press';
 import { Sheet } from '@/components/Sheet';
-import { formatMoney } from '@/domain/money';
 import { type AccountView, useAccountViews } from '@/features/accounts/accounts';
-import { BUDGETING } from '@/features/flags';
-import { type BudgetRow, budgetRows } from '@/features/budgets/budgetRows';
-import {
-  useAllTransactions,
-  useBills,
-  useBudgets,
-  useIncomes,
-  useMoneyMonth,
-} from '@/features/live';
+import { useAllTransactions, useBills, useIncomes } from '@/features/live';
 import { useTransactionView } from '@/features/transactions/useTransactionView';
-import { color, fontFamily, gradient, radius, shadow, size, text } from '@/theme';
+import { color, fontFamily, radius, shadow, size, text } from '@/theme';
 
-// TransactionDetail: what it was, when, where it came from, how its budget
-// stands, and Delete / Edit. Five looks: manual, no budget, automatic bill,
-// income, balance adjusted. With two or more accounts it also says which one
-// paid or got it (TransactionDetail-Account).
+// TransactionDetail: what it was, when, where it came from, and Delete / Edit.
+// Four looks: manual, automatic bill, income, balance adjusted. With two or more
+// accounts it also says which one paid or got it (TransactionDetail-Account).
 export default function TransactionScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const transactions = useAllTransactions();
-  const budgets = useBudgets();
   const bills = useBills();
   const incomes = useIncomes();
-  const { summary } = useMoneyMonth();
   const view = useTransactionView();
   const accounts = useAccountViews();
   const tx = transactions.find((x) => x.id === id);
 
   if (!tx) return null;
   const v = view(tx);
-  const expense = tx.kind === 'expense' && !v.adjust;
 
   const repeatDay =
     tx.source === 'bill'
@@ -89,10 +75,6 @@ export default function TransactionScreen() {
         ? { label: t('history.detail.added'), value: t('history.detail.fromIncome'), auto: true }
         : { label: t('history.detail.added'), value: t('history.detail.byYou') },
   );
-
-  const budget =
-    expense && tx.categoryId ? budgets.find((b) => b.categoryId === tx.categoryId) : undefined;
-  const money = (minor: number) => formatMoney(minor, tx.currency, { decimals: 'auto' });
 
   const openDelete = () =>
     router.push({ pathname: '/transaction-delete', params: { id: tx.id, close: '2' } });
@@ -177,38 +159,6 @@ export default function TransactionScreen() {
             ))}
           </View>
 
-          {!BUDGETING ? null : budget && summary ? (
-            <BudgetCard
-              label={v.label}
-              row={
-                budgetRows({
-                  budgets: [budget],
-                  transactions,
-                  bills: bills.filter((b) => b.active),
-                  period: summary.period,
-                })[0]!
-              }
-              money={money}
-            />
-          ) : expense && tx.categoryId ? (
-            <View style={styles.noBudget}>
-              <Text style={styles.noBudgetText}>
-                {t('history.detail.noBudgetBefore')}
-                <Text style={styles.noBudgetName}>{v.label}</Text>
-                {t('history.detail.noBudgetAfter')}
-              </Text>
-              <Press
-                accessibilityRole="button"
-                onPress={() =>
-                  router.push({ pathname: '/edit-budget', params: { category: tx.categoryId! } })
-                }
-                style={styles.setOne}
-              >
-                <Text style={styles.setOneText}>{t('history.detail.setOne')}</Text>
-              </Press>
-            </View>
-          ) : null}
-
           {v.income || v.adjust ? (
             <View
               style={[styles.note, { backgroundColor: v.adjust ? color.wash : color.goodSoft }]}
@@ -235,49 +185,6 @@ export default function TransactionScreen() {
         </>
       )}
     </Sheet>
-  );
-}
-
-/** The category's budget as on the Budgets board: what's left, the bar, "All paid". */
-function BudgetCard({
-  label,
-  row,
-  money,
-}: {
-  label: string;
-  row: BudgetRow;
-  money: (minor: number) => string;
-}) {
-  const { t } = useTranslation();
-  const pct = Math.round(row.leftPercent);
-  return (
-    <View style={styles.budget}>
-      <View style={styles.budgetHead}>
-        <Text style={styles.budgetLabel}>{t('history.detail.budget', { category: label })}</Text>
-        <Text style={styles.budgetLeft}>
-          {t('history.detail.leftOf', { left: money(row.leftMinor), limit: money(row.limitMinor) })}
-        </Text>
-      </View>
-      <View
-        accessible
-        accessibilityRole="progressbar"
-        accessibilityLabel={t('history.detail.budgetLeft', { category: label })}
-        accessibilityValue={{ min: 0, max: 100, now: pct }}
-        style={styles.track}
-      >
-        <Fill
-          percent={pct > 0 ? Math.max(pct, 4) : 0}
-          style={
-            row.state === 'low'
-              ? { backgroundColor: color.warningFill }
-              : { backgroundImage: gradient.progress }
-          }
-        />
-      </View>
-      {row.state === 'allPaid' ? (
-        <Text style={styles.paid}>{t('history.detail.allPaid')}</Text>
-      ) : null}
-    </View>
   );
 }
 
@@ -385,49 +292,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: color.softInk,
   },
-  budget: {
-    marginTop: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    borderCurve: 'continuous',
-    backgroundColor: color.field,
-    boxShadow: shadow.detailCard,
-    gap: 10,
-  },
-  budgetHead: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  budgetLabel: { ...text.subtitle, fontFamily: fontFamily.bold, color: color.ink },
-  budgetLeft: { ...text.subtitle, color: color.muted, fontVariant: ['tabular-nums'] },
-  track: { height: 10, borderRadius: 5, backgroundColor: color.track, overflow: 'hidden' },
-  paid: { fontFamily: fontFamily.bold, fontSize: 12, color: color.good },
-  noBudget: {
-    marginTop: 12,
-    height: 56,
-    paddingLeft: 16,
-    paddingRight: 8,
-    borderRadius: 20,
-    borderCurve: 'continuous',
-    backgroundColor: color.field,
-    boxShadow: shadow.detailCard,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  noBudgetText: { ...text.subtitle, flex: 1, color: color.muted },
-  noBudgetName: { fontFamily: fontFamily.bold, color: color.ink },
-  setOne: {
-    height: 40,
-    paddingHorizontal: 14,
-    borderRadius: radius.pill,
-    backgroundColor: color.track,
-    justifyContent: 'center',
-  },
-  setOneText: { ...text.subtitle, fontFamily: fontFamily.bold, color: color.ink },
   note: {
     marginTop: 12,
     paddingVertical: 14,

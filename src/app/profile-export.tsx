@@ -19,16 +19,8 @@ import {
   inRange,
   rangeStart,
 } from '@/features/export/export';
-import {
-  useAllTransactions,
-  useBills,
-  useBudgets,
-  useIncomes,
-  useProfile,
-  useToday,
-} from '@/features/live';
+import { useAllTransactions, useBills, useIncomes, useProfile, useToday } from '@/features/live';
 import { writeBackupFile } from '@/features/backup/files';
-import { BUDGETING } from '@/features/flags';
 import { SettingsHeader } from '@/features/profile/SettingsHeader';
 import { color, fontFamily, radius, shadow, size, space, text } from '@/theme';
 
@@ -53,9 +45,6 @@ export default function ProfileExportScreen() {
   const today = useToday();
   const profile = useProfile();
   const transactions = useAllTransactions();
-  // Budgets aren't part of phase 1, so they're left out of the file too.
-  const allBudgets = useBudgets();
-  const budgets = BUDGETING ? allBudgets : [];
   const bills = useBills();
   const incomes = useIncomes();
   const categories = useCategories();
@@ -74,7 +63,6 @@ export default function ProfileExportScreen() {
   const words: ExportWords = {
     category: (id) => categories.get(id).label,
     transactions: t('exportData.transactions'),
-    budgets: t('exportData.budgets'),
     billsAndIncome: t('exportData.billsAndIncome'),
     columns: t('exportData.columns', { returnObjects: true }) as ExportWords['columns'],
     kind: t('exportData.kind', { returnObjects: true }) as ExportWords['kind'],
@@ -101,7 +89,7 @@ export default function ProfileExportScreen() {
     setBusy(true);
     setFailed(false);
     try {
-      const data = { transactions: chosen, budgets, bills, incomes };
+      const data = { transactions: chosen, bills, incomes };
       const name = `Kept ${today}`;
       let target: File;
       if (format === 'backup') {
@@ -141,7 +129,6 @@ export default function ProfileExportScreen() {
 
   const included = [
     { label: t('exportData.transactions'), count: chosen.length },
-    ...(BUDGETING ? [{ label: t('exportData.budgets'), count: budgets.length }] : []),
     { label: t('exportData.billsAndIncome'), count: bills.length + incomes.length },
     ...(backup ? [{ label: t('exportData.categories'), count: categories.list.length }] : []),
   ];

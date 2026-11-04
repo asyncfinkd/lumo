@@ -1,26 +1,16 @@
 // Keeps the phone's scheduled reminders in step with Kept (#15). Mounted once
 // in the root layout; renders nothing. Whenever bills, income, transactions or
 // the switches change, it plans the next weeks again (./plan.ts) and replaces
-// what's scheduled. A budget running low is sent the moment it happens.
+// what's scheduled.
 
 import { useEffect, useMemo, useRef } from 'react';
 import { Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { formatMoney } from '@/domain/money';
-import { budgetRows } from '@/features/budgets/budgetRows';
-import { BUDGETING } from '@/features/flags';
-import { useCategories } from '@/features/categories/categories';
-import {
-  useActiveBills,
-  useAllTransactions,
-  useBills,
-  useBudgets,
-  useIncomes,
-  useMoneyMonth,
-} from '@/features/live';
+import { useAllTransactions, useBills, useIncomes, useMoneyMonth } from '@/features/live';
 import { JAR_REMINDER_PREFIX } from '@/features/savings/reminders';
 import { Notifications } from './notifications';
-import { newlyLow, outsideQuietHours, planReminders } from './plan';
+import { planReminders } from './plan';
 
 export const CHANNEL = 'reminders';
 
@@ -55,17 +45,13 @@ export async function askForNotifications(): Promise<boolean> {
   return result.granted || result.ios?.status === IosAuthorizationStatus.AUTHORIZED;
 }
 
-/**
- * Cancels the planned reminders, but not a "budget running low" waiting for
- * 8:00 or a jar's own reminder (JarRemindersSync).
- */
+/** Cancels the planned reminders, but not a jar's own (JarRemindersSync). */
 async function clearPlanned() {
   const N = Notifications;
   if (!N) return;
   const pending = await N.getAllScheduledNotificationsAsync();
   await Promise.all(
     pending
-      .filter((n) => !n.identifier.startsWith('low-'))
       .filter((n) => !n.identifier.startsWith(JAR_REMINDER_PREFIX))
       .map((n) => N.cancelScheduledNotificationAsync(n.identifier)),
   );
@@ -82,13 +68,10 @@ export async function ensureChannel(name: string) {
 
 export function RemindersSync() {
   const { t } = useTranslation();
-  const { profile, summary } = useMoneyMonth();
+  const { profile } = useMoneyMonth();
   const bills = useBills();
-  const activeBills = useActiveBills();
   const incomes = useIncomes();
   const transactions = useAllTransactions();
-  const budgets = useBudgets();
-  const categories = useCategories();
 
   const currency = profile?.currency ?? 'GEL';
   const reminders = profile?.reminders ?? false;
@@ -167,56 +150,6 @@ export function RemindersSync() {
       cancelled = true;
     };
   }, [plan, t]);
-
-  // A budget running low: compare with the last time, only while Kept runs,
-  // so a restart never repeats one.
-  const lowBefore = useRef<Map<string, number> | null>(null);
-  useEffect(() => {
-    if (!summary) return;
-    const rows = budgetRows({ budgets, transactions, bills: activeBills, period: summary.period });
-    const now = new Map(rows.map((r) => [r.category, r.leftPercent]));
-    const dropped = newlyLow(lowBefore.current, now);
-    lowBefore.current = now;
-    if (!BUDGETING || !profile?.reminders || !profile.remindLowBudget || dropped.length === 0) {
-      return;
-    }
-    const N = Notifications;
-    if (!N) return;
-    (async () => {
-      if (!(await notificationsAllowed())) return;
-      await ensureChannel(t('remindersScreen.title'));
-      for (const id of dropped) {
-        const row = rows.find((r) => r.category === id)!;
-        const later = outsideQuietHours(new Date());
-        await N.scheduleNotificationAsync({
-          identifier: `low-${id}-${summary.period.start}`,
-          content: {
-            title: t('remindersScreen.notify.lowTitle', { category: categories.get(id).label }),
-            body: t('remindersScreen.notify.lowBody', {
-              left: formatMoney(row.leftMinor, currency, { decimals: 'auto' }),
-            }),
-          },
-          trigger: later
-            ? {
-                type: N.SchedulableTriggerInputTypes.DATE,
-                date: later,
-                channelId: CHANNEL,
-              }
-            : null,
-        });
-      }
-    })().catch(() => {});
-  }, [
-    summary,
-    budgets,
-    transactions,
-    activeBills,
-    profile?.reminders,
-    profile?.remindLowBudget,
-    categories,
-    currency,
-    t,
-  ]);
 
   return null;
 }

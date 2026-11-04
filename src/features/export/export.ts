@@ -65,7 +65,6 @@ export function plainAmount(minor: number, currency: CurrencyCode): string {
 
 export type ExportData = {
   transactions: readonly Tx[];
-  budgets: readonly { categoryId: string; limitMinor: number; currency: CurrencyCode }[];
   bills: readonly {
     name: string;
     amountMinor: number;
@@ -81,7 +80,6 @@ export type ExportData = {
 export type ExportWords = {
   category: (id: string | null) => string;
   transactions: string;
-  budgets: string;
   billsAndIncome: string;
   columns: {
     date: string;
@@ -93,7 +91,6 @@ export type ExportWords = {
     amount: string;
     currency: string;
     added: string;
-    limit: string;
     name: string;
     day: string;
     auto: string;
@@ -110,7 +107,7 @@ const time = (iso: string) => {
 };
 
 /**
- * The CSV: transactions, then budgets, then bills and income, each with its
+ * The CSV: transactions, then bills and income, each with its
  * own header row. Starts with a BOM so Excel reads Georgian correctly.
  */
 export function buildCsv(data: ExportData, w: ExportWords): string {
@@ -142,18 +139,6 @@ export function buildCsv(data: ExportData, w: ExportWords): string {
         csvCell(w.source[t.source]),
       ]),
     );
-  }
-
-  // No budgets, no section (they're off in phase 1).
-  if (data.budgets.length > 0) {
-    lines.push('');
-    lines.push(csvCell(w.budgets));
-    lines.push(row([c.category, c.limit, c.currency].map((x) => csvCell(x))));
-    for (const b of data.budgets) {
-      lines.push(
-        row([csvCell(w.category(b.categoryId)), plainAmount(b.limitMinor, b.currency), b.currency]),
-      );
-    }
   }
 
   lines.push('');
@@ -251,12 +236,6 @@ export function buildHtml(data: ExportData, currency: CurrencyCode, w: PdfWords)
   <h2>${escapeHtml(w.transactions)}</h2><table><tr><th>${escapeHtml(c.date)}</th><th>${escapeHtml(
     c.title,
   )}</th><th>${escapeHtml(c.category)}</th><th class="n">${escapeHtml(c.amount)}</th></tr>${txRows}</table>
-  ${data.budgets.length === 0 ? '' : `<h2>${escapeHtml(w.budgets)}</h2>`}<table>${data.budgets
-    .map(
-      (b) =>
-        `<tr><td>${escapeHtml(w.category(b.categoryId))}</td><td class="n">${money(b.limitMinor)}</td></tr>`,
-    )
-    .join('')}</table>
   <h2>${escapeHtml(w.billsAndIncome)}</h2><table>${[
     ...data.bills.map(
       (b) =>

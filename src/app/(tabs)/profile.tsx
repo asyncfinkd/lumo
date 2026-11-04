@@ -29,7 +29,6 @@ import { currencies, formatMoney } from '@/domain/money';
 import { useAccountViews } from '@/features/accounts/accounts';
 import { useBills, useCategories, useIncomes, useProfile } from '@/features/live';
 import { useRestoreBackup } from '@/features/backup/useRestoreBackup';
-import { BUDGETING } from '@/features/flags';
 import { authenticate, type Biometrics, useBiometrics } from '@/features/lock/biometrics';
 import { Avatar } from '@/features/profile/Avatar';
 import { PhotoToast } from '@/features/profile/photoToast';
@@ -182,7 +181,7 @@ export default function ProfileScreen() {
               tile={categoryPalette.butter}
               icon={<BellIcon color={categoryPalette.butter.fg} />}
               label={t('profile.reminders')}
-              sub={BUDGETING ? t('profile.remindersSub') : t('profile.remindersSubNoBudgets')}
+              sub={t('profile.remindersSub')}
               value={profile.reminders ? t('profile.on') : t('profile.off')}
               onPress={() => router.push('/profile-reminders')}
             />

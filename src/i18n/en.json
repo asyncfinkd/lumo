@@ -5,14 +5,12 @@
     "cancel": "Cancel",
     "save": "Save",
     "skipForNow": "Skip for now",
-    "maybeLater": "Maybe later",
     "comingSoon": "Coming soon.",
     "back": "Back"
   },
   "tabs": {
     "home": "Home",
     "insights": "Insights",
-    "budgets": "Budgets",
     "history": "History",
     "savings": "Savings",
     "profile": "Profile",
@@ -28,15 +26,6 @@
       "evening": "Good evening, {{name}} 🌙"
     },
     "doingGreat": "You're doing great this month.",
-    "leftToSpend": "Left to spend",
-    "ofAvailable": "of {{amount}}",
-    "leftOf": "{{left}} left of {{available}}",
-    "spentPercent": "{{percent}}% spent",
-    "daysLeft_one": "{{count}} day left",
-    "daysLeft_other": "{{count}} days left",
-    "budgetLeft": "Budget left",
-    "overspent": "{{amount}} over this month. That's okay, it happens.",
-    "totalBalance": "Total balance",
     "addBalance": "Add your balance",
     "changeBalance": "Change your balance",
     "cameIn": "Came in",
@@ -108,13 +97,6 @@
       "fromBills": "From your bills",
       "fromIncome": "From your income",
       "repeatsValue": "Every month on the {{day}}",
-      "budget": "{{category}} budget",
-      "leftOf": "{{left}} left of {{limit}}",
-      "budgetLeft": "{{category}} budget left",
-      "allPaid": "All paid this month ✓",
-      "noBudgetBefore": "No budget for ",
-      "noBudgetAfter": " yet",
-      "setOne": "Set one",
       "incomeNote": "Income isn’t part of any budget. It adds to your balance.",
       "adjustNote": "Not counted as spending. It only fixes your balance.",
       "delete": "Delete",
@@ -132,7 +114,6 @@
       "removeAdjust": "Remove this adjustment?",
       "deleteBill": "Delete this bill payment?",
       "deleteSalary": "Delete this salary payment?",
-      "bodyBudget": "{{amount}} goes back to your {{category}} budget. This can’t be undone.",
       "bodyExpense": "This can’t be undone.",
       "bodyIncome": "{{amount}} comes off your balance and this month’s income. This can’t be undone.",
       "bodyAdjustLess": "Your balance goes back to {{amount}} less. Budgets and charts stay the same.",
@@ -224,11 +205,6 @@
     "decimalKey": "Decimal point",
     "message": {
       "income": "Lovely! That goes straight to your balance 🌿",
-      "stillLeft": "Nice! Still {{amount}} left for {{category}} {{emoji}}",
-      "over": "{{amount}} over on {{category}} — that's okay 🤍",
-      "covered": "{{category}} already covered this month {{emoji}}",
-      "stillLeftToSpend": "Nice! Still {{amount}} left to spend ✨",
-      "overMonth": "{{amount}} over this month — that's okay 🤍",
       "incomeTo": "Lovely! That goes to {{name}} 🌿"
     },
     "transfer": "Transfer",
@@ -244,35 +220,6 @@
     "goesTo": "Goes to",
     "paidFromLabel": "Paid from {{name}}. Change account",
     "goesToLabel": "Goes to {{name}}. Change account"
-  },
-  "budgets": {
-    "title": "Budgets",
-    "leftAcross": "{{amount}} left across budgets",
-    "daysToGo_one": "{{count}} day to go",
-    "daysToGo_other": "{{count}} days to go",
-    "onTrack": "{{count}} of {{total}} on track 🌿",
-    "spentOf": "{{spent}} of {{limit}}",
-    "left": "left",
-    "newBudget": "New budget",
-    "editBudget": "{{category}}, {{left}} left of {{limit}}. Edit budget",
-    "note": {
-      "allPaid": "All paid this month ✓",
-      "low": "Running a little low · easy does it",
-      "plenty": "Plenty left · treat yourself 🍰",
-      "left_one": "{{amount}} left · {{count}} day to go",
-      "left_other": "{{amount}} left · {{count}} days to go"
-    }
-  },
-  "editBudget": {
-    "title": "Edit {{category}} budget",
-    "monthly": "Monthly budget",
-    "lower": "Lower by {{amount}}",
-    "raise": "Raise by {{amount}}",
-    "spentSoFar": "{{spent}} spent so far · {{left}} left",
-    "stretch": "You've already spent {{spent}}, so that's a stretch",
-    "nudge": "Nudge me when {{amount}} is left",
-    "save": "Save budget",
-    "quickAmounts": "Quick amounts"
   },
   "insights": {
     "title": "Insights",
@@ -471,16 +418,6 @@
       },
       "amountLabel": "{{bill}} per month",
       "total": "{{amount}} / month"
-    },
-    "reveal": {
-      "title": "{{name}}, here's your month ✨",
-      "hint": "Based on what you told us. Tweak it anytime.",
-      "income": "Income",
-      "bills": "Bills",
-      "yoursToSpend": "Yours to spend",
-      "perDay": "That's about {{amount}} a day.",
-      "looksGood": "Looks good",
-      "breakdown": "Your monthly breakdown"
     }
   },
   "profile": {
@@ -555,7 +492,7 @@
     "categories": "Categories",
     "categoriesCount_one": "{{count}} category",
     "categoriesCount_other": "{{count}} categories",
-    "remindersSub": "Bills, payday and low budgets",
+    "remindersSub": "Bills and payday",
     "on": "On",
     "off": "Off",
     "yourData": "Your data",
@@ -564,7 +501,6 @@
     "nameCount": "{{count}} / {{max}}",
     "preview": "Preview",
     "friend": "friend",
-    "remindersSubNoBudgets": "Bills and payday",
     "restore": "Restore from backup",
     "accounts": "Accounts",
     "accountsCount_one": "{{count}} account",
@@ -602,8 +538,6 @@
     "spending": "Spending",
     "income": "Income",
     "new": "New category",
-    "spentWithBudget": "{{amount}} this month · budget {{budget}}",
-    "spentNoBudget": "{{amount}} this month · no budget",
     "earned": "{{amount}} this month",
     "rowLabel": "{{name}}, {{detail}}. Edit",
     "edit": "Edit category",
@@ -612,8 +546,6 @@
     "type": "Type",
     "icon": "Icon",
     "color": "Color",
-    "budget": "Monthly budget",
-    "setBudget": "Set one",
     "save": "Save",
     "add": "Add category",
     "delete": "Delete",
@@ -645,7 +577,6 @@
     "deleteBody_one": "{{count}} transaction uses {{name}}. Nothing gets lost — choose where it goes.",
     "deleteBody_other": "{{count}} transactions use {{name}}. Nothing gets lost — choose where they go.",
     "moveTo": "Move them to",
-    "budgetRemoved": "Its {{amount}} monthly budget will be removed.",
     "deleteAndMove": "Delete and move",
     "deleteOnly": "Delete category",
     "keep": "Keep it"
@@ -703,7 +634,6 @@
     "pdf": "PDF",
     "pdfHint": "A tidy summary to read or print",
     "transactions": "Transactions",
-    "budgets": "Budgets",
     "billsAndIncome": "Bills and income",
     "madeHere": "Made on your phone. You choose where it goes.",
     "cta": "Export {{format}}",
@@ -719,7 +649,6 @@
       "amount": "Amount",
       "currency": "Currency",
       "added": "Added",
-      "limit": "Monthly budget",
       "name": "Name",
       "day": "Day of month",
       "auto": "Added automatically"
@@ -754,7 +683,6 @@
     "billsHint": "A day before rent, Telasi and the rest",
     "payday": "Payday",
     "paydayHint": "When your salary lands, with what’s left to plan",
-    "low": "A budget is running low",
     "lowHint": "When a category has 15% left",
     "evening": "Evening check-in",
     "eveningHint": "At 21:00, if you haven’t added anything today",
@@ -768,8 +696,6 @@
       "billManual": "{{amount}} · Add it when you pay.",
       "paydayTitle": "Payday 🌿",
       "paydayBody": "{{name}} lands today: {{amount}}. A good moment to plan the month.",
-      "lowTitle": "{{category}} is running low",
-      "lowBody": "{{left}} left this month. Easy does it.",
       "eveningTitle": "Anything to add today?",
       "eveningBody": "Nothing added yet today. It only takes a second."
     }

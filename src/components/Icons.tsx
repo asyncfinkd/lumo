@@ -80,7 +80,7 @@ export function CategoryIcon({
   );
 }
 
-export type TabIconName = 'home' | 'insights' | 'budgets' | 'savings' | 'profile';
+export type TabIconName = 'home' | 'insights' | 'savings' | 'profile';
 
 export function TabIcon({ name, color }: { name: TabIconName; color: string }) {
   const s = line(color);
@@ -98,22 +98,6 @@ export function TabIcon({ name, color }: { name: TabIconName; color: string }) {
         <>
           <Path {...s} fill={color} fillOpacity={0.22} d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5H12z" />
           <Path {...s} d="M15 3.8A8.5 8.5 0 0 1 20.2 9H15z" />
-        </>
-      )}
-      {name === 'budgets' && (
-        <>
-          <Rect
-            {...s}
-            fill={color}
-            fillOpacity={0.22}
-            x={3.5}
-            y={6.5}
-            width={17}
-            height={13}
-            rx={4}
-          />
-          <Path {...s} d="M16 13h1.5" />
-          <Path {...s} d="M6.5 6.5 15 3.8a1.5 1.5 0 0 1 2 1.4v1.3" />
         </>
       )}
       {name === 'savings' && (
@@ -264,7 +248,7 @@ export function CalendarIcon({ color, size = 18, width = 1.9 }: IconProps & { wi
   );
 }
 
-/** EditBudget's nudge row. */
+/** Reminders: the Profile row and a jar that reminds you. */
 export function BellIcon({ color }: { color: string }) {
   const s = line(color);
   return (
@@ -484,18 +468,6 @@ export function MoonIcon({ color }: { color: string }) {
         fillOpacity={0.22}
         d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z"
       />
-    </Svg>
-  );
-}
-
-/** "A budget is running low" (ProfileReminders): a purse. */
-export function PurseIcon({ color }: { color: string }) {
-  const s = line(color, 1.9);
-  return (
-    <Svg width={20} height={20} viewBox="0 0 24 24" accessible={false}>
-      <Rect {...s} fill={color} fillOpacity={0.22} x={3.5} y={6.5} width={17} height={13} rx={4} />
-      <Path {...s} d="M16 13h1.5" />
-      <Path {...s} d="M6.5 6.5 15 3.8a1.5 1.5 0 0 1 2 1.4v1.3" />
     </Svg>
   );
 }

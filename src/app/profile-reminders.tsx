@@ -5,14 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useScreenTop } from '@/components/useScreenTop';
 import { Orbs } from '@/components/Backdrop';
-import { CategoryIcon, MoonIcon, PurseIcon } from '@/components/Icons';
+import { CategoryIcon, MoonIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
 import { Switch } from '@/components/Switch';
 import { db } from '@/db/client';
 import { formatMoney } from '@/domain/money';
 import { useBills, useProfile } from '@/features/live';
 import { type ReminderKind, setReminderKind, setReminders } from '@/features/profile/repo';
-import { BUDGETING } from '@/features/flags';
 import { SettingsHeader } from '@/features/profile/SettingsHeader';
 import { askForNotifications, notificationsAllowed } from '@/features/reminders/RemindersSync';
 import { categoryPalette, color, fontFamily, radius, shadow, space, text } from '@/theme';
@@ -21,7 +20,7 @@ const appIcon = require('../../assets/icon.png');
 
 const KINDS: {
   kind: ReminderKind;
-  title: 'bills' | 'payday' | 'low' | 'evening';
+  title: 'bills' | 'payday' | 'evening';
   tint: { bg: string; fg: string };
   icon: (fg: string) => ReactNode;
 }[] = [
@@ -36,12 +35,6 @@ const KINDS: {
     title: 'payday',
     tint: categoryPalette.mint,
     icon: (fg) => <CategoryIcon icon="wallet" size={20} color={fg} />,
-  },
-  {
-    kind: 'remindLowBudget',
-    title: 'low',
-    tint: categoryPalette.butter,
-    icon: (fg) => <PurseIcon color={fg} />,
   },
   {
     kind: 'remindEvening',
@@ -160,7 +153,7 @@ export default function ProfileRemindersScreen() {
         ) : null}
 
         <View style={[styles.list, !on && styles.listOff]}>
-          {KINDS.filter((k) => BUDGETING || k.kind !== 'remindLowBudget').map((k) => {
+          {KINDS.map((k) => {
             const value = on && profile[k.kind];
             const title = t(`remindersScreen.${k.title}`);
             return (

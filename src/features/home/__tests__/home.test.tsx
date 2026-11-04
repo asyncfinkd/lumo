@@ -1,18 +1,10 @@
 import { render, screen } from '@testing-library/react-native';
 import '@/i18n';
 import { typedAmount } from '@/components/Numpad';
-import {
-  buildSampleTransactions,
-  SAMPLE_PAYDAY,
-  sampleBills,
-  sampleIncomes,
-} from '@/db/sampleData';
 import type { Transaction } from '@/db/schema';
-import { summarizeMonth } from '@/features/money/summary';
 import { TransactionRow } from '@/features/transactions/TransactionRow';
 import { BalanceCard } from '../BalanceCard';
 import { clockTime, greetingKey, monthChange, recentDays } from '../home';
-import { LeftToSpendCard } from '../LeftToSpendCard';
 
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),
@@ -141,51 +133,6 @@ describe('typedAmount', () => {
     expect(typedAmount(1248055, 'GEL')).toBe('12480.55');
     expect(typedAmount(380000, 'GEL')).toBe('3800');
     expect(typedAmount(5, 'GEL')).toBe('0.05');
-  });
-});
-
-describe('LeftToSpendCard', () => {
-  const sample = summarizeMonth({
-    today: '2026-10-31',
-    payday: SAMPLE_PAYDAY,
-    incomes: sampleIncomes,
-    bills: sampleBills,
-    transactions: buildSampleTransactions('2026-10-31'),
-  });
-
-  it('matches the design with the sample data', async () => {
-    await render(<LeftToSpendCard summary={sample} currency="GEL" onBalance={jest.fn()} />);
-    expect(screen.getByLabelText('₾799.70 left of ₾2,650')).toBeOnTheScreen();
-    expect(screen.getByText('70% spent')).toBeOnTheScreen();
-    expect(screen.getByText('5 days left')).toBeOnTheScreen();
-    expect(screen.getByText('₾12,480.50')).toBeOnTheScreen();
-    expect(screen.getByRole('progressbar')).toHaveProp('accessibilityValue', {
-      min: 0,
-      max: 100,
-      now: 30,
-    });
-  });
-
-  it('shows ₾0 and a gentle line when overspent', async () => {
-    const over = {
-      ...sample,
-      left: { ...sample.left, leftMinor: 0, overMinor: 12050, spentPercent: 105 },
-    };
-    await render(<LeftToSpendCard summary={over} currency="GEL" onBalance={jest.fn()} />);
-    expect(screen.getByLabelText('₾0.00 left of ₾2,650')).toBeOnTheScreen();
-    expect(screen.getByText("₾120.50 over this month. That's okay, it happens.")).toBeOnTheScreen();
-  });
-
-  it('asks for the balance until one is set', async () => {
-    const onBalance = jest.fn();
-    await render(
-      <LeftToSpendCard
-        summary={{ ...sample, balanceMinor: null }}
-        currency="GEL"
-        onBalance={onBalance}
-      />,
-    );
-    expect(screen.getByRole('button', { name: 'Add your balance' })).toBeOnTheScreen();
   });
 });
 

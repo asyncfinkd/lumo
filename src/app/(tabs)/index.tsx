@@ -7,14 +7,12 @@ import { Rise } from '@/components/motion';
 import { Press } from '@/components/Press';
 import type { Transaction } from '@/db/schema';
 import { addDays } from '@/domain/dates';
-import { BUDGETING } from '@/features/flags';
 import { db } from '@/db/client';
 import { AccountsSplit } from '@/features/home/AccountsSplit';
 import { BalanceCard } from '@/features/home/BalanceCard';
 import { setHideAmounts } from '@/features/profile/repo';
 import { FlowCard } from '@/features/home/FlowCard';
 import { greetingKey, monthChange, recentDays } from '@/features/home/home';
-import { LeftToSpendCard } from '@/features/home/LeftToSpendCard';
 import { useHour } from '@/features/home/useHour';
 import { Avatar } from '@/features/profile/Avatar';
 import {
@@ -32,8 +30,8 @@ import { savedByJar } from '@/features/savings/savings';
 import { TransactionRow } from '@/features/transactions/TransactionRow';
 import { color, fontFamily, radius, shadow, size, space, text } from '@/theme';
 
-// Main: greeting, your balance (or Left to spend, with budgeting on), Came in /
-// Went out, and today's and yesterday's transactions.
+// Main: greeting, your balance, Came in / Went out, and today's and yesterday's
+// transactions.
 export default function HomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -82,29 +80,21 @@ export default function HomeScreen() {
           <Text accessibilityRole="header" style={styles.greeting}>
             {t(`home.greeting.${greetingKey(hour)}`, { name })}
           </Text>
-          {(BUDGETING ? summary.left.overMinor === 0 : (change?.deltaMinor ?? 0) >= 0) ? (
+          {(change?.deltaMinor ?? 0) >= 0 ? (
             <Text style={styles.subtitle}>{t('home.doingGreat')}</Text>
           ) : null}
         </View>
       </Rise>
 
       <Rise delay={60}>
-        {BUDGETING ? (
-          <LeftToSpendCard
-            summary={summary}
-            currency={profile.currency}
-            onBalance={() => router.push('/balance')}
-          />
-        ) : (
-          <BalanceCard
-            balanceMinor={summary.balanceMinor}
-            change={change}
-            currency={profile.currency}
-            onBalance={() => router.push('/balance')}
-            onToggleHidden={() => setHideAmounts(db, !profile.hideAmounts)}
-            split={accountCount > 1 ? <AccountsSplit currency={profile.currency} /> : null}
-          />
-        )}
+        <BalanceCard
+          balanceMinor={summary.balanceMinor}
+          change={change}
+          currency={profile.currency}
+          onBalance={() => router.push('/balance')}
+          onToggleHidden={() => setHideAmounts(db, !profile.hideAmounts)}
+          split={accountCount > 1 ? <AccountsSplit currency={profile.currency} /> : null}
+        />
       </Rise>
 
       <Rise delay={120} style={styles.flows}>
