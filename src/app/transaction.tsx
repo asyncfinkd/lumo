@@ -17,6 +17,9 @@ import { useAllTransactions, useBills, useIncomes } from '@/features/live';
 import { useTransactionView } from '@/features/transactions/useTransactionView';
 import { color, fontFamily, radius, shadow, size, text } from '@/theme';
 
+// A crash here shows Try again in a sheet, not over the screen under it.
+export { SheetErrorBoundary as ErrorBoundary } from '@/components/ErrorFallback';
+
 // TransactionDetail: what it was, when, where it came from, and Delete / Edit.
 // Four looks: manual, automatic bill, income, balance adjusted. With two or more
 // accounts it also says which one paid or got it (TransactionDetail-Account).

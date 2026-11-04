@@ -13,7 +13,11 @@ import { formatMoney } from '@/domain/money';
 import { useAccountViews } from '@/features/accounts/accounts';
 import { accountUsage, deleteAccount } from '@/features/accounts/repo';
 import { useAllTransactions, useProfile, useToday } from '@/features/live';
+import { runWrite } from '@/features/runWrite';
 import { color, fontFamily, radius, text } from '@/theme';
+
+// A crash here shows Try again in a sheet, not over the screen under it.
+export { SheetErrorBoundary as ErrorBoundary } from '@/components/ErrorFallback';
 
 type How = 'move' | 'delete';
 
@@ -120,7 +124,10 @@ export default function AccountDeleteScreen() {
 
   const confirm = () => {
     if (how === 'move' && !moveTo) return;
-    deleteAccount(db, id, how === 'move' ? { moveTo: moveTo! } : 'delete', today);
+    const deleted = runWrite(() =>
+      deleteAccount(db, id, how === 'move' ? { moveTo: moveTo! } : 'delete', today),
+    );
+    if (!deleted) return;
     // Back past the edit sheet to the list.
     router.dismissTo('/accounts');
   };

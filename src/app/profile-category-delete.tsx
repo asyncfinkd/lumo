@@ -10,7 +10,11 @@ import { Press } from '@/components/Press';
 import { db } from '@/db/client';
 import { type CategoryView, useCategories } from '@/features/categories/categories';
 import { categoryUsage, deleteCategory } from '@/features/categories/repo';
+import { runWrite } from '@/features/runWrite';
 import { color, fontFamily, radius, shadow, text } from '@/theme';
+
+// A crash here shows Try again in a sheet, not over the screen under it.
+export { SheetErrorBoundary as ErrorBoundary } from '@/components/ErrorFallback';
 
 /** The board offers the two closest categories to move into, plus "No category". */
 const SUGGESTIONS = 2;
@@ -39,7 +43,7 @@ export default function ProfileCategoryDeleteScreen() {
   const [moveTo, setMoveTo] = useState<string | null>(targets[0]?.id ?? null);
 
   const confirm = () => {
-    deleteCategory(db, id, moveTo);
+    if (!runWrite(() => deleteCategory(db, id, moveTo))) return;
     // Back past the edit sheet to the list.
     router.dismissTo('/profile-categories');
   };

@@ -10,6 +10,7 @@ import { finishOnboarding } from '@/features/onboarding/finish';
 import { OnboardingStep } from '@/features/onboarding/OnboardingStep';
 import { chosenBills } from '@/features/onboarding/save';
 import { useOnboarding } from '@/features/onboarding/store';
+import { runWrite } from '@/features/runWrite';
 import { billColor, color, radius, shadow, text } from '@/theme';
 
 // OBBills: step 4 of 4. Tap a bill to turn it on, then type its monthly amount.
@@ -25,7 +26,7 @@ export default function BillsScreen() {
   const next = () => {
     if (saving) return;
     setSaving(true);
-    finishOnboarding(answers);
+    if (!runWrite(() => finishOnboarding(answers))) setSaving(false);
   };
 
   return (

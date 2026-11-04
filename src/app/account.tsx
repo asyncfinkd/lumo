@@ -17,7 +17,11 @@ import { currencies, formatMoney, parseAmount } from '@/domain/money';
 import { accountLabel, useAccountViews } from '@/features/accounts/accounts';
 import { accountById, createAccount, updateAccount } from '@/features/accounts/repo';
 import { useAllTransactions, useProfile, useToday } from '@/features/live';
+import { runWrite } from '@/features/runWrite';
 import { categoryPalette, color, fontFamily, radius, shadow, size, text } from '@/theme';
+
+// A crash here shows Try again in a sheet, not over the screen under it.
+export { SheetErrorBoundary as ErrorBoundary } from '@/components/ErrorFallback';
 
 const MAX_NAME = 24;
 
@@ -56,18 +60,24 @@ export default function AccountScreen() {
 
   const save = (close: () => void) => {
     if (!ready) return;
-    if (isNew) {
-      createAccount(db, { name: trimmed, kind, color: shown, startMinor: startMinor ?? 0 }, today);
-    } else if (row) {
-      // Main's translated name, left as it was, isn't a rename.
-      updateAccount(db, row.id, {
-        name: trimmed,
-        kind,
-        color: shown,
-        renamed: trimmed !== label,
-      });
-    }
-    close();
+    const saved = runWrite(() => {
+      if (isNew) {
+        createAccount(
+          db,
+          { name: trimmed, kind, color: shown, startMinor: startMinor ?? 0 },
+          today,
+        );
+      } else if (row) {
+        // Main's translated name, left as it was, isn't a rename.
+        updateAccount(db, row.id, {
+          name: trimmed,
+          kind,
+          color: shown,
+          renamed: trimmed !== label,
+        });
+      }
+    });
+    if (saved) close();
   };
 
   return (

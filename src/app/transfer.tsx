@@ -19,6 +19,9 @@ import { useTransfers } from '@/features/live';
 import { useMoneyText } from '@/features/privacy/amounts';
 import { color, fontFamily, radius, shadow, size, text } from '@/theme';
 
+// A crash here shows Try again in a sheet, not over the screen under it.
+export { SheetErrorBoundary as ErrorBoundary } from '@/components/ErrorFallback';
+
 // TransactionDetail-Transfer (#21): where the money went, what each account
 // holds now, and Delete / Edit.
 export default function TransferScreen() {

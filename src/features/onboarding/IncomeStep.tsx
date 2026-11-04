@@ -14,6 +14,7 @@ import { saveProfile } from '@/features/profile/repo';
 import { saveIncome } from '@/features/recurring/repo';
 import { OnboardingStep } from './OnboardingStep';
 import { useOnboarding } from './store';
+import { runWrite } from '@/features/runWrite';
 import { color, radius, shadow, text } from '@/theme';
 
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -49,14 +50,16 @@ export function IncomeStep({ mode }: { mode: 'onboarding' | 'settings' }) {
   const save = () => {
     const amountMinor = parseAmount(income, currency) ?? 0;
     if (!profile || amountMinor <= 0) return;
-    saveProfile(db, { ...profile, payday });
-    saveIncome(db, {
-      id: salary?.id,
-      name: salary?.name ?? t('categories.salary'),
-      amountMinor,
-      day: payday,
+    const saved = runWrite(() => {
+      saveProfile(db, { ...profile, payday });
+      saveIncome(db, {
+        id: salary?.id,
+        name: salary?.name ?? t('categories.salary'),
+        amountMinor,
+        day: payday,
+      });
     });
-    router.back();
+    if (saved) router.back();
   };
 
   const amount = parseAmount(income, currency) ?? 0;

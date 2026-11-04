@@ -14,7 +14,11 @@ import { useCategories } from '@/features/categories/categories';
 import { useBills, useProfile } from '@/features/live';
 import { cleanAmount } from '@/features/onboarding/bills';
 import { deleteBill, saveBill, setBillActive, setBillRemind } from '@/features/recurring/repo';
+import { runWrite } from '@/features/runWrite';
 import { color, fontFamily, radius, shadow, size, text } from '@/theme';
+
+// A crash here shows Try again in a sheet, not over the screen under it.
+export { SheetErrorBoundary as ErrorBoundary } from '@/components/ErrorFallback';
 
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 
@@ -59,16 +63,18 @@ function BillForm({
 
   const save = (close: () => void) => {
     if (!ready) return;
-    const saved = saveBill(db, {
-      id: bill?.id,
-      name,
-      amountMinor: amountMinor!,
-      day,
-      categoryId,
+    const saved = runWrite(() => {
+      const { id } = saveBill(db, {
+        id: bill?.id,
+        name,
+        amountMinor: amountMinor!,
+        day,
+        categoryId,
+      });
+      setBillActive(db, id, auto);
+      setBillRemind(db, id, remind);
     });
-    setBillActive(db, saved.id, auto);
-    setBillRemind(db, saved.id, remind);
-    close();
+    if (saved) close();
   };
 
   return (
@@ -180,8 +186,7 @@ function BillForm({
                 <Press
                   accessibilityRole="button"
                   onPress={() => {
-                    close();
-                    deleteBill(db, bill.id);
+                    if (runWrite(() => deleteBill(db, bill.id))) close();
                   }}
                   style={styles.delete}
                 >

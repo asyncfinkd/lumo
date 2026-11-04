@@ -13,6 +13,7 @@ import { useHour } from '@/features/home/useHour';
 import { useMoneyMonth } from '@/features/live';
 import { setLanguage } from '@/features/profile/repo';
 import { SettingsHeader } from '@/features/profile/SettingsHeader';
+import { runWrite } from '@/features/runWrite';
 import i18n, { type Language } from '@/i18n';
 import { categoryPalette, color, fontFamily, radius, shadow, space, text } from '@/theme';
 
@@ -69,7 +70,7 @@ export default function ProfileLanguageScreen() {
                 accessibilityState={{ checked: on }}
                 accessibilityLabel={l.native}
                 accessibilityLanguage={l.code}
-                onPress={() => setLanguage(db, l.code)}
+                onPress={() => runWrite(() => setLanguage(db, l.code))}
                 style={[styles.row, on && styles.rowOn]}
               >
                 <View style={[styles.tile, { backgroundColor: l.tile }]}>

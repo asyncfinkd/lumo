@@ -8,6 +8,7 @@ import { Press } from '@/components/Press';
 import { db } from '@/db/client';
 import { formatMoney } from '@/domain/money';
 import { useAllTransactions } from '@/features/live';
+import { runWrite } from '@/features/runWrite';
 import { deleteTransaction, type Scope } from '@/features/transactions/repo';
 import { useTransactionView } from '@/features/transactions/useTransactionView';
 import { color, fontFamily, radius, text } from '@/theme';
@@ -45,7 +46,7 @@ export function TransactionConfirm({
 
   const remove = (scope: Scope) => {
     router.dismiss(close);
-    deleteTransaction(db, tx.id, scope);
+    runWrite(() => deleteTransaction(db, tx.id, scope));
   };
   const editWith = (scope: Scope) =>
     router.replace({

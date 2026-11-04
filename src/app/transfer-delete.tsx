@@ -10,7 +10,11 @@ import { deleteTransfer } from '@/features/accounts/repo';
 import { useTransferView } from '@/features/accounts/useTransferView';
 import { useTransfers } from '@/features/live';
 import { useMoneyText } from '@/features/privacy/amounts';
+import { runWrite } from '@/features/runWrite';
 import { color, fontFamily, radius, text } from '@/theme';
+
+// A crash here shows Try again in a sheet, not over the screen under it.
+export { SheetErrorBoundary as ErrorBoundary } from '@/components/ErrorFallback';
 
 // Deleting a transfer: DeleteConfirm with its own words (#21) — "Delete this
 // move? ₾200 goes back to Bank card." `close`: how many screens to close after
@@ -32,7 +36,7 @@ export default function TransferDeleteScreen() {
   const remove = () => {
     if (!canDelete) return;
     router.dismiss(Number(close ?? 1));
-    deleteTransfer(db, transfer.id);
+    runWrite(() => deleteTransfer(db, transfer.id));
   };
 
   return (
