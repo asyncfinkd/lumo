@@ -8,13 +8,24 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { db } from '@/db/client';
 import { categories, recurringBills } from '@/db/schema';
 import type { CalendarDate } from '@/domain/dates';
-import { accountsQuery, transfersQuery } from './accounts/repo';
-import { summarizeMonth } from './money/summary';
+import { accountsQuery, transferById, transfersQuery } from './accounts/repo';
+import { useMoney } from './money/MoneyProvider';
+import { accountTotalsQuery, jarTotalsByAccountQuery, transferTotalsQuery } from './money/repo';
 import { useToday } from './money/useToday';
 import { profileQuery } from './profile/repo';
 import { allJarsQuery, jarEntriesQuery, openJarsQuery } from './savings/repo';
 import { billsQuery, incomesQuery } from './recurring/repo';
-import { allTransactions, transactionsBetween } from './transactions/repo';
+import {
+  categoryTotalsQuery,
+  exportCountQuery,
+  flowTotalsQuery,
+  manualDatesQuery,
+  type SearchInput,
+  searchQuery,
+  transactionById,
+  transactionsBetween,
+  transactionsList,
+} from './transactions/repo';
 
 export { useToday };
 
@@ -35,6 +46,18 @@ export function useCategories() {
 /** Accounts in their order; just Main until someone adds another (#21). */
 export function useAccounts() {
   return useLiveQuery(accountsQuery(db)).data;
+}
+
+/**
+ * What each account's balance is made of, summed in SQL (issue 111): its
+ * transactions per kind (with how many there are), its jar money, and the
+ * transfers per pair of accounts.
+ */
+export function useAccountTotals() {
+  const transactions = useLiveQuery(accountTotalsQuery(db)).data;
+  const jarEntries = useLiveQuery(jarTotalsByAccountQuery(db)).data;
+  const transfers = useLiveQuery(transferTotalsQuery(db)).data;
+  return { transactions, jarEntries, transfers };
 }
 
 /** Money moved between accounts, newest first. */
@@ -70,8 +93,22 @@ export function useJarEntries() {
   return useLiveQuery(jarEntriesQuery(db)).data;
 }
 
-export function useAllTransactions() {
-  return useLiveQuery(allTransactions(db)).data;
+/** One transfer by id; `undefined` until the first read (or when it's gone). */
+export function useTransfer(id: string | undefined) {
+  return useLiveQuery(transferById(db, id ?? ''), [id]).data[0];
+}
+
+/**
+ * Every transaction, or one account's, newest day first. Only History needs
+ * the whole list: a total or one row has its own query below (issue 111).
+ */
+export function useTransactionList(accountId: string | null = null) {
+  return useLiveQuery(transactionsList(db, accountId), [accountId]).data;
+}
+
+/** One transaction by id; `undefined` until the first read (or when it's gone). */
+export function useTransaction(id: string | undefined) {
+  return useLiveQuery(transactionById(db, id ?? ''), [id]).data[0];
 }
 
 /** Transactions with `start <= date < end`, newest first. */
@@ -79,28 +116,52 @@ export function useTransactionsBetween(start: CalendarDate, end: CalendarDate) {
   return useLiveQuery(transactionsBetween(db, start, end), [start, end]).data;
 }
 
-/** Left to spend, Came in / Went out and the balance for today's pay period. */
-export function useMoneyMonth() {
-  const today = useToday();
-  const profile = useProfile();
-  const incomes = useIncomes();
-  const bills = useActiveBills();
-  const transactions = useAllTransactions();
-  const jarEntries = useJarEntries();
+/** Came in and went out per category, `start <= date < end`, adjustments left out. */
+export function useCategoryTotals(start: CalendarDate, end: CalendarDate) {
+  return useLiveQuery(categoryTotalsQuery(db, start, end), [start, end]).data;
+}
 
-  const summary = useMemo(
-    () =>
-      profile
-        ? summarizeMonth({
-            today,
-            payday: profile.payday,
-            incomes,
-            bills,
-            transactions,
-            jarEntries,
-          })
-        : undefined,
-    [today, profile, incomes, bills, transactions, jarEntries],
+/** Came in and went out, `start <= date < end`, adjustments left out. */
+export function useFlowTotals(start: CalendarDate, end: CalendarDate) {
+  const rows = useLiveQuery(flowTotalsQuery(db, start, end), [start, end]).data;
+  return useMemo(
+    () => ({
+      cameInMinor: rows.find((r) => r.kind === 'income')?.amountMinor ?? 0,
+      wentOutMinor: rows.find((r) => r.kind === 'expense')?.amountMinor ?? 0,
+    }),
+    [rows],
   );
-  return { today, profile, summary };
+}
+
+/** Days with something you added yourself, `start <= date < end`. */
+export function useManualDates(start: CalendarDate, end: CalendarDate) {
+  const rows = useLiveQuery(manualDatesQuery(db, start, end), [start, end]).data;
+  return useMemo(() => new Set(rows.map((r) => r.date)), [rows]);
+}
+
+/** How many transactions an export of `start <= date < end` holds (`null`: from the first). */
+export function useExportCount(start: CalendarDate | null, end: CalendarDate) {
+  return useLiveQuery(exportCountQuery(db, start, end), [start, end]).data[0]?.count ?? 0;
+}
+
+/** HistorySearch's matches, found in SQL. */
+export function useSearch(input: SearchInput) {
+  const { query, filter, categoryIds, adjustments, digits, limit } = input;
+  return useLiveQuery(searchQuery(db, input), [
+    query,
+    filter,
+    categoryIds.join(','),
+    adjustments,
+    digits,
+    limit,
+  ]).data;
+}
+
+/**
+ * Left to spend, Came in / Went out and the balance for today's pay period,
+ * plus how the balance moved this month. Worked out once per change, near the
+ * root (MoneyProvider); every screen reads the same result.
+ */
+export function useMoneyMonth() {
+  return useMoney();
 }

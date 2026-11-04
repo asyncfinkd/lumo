@@ -16,7 +16,7 @@ import { db } from '@/db/client';
 import { currencies, formatMoney, parseAmount } from '@/domain/money';
 import { accountLabel, useAccountViews } from '@/features/accounts/accounts';
 import { accountById, createAccount, updateAccount } from '@/features/accounts/repo';
-import { useAllTransactions, useProfile, useToday } from '@/features/live';
+import { useAccountTotals, useProfile, useToday } from '@/features/live';
 import { runWrite } from '@/features/runWrite';
 import { categoryPalette, color, fontFamily, radius, shadow, size, text } from '@/theme';
 
@@ -34,7 +34,7 @@ export default function AccountScreen() {
   const params = useLocalSearchParams<{ id?: string }>();
   const profile = useProfile();
   const views = useAccountViews();
-  const transactions = useAllTransactions();
+  const totals = useAccountTotals().transactions;
   const currency = profile?.currency ?? 'GEL';
   const isNew = !params.id;
   // Read once, so the fields start filled in rather than waiting on the live query.
@@ -49,8 +49,8 @@ export default function AccountScreen() {
   const [start, setStart] = useState('');
   // Live, so a Fix made from here shows up when it comes back.
   const usage = useMemo(
-    () => transactions.filter((tx) => tx.accountId === params.id).length,
-    [transactions, params.id],
+    () => totals.filter((row) => row.accountId === params.id).reduce((n, row) => n + row.count, 0),
+    [totals, params.id],
   );
   const shown = tint ?? KIND_COLOR[kind];
   const palette = categoryPalette[shown];

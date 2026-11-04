@@ -1,7 +1,20 @@
 // Reading and writing transactions. Takes a `Db` so tests can run it on the
 // real migrations; screens use the live hooks in ../live.ts.
 
-import { and, desc, eq, gte, lt } from 'drizzle-orm';
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gte,
+  inArray,
+  isNotNull,
+  lt,
+  ne,
+  or,
+  sql,
+  type SQL,
+} from 'drizzle-orm';
 import type { AccountId } from '@/db/accounts';
 import type { CategoryId } from '@/db/categories';
 import { defaultAccountId } from '@/db/defaultAccount';
@@ -17,6 +30,7 @@ import {
 import type { Db } from '@/db/types';
 import type { CalendarDate } from '@/domain/dates';
 import type { TransactionKind } from '@/domain/leftToSpend';
+import type { HistoryFilter } from '../history/history';
 
 export type TransactionInput = {
   kind: TransactionKind;
@@ -178,9 +192,173 @@ export function transactionsBetween(db: Db, start: CalendarDate, end: CalendarDa
     .orderBy(desc(transactions.date), desc(transactions.createdAt));
 }
 
-export function allTransactions(db: Db) {
+/** Every transaction, or one account's, newest day first (History lists them all). */
+export function transactionsList(db: Db, accountId: string | null = null) {
   return db
     .select()
     .from(transactions)
+    .where(accountId ? eq(transactions.accountId, accountId) : undefined)
     .orderBy(desc(transactions.date), desc(transactions.createdAt));
+}
+
+/** Every transaction, newest day first. */
+export function allTransactions(db: Db) {
+  return transactionsList(db);
+}
+
+/** One transaction (TransactionDetail, EditTransaction, the delete dialog). */
+export function transactionById(db: Db, id: string) {
+  return db.select().from(transactions).where(eq(transactions.id, id)).limit(1);
+}
+
+/**
+ * What came in and went out per category with `start <= date < end`, bills
+ * included, adjustments never (Insights, Profile → Categories).
+ */
+export function categoryTotalsQuery(db: Db, start: CalendarDate, end: CalendarDate) {
+  return db
+    .select({
+      categoryId: transactions.categoryId,
+      kind: transactions.kind,
+      amountMinor: sql<number>`sum(${transactions.amountMinor})`.mapWith(Number),
+    })
+    .from(transactions)
+    .where(
+      and(
+        gte(transactions.date, start),
+        lt(transactions.date, end),
+        ne(transactions.source, 'adjustment'),
+        isNotNull(transactions.categoryId),
+      ),
+    )
+    .groupBy(transactions.categoryId, transactions.kind);
+}
+
+/** Came in and went out with `start <= date < end`, adjustments left out. */
+export function flowTotalsQuery(db: Db, start: CalendarDate, end: CalendarDate) {
+  return db
+    .select({
+      kind: transactions.kind,
+      amountMinor: sql<number>`sum(${transactions.amountMinor})`.mapWith(Number),
+    })
+    .from(transactions)
+    .where(
+      and(
+        gte(transactions.date, start),
+        lt(transactions.date, end),
+        ne(transactions.source, 'adjustment'),
+      ),
+    )
+    .groupBy(transactions.kind);
+}
+
+/** Days with something you added yourself, `start <= date < end` (evening reminders). */
+export function manualDatesQuery(db: Db, start: CalendarDate, end: CalendarDate) {
+  return db
+    .selectDistinct({ date: transactions.date })
+    .from(transactions)
+    .where(
+      and(
+        eq(transactions.source, 'manual'),
+        gte(transactions.date, start),
+        lt(transactions.date, end),
+      ),
+    );
+}
+
+/**
+ * The expense (or income) you added or changed last in one of `accountIds`,
+ * as a list of at most one for `lastUsedAccount`.
+ */
+export function lastUsedQuery(db: Db, kind: TransactionKind, accountIds: readonly string[]) {
+  return db
+    .select({
+      kind: transactions.kind,
+      source: transactions.source,
+      accountId: transactions.accountId,
+      updatedAt: transactions.updatedAt,
+    })
+    .from(transactions)
+    .where(
+      and(
+        eq(transactions.kind, kind),
+        eq(transactions.source, 'manual'),
+        inArray(transactions.accountId, [...accountIds]),
+      ),
+    )
+    .orderBy(desc(transactions.updatedAt))
+    .limit(1);
+}
+
+/** `%` and `_` match themselves in a LIKE pattern. */
+export function likePattern(text: string): string {
+  return `%${text.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+}
+
+export type SearchInput = {
+  /** What was typed, trimmed. Empty lists everything the chip allows. */
+  query: string;
+  filter: HistoryFilter;
+  /** Categories whose shown name matches (names are translated, so the screen finds them). */
+  categoryIds: readonly string[];
+  /** Whether "Balance adjusted" matches, likewise. */
+  adjustments: boolean;
+  /** The typed digits, when there are any: "64.2" finds ₾64.20 by its 6420 minor units. */
+  digits: string;
+  /** Results shown at most, newest first. */
+  limit?: number;
+};
+
+/**
+ * HistorySearch in SQL (issue 111): the chip, then the name or note (`LIKE`), the
+ * category or the amount. ASCII matches ignore case; the screen narrows the
+ * rest with `searchTransactions`.
+ */
+export function searchQuery(db: Db, input: SearchInput) {
+  const conditions: (SQL | undefined)[] = [];
+  const notAdjustment = ne(transactions.source, 'adjustment');
+  if (input.filter === 'spending') conditions.push(eq(transactions.kind, 'expense'), notAdjustment);
+  if (input.filter === 'income') conditions.push(eq(transactions.kind, 'income'), notAdjustment);
+  if (input.filter === 'auto') {
+    conditions.push(inArray(transactions.source, ['bill', 'recurring_income']));
+  }
+  if (input.query) {
+    const pattern = likePattern(input.query);
+    conditions.push(
+      or(
+        sql`${transactions.title} like ${pattern} escape '\\'`,
+        sql`${transactions.note} like ${pattern} escape '\\'`,
+        input.categoryIds.length > 0
+          ? inArray(transactions.categoryId, [...input.categoryIds])
+          : undefined,
+        input.adjustments ? eq(transactions.source, 'adjustment') : undefined,
+        input.digits
+          ? sql`cast(${transactions.amountMinor} as text) like ${likePattern(input.digits)} escape '\\'`
+          : undefined,
+      ),
+    );
+  }
+  return db
+    .select()
+    .from(transactions)
+    .where(and(...conditions))
+    .orderBy(desc(transactions.date), desc(transactions.createdAt))
+    .limit(input.limit ?? 500);
+}
+
+/** For the export: `start <= date < end` (`null`: from the first), oldest first. */
+export function exportQuery(db: Db, start: CalendarDate | null, end: CalendarDate) {
+  return db
+    .select()
+    .from(transactions)
+    .where(and(start ? gte(transactions.date, start) : undefined, lt(transactions.date, end)))
+    .orderBy(asc(transactions.date), asc(transactions.occurredAt));
+}
+
+/** How many the export would hold. */
+export function exportCountQuery(db: Db, start: CalendarDate | null, end: CalendarDate) {
+  return db
+    .select({ count: sql<number>`count(*)`.mapWith(Number) })
+    .from(transactions)
+    .where(and(start ? gte(transactions.date, start) : undefined, lt(transactions.date, end)));
 }

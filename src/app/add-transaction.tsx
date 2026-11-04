@@ -31,7 +31,7 @@ import { lastUsedAccount } from '@/features/accounts/lastUsed';
 import { accountsQuery, addTransfer, updateTransfer } from '@/features/accounts/repo';
 import { useTransferView } from '@/features/accounts/useTransferView';
 import { useCategories } from '@/features/categories/categories';
-import { useAllTransactions, useMoneyMonth, useTransfers } from '@/features/live';
+import { useMoneyMonth, useTransaction, useTransfer } from '@/features/live';
 import {
   editedTitle,
   occurredAt,
@@ -41,7 +41,12 @@ import {
 } from '@/features/transactions/addForm';
 import { clockTime } from '@/features/home/home';
 import { runWrite } from '@/features/runWrite';
-import { addTransaction, type Scope, updateTransaction } from '@/features/transactions/repo';
+import {
+  addTransaction,
+  lastUsedQuery,
+  type Scope,
+  updateTransaction,
+} from '@/features/transactions/repo';
 import { color, fontFamily, radius, shadow, size, text } from '@/theme';
 
 // A crash here shows Try again in a sheet, not over the screen under it.
@@ -63,16 +68,14 @@ export default function AddTransactionScreen() {
     type?: 'transfer';
     transfer?: string;
   }>();
-  const transactions = useAllTransactions();
-  const transfers = useTransfers();
+  const existing = useTransaction(id);
+  const move = useTransfer(transfer);
   if (transfer) {
-    const move = transfers.find((x) => x.id === transfer);
     // Wait for the live query, as below.
     if (!move) return null;
     return <TransactionForm move={move} under={Number(under ?? 0)} />;
   }
   if (!id) return <TransactionForm transfer={type === 'transfer'} />;
-  const existing = transactions.find((x) => x.id === id);
   // Wait for the live query, so the form starts filled in.
   if (!existing) return null;
   return <TransactionForm existing={existing} scope={scope ?? 'one'} under={Number(under ?? 0)} />;
@@ -97,7 +100,6 @@ function TransactionForm({
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const { today, profile, summary } = useMoneyMonth();
-  const transactions = useAllTransactions();
 
   const currency: CurrencyCode = profile?.currency ?? existing?.currency ?? 'GEL';
   const accounts = useAccountViews();
@@ -143,16 +145,14 @@ function TransactionForm({
   // yourself. Bills and salary keep the account their bill or income has.
   const showPay =
     accounts.length > 1 && !moving && !adjust && (!existing || existing.source === 'manual');
+  const ids = useMemo(() => accounts.map((a) => a.id), [accounts]);
   const lastUsed = useMemo(
     () =>
       showPay && !existing
-        ? lastUsedAccount(
-            transactions,
-            kind,
-            accounts.map((a) => a.id),
-          )
+        ? lastUsedAccount(lastUsedQuery(db, kind, ids).all(), kind, ids)
         : undefined,
-    [showPay, existing, transactions, kind, accounts],
+    // Read once per kind: nothing else changes it while the sheet is open.
+    [showPay, existing, kind, ids],
   );
   const pay = payPick[kind] ?? existing?.accountId ?? lastUsed;
   const payAccount = accounts.find((a) => a.id === pay);

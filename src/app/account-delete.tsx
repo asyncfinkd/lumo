@@ -12,7 +12,7 @@ import { accountBalances } from '@/domain/balance';
 import { formatMoney } from '@/domain/money';
 import { useAccountViews } from '@/features/accounts/accounts';
 import { accountUsage, deleteAccount } from '@/features/accounts/repo';
-import { useAllTransactions, useProfile, useToday } from '@/features/live';
+import { useAccountTotals, useProfile, useToday } from '@/features/live';
 import { runWrite } from '@/features/runWrite';
 import { color, fontFamily, radius, text } from '@/theme';
 
@@ -54,7 +54,7 @@ export default function AccountDeleteScreen() {
   const profile = useProfile();
   const today = useToday();
   const accounts = useAccountViews();
-  const transactions = useAllTransactions();
+  const totals = useAccountTotals().transactions;
   const currency = profile?.currency ?? 'GEL';
   const account = accounts.find((a) => a.id === id);
   const others = accounts.filter((a) => a.id !== id);
@@ -72,9 +72,9 @@ export default function AccountDeleteScreen() {
     () =>
       accountBalances(
         [id],
-        transactions.filter((tx) => tx.accountId === id),
+        totals.filter((row) => row.accountId === id),
       ).get(id) ?? 0,
-    [id, transactions],
+    [id, totals],
   );
 
   if (!account) return null;

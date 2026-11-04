@@ -10,9 +10,9 @@ import { Press } from '@/components/Press';
 import type { Transaction } from '@/db/schema';
 import { formatMoney } from '@/domain/money';
 import { useCategories } from '@/features/categories/categories';
-import { type HistoryFilter, searchTransactions } from '@/features/history/history';
+import { type HistoryFilter, searchTerms, searchTransactions } from '@/features/history/history';
 import { useDayLabel } from '@/features/history/useDayLabel';
-import { useAllTransactions } from '@/features/live';
+import { useSearch } from '@/features/live';
 import { TransactionRow } from '@/features/transactions/TransactionRow';
 import { color, fontFamily, radius, shadow, space, text } from '@/theme';
 
@@ -31,11 +31,23 @@ export default function HistorySearchScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const screenTop = useScreenTop();
-  const transactions = useAllTransactions();
   const categories = useCategories();
   const dayLabel = useDayLabel();
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<HistoryFilter>('all');
+  // SQL finds the candidates (issue 111): names and notes with LIKE, plus the
+  // categories whose shown name matches and amounts with the typed digits.
+  const adjustmentLabel = t('history.adjustment');
+  const terms = useMemo(
+    () =>
+      searchTerms(
+        query,
+        categories.list.flatMap((c) => (c.id ? [{ id: c.id, label: c.label }] : [])),
+        adjustmentLabel,
+      ),
+    [query, categories, adjustmentLabel],
+  );
+  const transactions = useSearch({ ...terms, filter, limit: terms.query ? 500 : 100 });
 
   const results = useMemo(
     () =>

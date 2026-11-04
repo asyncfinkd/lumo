@@ -224,10 +224,35 @@ export function monthSpent(transactions: readonly Listed[], today: CalendarDate)
 export type HistoryFilter = 'all' | 'spending' | 'income' | 'auto';
 
 /**
- * HistorySearch: matches the name, the category or the amount ("coffee",
- * "Fresh", "64.2"), then the chip. Adjustments only show under All.
+ * What HistorySearch asks SQL for (`searchQuery`): the trimmed text, the
+ * categories and whether "Balance adjusted" match it by their shown (translated)
+ * name, and the typed digits for the amount. SQL can't see translations or
+ * formatted amounts, so those are worked out here.
  */
-export function searchTransactions<T extends Listed & { title: string }>(
+export function searchTerms(
+  query: string,
+  categories: readonly { id: string; label: string }[],
+  adjustmentLabel: string,
+): { query: string; categoryIds: string[]; adjustments: boolean; digits: string } {
+  const q = query.trim();
+  const lower = q.toLowerCase();
+  const matches = (label: string) => !!lower && label.toLowerCase().includes(lower);
+  // "64.20", "1,248": only an amount-looking query is matched on amounts.
+  const digits = /^[\d.,\s]+$/.test(q) ? q.replace(/\D/g, '') : '';
+  return {
+    query: q,
+    categoryIds: categories.filter((c) => matches(c.label)).map((c) => c.id),
+    adjustments: matches(adjustmentLabel),
+    digits,
+  };
+}
+
+/**
+ * HistorySearch: matches the name, the note, the category or the amount
+ * ("coffee", "Fresh", "64.2"), then the chip. Runs on what `searchQuery` found,
+ * so the result is exactly this, whatever SQL's LIKE does with case. Adjustments only show under All.
+ */
+export function searchTransactions<T extends Listed & { title: string; note?: string | null }>(
   transactions: readonly T[],
   query: string,
   filter: HistoryFilter,
@@ -240,6 +265,8 @@ export function searchTransactions<T extends Listed & { title: string }>(
     if (filter === 'auto' && !isAutomatic(t)) return false;
     if (!q) return true;
     const { category, amount } = describe(t);
-    return `${t.title} ${category} ${amount}`.toLowerCase().includes(q);
+    return [t.title, t.note ?? '', `${t.title} ${category} ${amount}`].some((text) =>
+      text.toLowerCase().includes(q),
+    );
   });
 }

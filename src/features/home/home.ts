@@ -2,7 +2,7 @@
 // Yesterday lists. Pure, so it's tested without React.
 
 import { addDays, type CalendarDate } from '@/domain/dates';
-import { totalBalance } from '@/domain/balance';
+import { type BalanceTotals, balanceFromTotals, balanceTotals } from '@/domain/balance';
 import type { MoneyTransaction, TransactionSource } from '@/domain/leftToSpend';
 
 export type GreetingKey = 'morning' | 'afternoon' | 'evening';
@@ -39,21 +39,40 @@ export function recentDays<T extends Listed>(
   };
 }
 
+/** The day `monthChange` compares with: the 1st of this month. */
+export function monthChangeSince(today: CalendarDate): CalendarDate {
+  return `${today.slice(0, 7)}-01`;
+}
+
 /**
  * How the balance moved since the 1st of this month ("₾800 more than on Oct
- * 1", Main). `null` when there was no balance before the 1st to compare with.
+ * 1", Main), from the balance's parts before the 1st and now. `null` when
+ * there was no balance before the 1st to compare with.
  */
+export function monthChangeFromTotals(
+  since: CalendarDate,
+  before: BalanceTotals,
+  now: BalanceTotals,
+): { since: CalendarDate; deltaMinor: number } | null {
+  const start = balanceFromTotals(before);
+  const end = balanceFromTotals(now);
+  if (start === null || end === null) return null;
+  return { since, deltaMinor: end - start };
+}
+
+/** `monthChangeFromTotals` over plain rows. */
 export function monthChange(
   transactions: readonly (MoneyTransaction & { date: CalendarDate })[],
   today: CalendarDate,
   jarEntries: readonly { amountMinor: number; date: CalendarDate }[] = [],
 ): { since: CalendarDate; deltaMinor: number } | null {
-  const since = `${today.slice(0, 7)}-01`;
-  const start = totalBalance(
-    transactions.filter((t) => t.date < since),
-    jarEntries.filter((e) => e.date < since),
+  const since = monthChangeSince(today);
+  return monthChangeFromTotals(
+    since,
+    balanceTotals(
+      transactions.filter((t) => t.date < since),
+      jarEntries.filter((e) => e.date < since),
+    ),
+    balanceTotals(transactions, jarEntries),
   );
-  const now = totalBalance(transactions, jarEntries);
-  if (start === null || now === null) return null;
-  return { since, deltaMinor: now - start };
 }

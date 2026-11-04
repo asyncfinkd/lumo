@@ -8,7 +8,7 @@ import { type AccountColor, type AccountKind, MAIN_ACCOUNT_ID } from '@/db/accou
 import type { Account } from '@/db/schema';
 import { accountBalances } from '@/domain/balance';
 import { categoryPalette } from '@/theme';
-import { useAccounts, useAllTransactions, useJarEntries, useTransfers } from '../live';
+import { useAccountTotals, useAccounts } from '../live';
 
 export type AccountView = {
   id: string;
@@ -33,9 +33,7 @@ export function accountLabel(
 export function useAccountViews(): AccountView[] {
   const { t } = useTranslation();
   const accounts = useAccounts();
-  const transactions = useAllTransactions();
-  const jarEntries = useJarEntries();
-  const transfers = useTransfers();
+  const { transactions, jarEntries, transfers } = useAccountTotals();
   return useMemo(() => {
     const balances = accountBalances(
       accounts.map((a) => a.id),

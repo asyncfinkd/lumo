@@ -4,28 +4,58 @@
 import type { MoneyTransaction, TransactionKind } from './leftToSpend';
 
 /**
+ * What the total balance is made of: every transaction ever (income +, expense
+ * −, adjustments included), whether any of them is an adjustment, and what
+ * sits in savings jars. The app gets these from `SUM` queries; `balanceTotals`
+ * adds them up from plain rows.
+ */
+export type BalanceTotals = {
+  /** Income minus expenses over every transaction, adjustments included. */
+  netMinor: number;
+  /** The starting balance is the first adjustment: none yet, no balance. */
+  hasAdjustment: boolean;
+  /** Everything moved into jars, less what came back out. */
+  jarMinor: number;
+};
+
+export function balanceTotals(
+  transactions: readonly MoneyTransaction[],
+  jarEntries: readonly { amountMinor: number }[] = [],
+): BalanceTotals {
+  return {
+    netMinor: transactions.reduce(
+      (sum, t) => sum + (t.kind === 'income' ? t.amountMinor : -t.amountMinor),
+      0,
+    ),
+    hasAdjustment: transactions.some((t) => t.source === 'adjustment'),
+    jarMinor: jarEntries.reduce((sum, e) => sum + e.amountMinor, 0),
+  };
+}
+
+/**
  * All the money you have: every transaction ever, income + and expense −,
  * adjustments included, less what sits in savings jars ("Moves from your
  * balance", SavingsAdd). `null` until the user sets a starting balance, which
  * is stored as the first adjustment; the Home card then shows "Add your balance".
  */
+export function balanceFromTotals(totals: BalanceTotals): number | null {
+  return totals.hasAdjustment ? totals.netMinor - totals.jarMinor : null;
+}
+
+/** `balanceFromTotals` over plain rows. */
 export function totalBalance(
   transactions: readonly MoneyTransaction[],
   jarEntries: readonly { amountMinor: number }[] = [],
 ): number | null {
-  if (!transactions.some((t) => t.source === 'adjustment')) return null;
-  const free = transactions.reduce(
-    (sum, t) => sum + (t.kind === 'income' ? t.amountMinor : -t.amountMinor),
-    0,
-  );
-  return jarEntries.reduce((sum, e) => sum - e.amountMinor, free);
+  return balanceFromTotals(balanceTotals(transactions, jarEntries));
 }
 
 /**
  * What each account holds (#21): its transactions, less what it put into jars,
  * plus or minus the transfers in and out. Transfers move money between
  * accounts, so the accounts always add up to `totalBalance`. Accounts with no
- * rows yet hold 0.
+ * rows yet hold 0. The rows can be sums already (one per account and kind, as
+ * the SQL in features/accounts/repo.ts returns them): the result is the same.
  */
 export function accountBalances(
   accountIds: readonly string[],

@@ -13,7 +13,7 @@ import {
 import { Press } from '@/components/Press';
 import { Sheet } from '@/components/Sheet';
 import { type AccountView, useAccountViews } from '@/features/accounts/accounts';
-import { useAllTransactions, useBills, useIncomes } from '@/features/live';
+import { useBills, useIncomes, useTransaction } from '@/features/live';
 import { useTransactionView } from '@/features/transactions/useTransactionView';
 import { color, fontFamily, radius, shadow, size, text } from '@/theme';
 
@@ -27,12 +27,11 @@ export default function TransactionScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const transactions = useAllTransactions();
+  const tx = useTransaction(id);
   const bills = useBills();
   const incomes = useIncomes();
   const view = useTransactionView();
   const accounts = useAccountViews();
-  const tx = transactions.find((x) => x.id === id);
 
   if (!tx) return null;
   const v = view(tx);
