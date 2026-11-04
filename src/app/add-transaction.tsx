@@ -40,8 +40,12 @@ import {
   transactionTitle,
 } from '@/features/transactions/addForm';
 import { clockTime } from '@/features/home/home';
+import { runWrite } from '@/features/runWrite';
 import { addTransaction, type Scope, updateTransaction } from '@/features/transactions/repo';
 import { color, fontFamily, radius, shadow, size, text } from '@/theme';
+
+// A crash here shows Try again in a sheet, not over the screen under it.
+export { SheetErrorBoundary as ErrorBoundary } from '@/components/ErrorFallback';
 
 // AddTransaction: type, amount, a line on how it lands, category, date, note.
 // Saves a `manual` transaction; Home updates through live queries.
@@ -210,56 +214,65 @@ function TransactionForm({
         date: day,
         note: note.trim() || null,
       };
-      if (move) {
-        const at = new Date(move.occurredAt);
-        updateTransfer(db, move.id, {
-          ...input,
-          occurredAt: day === move.date ? at : occurredAt(day, at),
-        });
-      } else addTransfer(db, { ...input, occurredAt: occurredAt(day, new Date()) });
+      const done = runWrite(() => {
+        if (move) {
+          const at = new Date(move.occurredAt);
+          updateTransfer(db, move.id, {
+            ...input,
+            occurredAt: day === move.date ? at : occurredAt(day, at),
+          });
+        } else addTransfer(db, { ...input, occurredAt: occurredAt(day, new Date()) });
+      });
+      // Failed: the sheet stays open with what was typed, and can be saved again.
+      if (!done) {
+        moved.current = false;
+        return;
+      }
       close();
       return;
     }
-    setSaved({ income: kind === 'income' });
-    if (existing) {
-      const at = new Date(existing.occurredAt);
-      updateTransaction(
-        db,
-        existing.id,
-        {
-          kind,
-          amountMinor,
-          categoryId: category,
-          // Bills, salary and adjustments keep their names; what you typed is the title.
-          title:
-            existing.source === 'manual'
-              ? editedTitle(
-                  existing,
-                  categoryName(existing.categoryId),
-                  note,
-                  categoryName(category),
-                )
-              : existing.title,
-          note: note.trim() || null,
-          date: day,
-          occurredAt: day === existing.date ? at : occurredAt(day, at),
-          accountId: showPay ? pay : undefined,
-        },
-        scope,
-      );
-      close();
-      return;
-    }
-    addTransaction(db, {
-      kind,
-      amountMinor,
-      categoryId: category,
-      title: transactionTitle(note, categoryName(category)),
-      note: note.trim() || null,
-      date: day,
-      occurredAt: occurredAt(day, new Date()),
-      accountId: showPay ? pay : undefined,
+    const done = runWrite(() => {
+      if (existing) {
+        const at = new Date(existing.occurredAt);
+        updateTransaction(
+          db,
+          existing.id,
+          {
+            kind,
+            amountMinor,
+            categoryId: category,
+            // Bills, salary and adjustments keep their names; what you typed is the title.
+            title:
+              existing.source === 'manual'
+                ? editedTitle(
+                    existing,
+                    categoryName(existing.categoryId),
+                    note,
+                    categoryName(category),
+                  )
+                : existing.title,
+            note: note.trim() || null,
+            date: day,
+            occurredAt: day === existing.date ? at : occurredAt(day, at),
+            accountId: showPay ? pay : undefined,
+          },
+          scope,
+        );
+        return;
+      }
+      addTransaction(db, {
+        kind,
+        amountMinor,
+        categoryId: category,
+        title: transactionTitle(note, categoryName(category)),
+        note: note.trim() || null,
+        date: day,
+        occurredAt: occurredAt(day, new Date()),
+        accountId: showPay ? pay : undefined,
+      });
     });
+    if (!done) return;
+    setSaved({ income: kind === 'income' });
     close();
   };
 

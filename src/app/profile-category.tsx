@@ -17,7 +17,11 @@ import {
 import { db } from '@/db/client';
 import { useCategories } from '@/features/categories/categories';
 import { saveCategory } from '@/features/categories/repo';
+import { runWrite } from '@/features/runWrite';
 import { categoryPalette, color, fontFamily, radius, shadow, size, text } from '@/theme';
+
+// A crash here shows Try again in a sheet, not over the screen under it.
+export { SheetErrorBoundary as ErrorBoundary } from '@/components/ErrorFallback';
 
 const MAX_NAME = 20;
 
@@ -41,16 +45,19 @@ export default function ProfileCategoryScreen() {
   const palette = categoryPalette[tint];
   const trimmed = name.trim();
 
-  const save = () => {
-    if (!trimmed) return null;
-    return saveCategory(db, {
-      id: id ?? undefined,
-      name: trimmed,
-      kind,
-      icon,
-      color: tint,
-      renamed: !!id && DEFAULT_CATEGORY_IDS.has(id) && trimmed !== existing?.label,
-    });
+  const save = (close: () => void) => {
+    if (!trimmed) return;
+    const saved = runWrite(() =>
+      saveCategory(db, {
+        id: id ?? undefined,
+        name: trimmed,
+        kind,
+        icon,
+        color: tint,
+        renamed: !!id && DEFAULT_CATEGORY_IDS.has(id) && trimmed !== existing?.label,
+      }),
+    );
+    if (saved) close();
   };
 
   return (
@@ -164,10 +171,7 @@ export default function ProfileCategoryScreen() {
               accessibilityState={{ disabled: !trimmed }}
               disabled={!trimmed}
               haptic
-              onPress={() => {
-                save();
-                close();
-              }}
+              onPress={() => save(close)}
               style={[styles.add, trimmed ? styles.addOn : styles.addOff]}
             >
               <Text style={[styles.addText, { color: trimmed ? color.white : color.subtle }]}>
@@ -190,10 +194,7 @@ export default function ProfileCategoryScreen() {
                 accessibilityState={{ disabled: !trimmed }}
                 disabled={!trimmed}
                 haptic
-                onPress={() => {
-                  save();
-                  close();
-                }}
+                onPress={() => save(close)}
                 style={[styles.save, !trimmed && styles.saveOff]}
               >
                 <Text style={styles.saveText}>{t('categoryManage.save')}</Text>

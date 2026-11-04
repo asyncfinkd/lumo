@@ -7,7 +7,11 @@ import { Dialog } from '@/components/Dialog';
 import { TrashIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
 import { deleteEverything } from '@/features/profile/deleteAll';
+import { runWrite } from '@/features/runWrite';
 import { color, fontFamily, radius, text } from '@/theme';
+
+// A crash here shows Try again in a sheet, not over the screen under it.
+export { SheetErrorBoundary as ErrorBoundary } from '@/components/ErrorFallback';
 
 const WORD = 'DELETE';
 
@@ -56,7 +60,7 @@ export default function ProfileDeleteAllScreen() {
           onPress={() => {
             // Close the dialog first, so it isn't left alone in the stack when Welcome takes over.
             router.dismissAll();
-            deleteEverything();
+            runWrite(deleteEverything);
           }}
           style={[styles.delete, ok ? styles.deleteOn : styles.deleteOff]}
         >

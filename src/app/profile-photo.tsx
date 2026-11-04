@@ -11,6 +11,7 @@ import { useProfile } from '@/features/live';
 import { Avatar } from '@/features/profile/Avatar';
 import { deletePhotoFile, pickPhoto } from '@/features/profile/photo';
 import { setAvatarColor, setPhoto } from '@/features/profile/repo';
+import { runWrite } from '@/features/runWrite';
 import {
   avatarColor,
   type AvatarColor,
@@ -22,6 +23,9 @@ import {
   size,
   text,
 } from '@/theme';
+
+// A crash here shows Try again in a sheet, not over the screen under it.
+export { SheetErrorBoundary as ErrorBoundary } from '@/components/ErrorFallback';
 
 const COLORS = Object.keys(avatarColor) as AvatarColor[];
 
@@ -47,16 +51,19 @@ export default function ProfilePhotoScreen() {
   };
 
   const remove = (close: () => void) => {
+    if (!runWrite(() => setPhoto(db, null))) return;
     deletePhotoFile(profile.photoUri);
-    setPhoto(db, null);
     close();
   };
 
   const done = (close: () => void) => {
     if (picked) {
-      setAvatarColor(db, picked);
+      const saved = runWrite(() => {
+        setAvatarColor(db, picked);
+        setPhoto(db, null);
+      });
+      if (!saved) return;
       deletePhotoFile(profile.photoUri);
-      setPhoto(db, null);
     }
     close();
   };

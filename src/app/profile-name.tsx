@@ -13,6 +13,7 @@ import { useProfile } from '@/features/live';
 import { Avatar } from '@/features/profile/Avatar';
 import { saveProfile } from '@/features/profile/repo';
 import { SettingsHeader } from '@/features/profile/SettingsHeader';
+import { runWrite } from '@/features/runWrite';
 import { color, fontFamily, radius, shadow, space, text } from '@/theme';
 
 const MAX = 24;
@@ -32,8 +33,7 @@ export default function ProfileNameScreen() {
   const trimmed = value.trim();
   const save = () => {
     if (!trimmed) return;
-    saveProfile(db, { ...profile, name: trimmed });
-    router.back();
+    if (runWrite(() => saveProfile(db, { ...profile, name: trimmed }))) router.back();
   };
 
   return (

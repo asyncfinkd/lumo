@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useScreenTop } from '@/components/useScreenTop';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { Press } from '@/components/Press';
+import { showToast } from '@/components/Toast';
 import { db } from '@/db/client';
 import { useProfile } from '@/features/live';
 import {
@@ -25,8 +26,8 @@ import {
   ZOOM_START,
 } from '@/features/profile/crop';
 import { deletePhotoFile, savePhoto } from '@/features/profile/photo';
-import { usePhotoToast } from '@/features/profile/photoToast';
 import { setPhoto } from '@/features/profile/repo';
+import { runWrite } from '@/features/runWrite';
 import { color, radius, shadow, size, text } from '@/theme';
 
 // ProfilePhotoCrop: drag and zoom the photo so the face sits in the circle.
@@ -77,10 +78,14 @@ export default function ProfilePhotoCropScreen() {
   const use = async () => {
     if (saving || !profile) return;
     setSaving(true);
-    const uri = await savePhoto(params.uri, cropRect(frame(zoom.get()), x.get(), y.get()));
+    const saved = await runWrite(async () => {
+      const uri = await savePhoto(params.uri, cropRect(frame(zoom.get()), x.get(), y.get()));
+      setPhoto(db, uri);
+    });
+    // Stays on the crop, so Use photo can be tapped again.
+    if (!saved) return setSaving(false);
     deletePhotoFile(profile.photoUri);
-    setPhoto(db, uri);
-    usePhotoToast.getState().show();
+    showToast({ tone: 'good', message: t('profile.photo.updated'), delay: 500 });
     router.dismissTo('/profile');
   };
 

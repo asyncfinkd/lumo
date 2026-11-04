@@ -14,6 +14,8 @@ import { AccountRow } from '@/features/accounts/AccountRow';
 import { useAccountViews } from '@/features/accounts/accounts';
 import { lastJarAccount } from '@/features/accounts/lastUsed';
 import { useJarEntries, useJars, useMoneyMonth } from '@/features/live';
+import { runWrite } from '@/features/runWrite';
+import { showJarToast } from '@/features/savings/JarToast';
 import { useJarDrop } from '@/features/savings/dropStore';
 import { addToJar, takeFromJar } from '@/features/savings/repo';
 import {
@@ -25,6 +27,9 @@ import {
 } from '@/features/savings/savings';
 import { useMonthName } from '@/features/savings/useMonthName';
 import { color, fontFamily, fullLineFit, radius, savingsColor, shadow, size, text } from '@/theme';
+
+// A crash here shows Try again in a sheet, not over the screen under it.
+export { SheetErrorBoundary as ErrorBoundary } from '@/components/ErrorFallback';
 
 // "Add to New laptop" (SavingsAdd): pick an amount, see where the jar lands,
 // drop it in. A drop that fills the jar opens "You did it" (SavingsDone).
@@ -80,16 +85,17 @@ export default function SavingsAddScreen() {
   const dropIn = (close: () => void) => {
     if (amountMinor <= 0) return;
     if (out) {
-      takeFromJar(db, jar.id, amountMinor, today, account?.id);
+      if (!runWrite(() => takeFromJar(db, jar.id, amountMinor, today, account?.id))) return;
       showDrop({ jarId: jar.id, amountMinor, from: pct, to: afterPct, out: true });
       close();
       return;
     }
-    addToJar(db, jar.id, amountMinor, today, account?.id);
+    if (!runWrite(() => addToJar(db, jar.id, amountMinor, today, account?.id))) return;
     if (after >= jar.goalMinor) {
       filled.current = true;
     } else {
       showDrop({ jarId: jar.id, amountMinor, from: pct, to: afterPct });
+      showJarToast(amountMinor, afterPct, jar.currency);
     }
     close();
   };

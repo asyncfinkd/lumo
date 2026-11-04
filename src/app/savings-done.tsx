@@ -20,6 +20,7 @@ import { db } from '@/db/client';
 import type { CalendarDate } from '@/domain/dates';
 import { type CurrencyCode, formatMoney } from '@/domain/money';
 import { useProfile, useToday } from '@/features/live';
+import { runWrite } from '@/features/runWrite';
 import { closeJar } from '@/features/savings/repo';
 import { type JarTone, monthsTaken } from '@/features/savings/savings';
 import { color, fontFamily, gradient, savingsColor, text } from '@/theme';
@@ -46,8 +47,7 @@ export default function SavingsDoneScreen() {
   const savedMinor = Number(jar.saved);
   const months = monthsTaken(jar.start, today);
   const treat = () => {
-    closeJar(db, jar.jar, today);
-    router.back();
+    if (runWrite(() => closeJar(db, jar.jar, today))) router.back();
   };
 
   return (

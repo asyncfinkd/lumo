@@ -12,7 +12,6 @@ import { formatMoney } from '@/domain/money';
 import { useJarEntries, useJars, useToday } from '@/features/live';
 import { HeaderButton } from '@/features/profile/SettingsHeader';
 import { useJarDrop, usePickedJar } from '@/features/savings/dropStore';
-import { JarToast } from '@/features/savings/JarToast';
 import { jarPace, jarPercent, savedByJar } from '@/features/savings/savings';
 import { useMonthName } from '@/features/savings/useMonthName';
 import {
@@ -178,14 +177,6 @@ export default function SavingsScreen() {
           </Rise>
         ) : null}
       </ScrollView>
-      {drop && !drop.out && featured?.id === drop.jarId ? (
-        <JarToast
-          key={drop.key}
-          amount={money(drop.amountMinor)}
-          percent={drop.to}
-          currency={currency}
-        />
-      ) : null}
     </>
   );
 }

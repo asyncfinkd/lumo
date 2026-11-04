@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import { Stack } from 'expo-router';
+import { type ErrorBoundaryProps, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   Nunito_600SemiBold,
@@ -9,7 +10,8 @@ import {
   Nunito_800ExtraBold,
   useFonts,
 } from '@expo-google-fonts/nunito';
-import { Placeholder } from '@/components/Placeholder';
+import { ScreenError, ScreenErrorBoundary } from '@/components/ErrorFallback';
+import { ToastHost } from '@/components/Toast';
 import { useDatabase } from '@/db/useDatabase';
 import { CategoriesProvider } from '@/features/categories/CategoriesProvider';
 import { LaunchScreen } from '@/features/launch/LaunchScreen';
@@ -19,10 +21,27 @@ import { useProfileStatus } from '@/features/live';
 import { DueTransactionsSync } from '@/features/recurring/DueTransactionsSync';
 import { RemindersSync } from '@/features/reminders/RemindersSync';
 import { JarRemindersSync } from '@/features/savings/JarRemindersSync';
-import i18n, { applyLanguage } from '@/i18n';
+import { applyLanguage } from '@/i18n';
 import { color } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
+
+// A screen that throws shows Try again in its place; the navigator, the tab bar
+// and the other screens keep working. Nested layouts inherit it; sheets export
+// their own (SheetErrorBoundary).
+export const unstable_settings = { screenErrorBoundary: ScreenErrorBoundary };
+
+/** The root layout itself threw: the same fallback, over the whole app. */
+export function ErrorBoundary(props: ErrorBoundaryProps) {
+  useEffect(() => {
+    SplashScreen.hideAsync();
+  }, []);
+  return (
+    <GestureHandlerRootView style={styles.root}>
+      <ScreenErrorBoundary {...props} />
+    </GestureHandlerRootView>
+  );
+}
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -50,7 +69,11 @@ export default function RootLayout() {
   // The native splash stays until the fonts are in; the loading screen needs them.
   if (!fontsDone) return null;
   if (database.error) {
-    return <Placeholder title={i18n.t('errors.generic')} note={database.error.message} />;
+    return (
+      <View style={styles.root}>
+        <ScreenError error={database.error} />
+      </View>
+    );
   }
 
   return (
@@ -65,6 +88,7 @@ export default function RootLayout() {
       {launchGone ? null : (
         <LaunchScreen done={appLoaded} onShown={hideNativeSplash} onGone={onLaunchGone} />
       )}
+      <ToastHost />
     </GestureHandlerRootView>
   );
 }
@@ -160,3 +184,7 @@ function AppStack({ onLoaded }: { onLoaded: () => void }) {
     </CategoriesProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: color.bg },
+});

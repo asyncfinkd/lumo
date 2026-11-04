@@ -10,6 +10,7 @@ import { useProfile } from '@/features/live';
 import { saveProfile } from '@/features/profile/repo';
 import { OnboardingStep } from './OnboardingStep';
 import { useOnboarding } from './store';
+import { runWrite } from '@/features/runWrite';
 import { color, currencyColor, radius, shadow, text } from '@/theme';
 
 const CODES = Object.keys(currencies) as CurrencyCode[];
@@ -54,8 +55,9 @@ export function CurrencyStep({ mode }: { mode: 'onboarding' | 'settings' }) {
           ? {
               label: t('common.save'),
               onPress: () => {
-                if (profile) saveProfile(db, { ...profile, currency });
-                router.back();
+                if (!profile || runWrite(() => saveProfile(db, { ...profile, currency }))) {
+                  router.back();
+                }
               },
             }
           : {

@@ -15,11 +15,15 @@ import { db } from '@/db/client';
 import { currencies, formatMoney, parseAmount } from '@/domain/money';
 import { useJars, useProfile, useToday } from '@/features/live';
 import { askForNotifications } from '@/features/reminders/RemindersSync';
+import { runWrite } from '@/features/runWrite';
 import { usePickedJar } from '@/features/savings/dropStore';
 import { formatTime, parseTime } from '@/features/savings/reminders';
 import { createJar, updateJar } from '@/features/savings/repo';
 import { type Cadence, fullBy, JAR_TONES, type JarTone } from '@/features/savings/savings';
 import { color, fontFamily, jarColor, radius, shadow, size, text } from '@/theme';
+
+// A crash here shows Try again in a sheet, not over the screen under it.
+export { SheetErrorBoundary as ErrorBoundary } from '@/components/ErrorFallback';
 
 /** "Each month" moves in ₾50 steps (SavingsNew), "Each day" in ₾1, from ₾250 and ₾5. */
 const PLAN = {
@@ -75,12 +79,11 @@ function JarSheet({ jar }: { jar?: JarRow }) {
   const save = (close: () => void) => {
     if (!ready) return;
     const input = { name, tone, goalMinor, planMinor: plan, cadence, remindAt };
-    if (jar) {
-      updateJar(db, jar.id, input);
-    } else {
-      pick(createJar(db, input, today));
-    }
-    close();
+    const saved = runWrite(() => {
+      if (jar) updateJar(db, jar.id, input);
+      else pick(createJar(db, input, today));
+    });
+    if (saved) close();
   };
 
   // Turning it on asks the phone once; declined, it stays off.

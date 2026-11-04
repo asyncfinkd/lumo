@@ -15,7 +15,11 @@ import { accountLabel, useAccountViews } from '@/features/accounts/accounts';
 import { accountById, accountsQuery } from '@/features/accounts/repo';
 import { useToday } from '@/features/live';
 import { adjustBalance, currentAccountBalance, getProfile } from '@/features/profile/repo';
+import { runWrite } from '@/features/runWrite';
 import { color, fontFamily, radius, text } from '@/theme';
+
+// A crash here shows Try again in a sheet, not over the screen under it.
+export { SheetErrorBoundary as ErrorBoundary } from '@/components/ErrorFallback';
 
 // "Add your balance" / changing it from Home (#6): the user types what they
 // really have and Kept stores the difference as an adjustment. With two or
@@ -63,7 +67,9 @@ export default function BalanceScreen() {
     const minor = parseAmount(typed, currency);
     if (minor === null) return;
     // One account at a time, Save does just what the card says.
-    if (!multi || diff !== 0) adjustBalance(db, minor, today, accountId);
+    if (!multi || diff !== 0) {
+      if (!runWrite(() => adjustBalance(db, minor, today, accountId))) return;
+    }
     close();
   };
 

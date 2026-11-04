@@ -31,8 +31,8 @@ import { useBills, useCategories, useIncomes, useProfile } from '@/features/live
 import { useRestoreBackup } from '@/features/backup/useRestoreBackup';
 import { authenticate, type Biometrics, useBiometrics } from '@/features/lock/biometrics';
 import { Avatar } from '@/features/profile/Avatar';
-import { PhotoToast } from '@/features/profile/photoToast';
 import { setAppLock } from '@/features/profile/repo';
+import { runWrite } from '@/features/runWrite';
 import {
   categoryPalette,
   color,
@@ -237,7 +237,6 @@ export default function ProfileScreen() {
           {t('profile.footer', { version: Constants.expoConfig?.version ?? '' })}
         </Text>
       </ScrollView>
-      <PhotoToast />
     </>
   );
 }
@@ -310,7 +309,7 @@ function LockRow({ biometrics, on }: { biometrics: Biometrics; on: boolean }) {
   const Icon = kind === 'faceid' ? FaceIdIcon : FingerprintIcon;
 
   const toggle = async (next: boolean) => {
-    if (await authenticate().catch(() => false)) setAppLock(db, next);
+    if (await authenticate().catch(() => false)) runWrite(() => setAppLock(db, next));
   };
 
   return (

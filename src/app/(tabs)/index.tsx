@@ -24,6 +24,7 @@ import {
   useTransactionsBetween,
 } from '@/features/live';
 import { usePullToRefresh } from '@/features/money/usePullToRefresh';
+import { runWrite } from '@/features/runWrite';
 import { usePickedJar } from '@/features/savings/dropStore';
 import { SavingForCard } from '@/features/savings/SavingForCard';
 import { savedByJar } from '@/features/savings/savings';
@@ -92,7 +93,7 @@ export default function HomeScreen() {
           change={change}
           currency={profile.currency}
           onBalance={() => router.push('/balance')}
-          onToggleHidden={() => setHideAmounts(db, !profile.hideAmounts)}
+          onToggleHidden={() => runWrite(() => setHideAmounts(db, !profile.hideAmounts))}
           split={accountCount > 1 ? <AccountsSplit currency={profile.currency} /> : null}
         />
       </Rise>

@@ -17,7 +17,11 @@
     "add": "Add transaction"
   },
   "errors": {
-    "generic": "Something went wrong"
+    "generic": "Something went wrong",
+    "screenBody": "This screen hit a snag. What you've saved is safe on this phone.",
+    "sheetBody": "This didn't open properly. Nothing you've saved has changed.",
+    "tryAgain": "Try again",
+    "notSaved": "That didn't save. Try again."
   },
   "home": {
     "greeting": {

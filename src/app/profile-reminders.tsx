@@ -14,6 +14,7 @@ import { useBills, useProfile } from '@/features/live';
 import { type ReminderKind, setReminderKind, setReminders } from '@/features/profile/repo';
 import { SettingsHeader } from '@/features/profile/SettingsHeader';
 import { askForNotifications, notificationsAllowed } from '@/features/reminders/RemindersSync';
+import { runWrite } from '@/features/runWrite';
 import { categoryPalette, color, fontFamily, radius, shadow, space, text } from '@/theme';
 
 const appIcon = require('../../assets/icon.png');
@@ -75,13 +76,13 @@ export default function ProfileRemindersScreen() {
 
   const toggleAll = async (next: boolean) => {
     if (!next) {
-      setReminders(db, false);
+      runWrite(() => setReminders(db, false));
       return;
     }
     const ok = await askForNotifications();
     setAllowed(ok);
     setBlocked(!ok);
-    if (ok) setReminders(db, true);
+    if (ok) runWrite(() => setReminders(db, true));
   };
 
   // The sample uses your first bill, as the board does.
@@ -168,7 +169,7 @@ export default function ProfileRemindersScreen() {
                 <Switch
                   value={value}
                   disabled={!on}
-                  onChange={(next) => setReminderKind(db, k.kind, next)}
+                  onChange={(next) => runWrite(() => setReminderKind(db, k.kind, next))}
                   accessibilityLabel={title}
                 />
               </View>
