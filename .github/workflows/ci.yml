@@ -39,3 +39,7 @@ jobs:
 
       - name: Test
         run: npm test -- --ci
+
+      # Catches SDK-incompatible package versions and config issues early.
+      - name: Expo Doctor
+        run: npx expo-doctor
