@@ -8,25 +8,20 @@ import { Dialog } from '@/components/Dialog';
 import { CategoryIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
 import { db } from '@/db/client';
-import { formatMoney } from '@/domain/money';
-import { BUDGETING } from '@/features/flags';
 import { type CategoryView, useCategories } from '@/features/categories/categories';
 import { categoryUsage, deleteCategory } from '@/features/categories/repo';
-import { useBudgets, useProfile } from '@/features/live';
 import { color, fontFamily, radius, shadow, text } from '@/theme';
 
 /** The board offers the two closest categories to move into, plus "No category". */
 const SUGGESTIONS = 2;
 
 // ProfileCategoryDelete: nothing gets lost — the transactions move to another
-// category (or none), and the budget goes.
+// category (or none).
 export default function ProfileCategoryDeleteScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const categories = useCategories();
-  const budgets = useBudgets();
-  const profile = useProfile();
   const category = categories.get(id);
 
   // Read once: how many transactions it has, and the most used of its kind.
@@ -42,7 +37,6 @@ export default function ProfileCategoryDeleteScreen() {
     categories.get(null),
   ]);
   const [moveTo, setMoveTo] = useState<string | null>(targets[0]?.id ?? null);
-  const budget = budgets.find((b) => b.categoryId === id);
 
   const confirm = () => {
     deleteCategory(db, id, moveTo);
@@ -97,16 +91,6 @@ export default function ProfileCategoryDeleteScreen() {
           );
         })}
       </View>
-
-      {BUDGETING && budget ? (
-        <Text style={styles.note}>
-          {t('categoryManage.budgetRemoved', {
-            amount: formatMoney(budget.limitMinor, profile?.currency ?? 'GEL', {
-              decimals: 'auto',
-            }),
-          })}
-        </Text>
-      ) : null}
 
       <View style={styles.actions}>
         <Press accessibilityRole="button" haptic onPress={confirm} style={styles.delete}>

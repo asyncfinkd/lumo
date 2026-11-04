@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { CategoryIcon, ChevronRightIcon, CloseIcon } from '@/components/Icons';
+import { CategoryIcon, CloseIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Sheet } from '@/components/Sheet';
@@ -15,27 +15,20 @@ import {
   DEFAULT_CATEGORY_IDS,
 } from '@/db/categories';
 import { db } from '@/db/client';
-import { formatMoney } from '@/domain/money';
-import { BUDGETING } from '@/features/flags';
 import { useCategories } from '@/features/categories/categories';
 import { saveCategory } from '@/features/categories/repo';
-import { useBudgets, useProfile } from '@/features/live';
 import { categoryPalette, color, fontFamily, radius, shadow, size, text } from '@/theme';
 
 const MAX_NAME = 20;
 
-// ProfileCategoryEdit / ProfileCategoryNew: name, spending or income, icon,
-// color and (for spending) the monthly budget.
+// ProfileCategoryEdit / ProfileCategoryNew: name, spending or income, icon and
+// color.
 export default function ProfileCategoryScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams<{ id?: string }>();
   const categories = useCategories();
-  const budgets = useBudgets();
-  const profile = useProfile();
-  // Set when a new category is saved early to give it a budget.
-  const [createdId, setCreatedId] = useState<string | null>(null);
-  const id = params.id ?? createdId;
+  const id = params.id ?? null;
   const existing = params.id ? categories.get(params.id) : null;
   const isNew = !params.id;
 
@@ -47,7 +40,6 @@ export default function ProfileCategoryScreen() {
   const [tint, setTint] = useState<CategoryColorKey>(existing?.color ?? 'coral');
   const palette = categoryPalette[tint];
   const trimmed = name.trim();
-  const budget = id ? budgets.find((b) => b.categoryId === id) : undefined;
 
   const save = () => {
     if (!trimmed) return null;
@@ -59,13 +51,6 @@ export default function ProfileCategoryScreen() {
       color: tint,
       renamed: !!id && DEFAULT_CATEGORY_IDS.has(id) && trimmed !== existing?.label,
     });
-  };
-
-  const openBudget = () => {
-    const saved = save();
-    if (!saved) return;
-    setCreatedId(saved);
-    router.push({ pathname: '/edit-budget', params: { category: saved } });
   };
 
   return (
@@ -172,18 +157,6 @@ export default function ProfileCategoryScreen() {
               );
             })}
           </View>
-
-          {BUDGETING && kind === 'expense' ? (
-            <Press accessibilityRole="button" onPress={openBudget} style={styles.budget}>
-              <Text style={styles.budgetLabel}>{t('categoryManage.budget')}</Text>
-              <Text style={styles.budgetValue}>
-                {budget
-                  ? formatMoney(budget.limitMinor, profile?.currency ?? 'GEL', { decimals: 'auto' })
-                  : t('categoryManage.setBudget')}
-              </Text>
-              <ChevronRightIcon color={color.placeholder} />
-            </Press>
-          ) : null}
 
           {isNew ? (
             <Press
@@ -308,20 +281,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   colorDot: { width: 12, height: 12, borderRadius: 6 },
-  budget: {
-    marginTop: 16,
-    height: 56,
-    paddingLeft: 18,
-    paddingRight: 12,
-    borderRadius: 20,
-    borderCurve: 'continuous',
-    backgroundColor: color.washSoft,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  budgetLabel: { ...text.label, flex: 1, color: color.muted },
-  budgetValue: { ...text.label, color: color.ink },
   add: {
     marginTop: 18,
     height: size.button,

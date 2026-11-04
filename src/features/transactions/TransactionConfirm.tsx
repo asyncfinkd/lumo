@@ -6,10 +6,8 @@ import { Dialog } from '@/components/Dialog';
 import { CategoryIcon, RepeatIcon, TrashIcon } from '@/components/Icons';
 import { Press } from '@/components/Press';
 import { db } from '@/db/client';
-import { categorySpent } from '@/domain/budgets';
 import { formatMoney } from '@/domain/money';
-import { BUDGETING } from '@/features/flags';
-import { useAllTransactions, useBudgets, useMoneyMonth } from '@/features/live';
+import { useAllTransactions } from '@/features/live';
 import { deleteTransaction, type Scope } from '@/features/transactions/repo';
 import { useTransactionView } from '@/features/transactions/useTransactionView';
 import { color, fontFamily, radius, text } from '@/theme';
@@ -36,8 +34,6 @@ export function TransactionConfirm({
   const { t } = useTranslation();
   const router = useRouter();
   const transactions = useAllTransactions();
-  const budgets = useBudgets();
-  const { summary } = useMoneyMonth();
   const view = useTransactionView();
   const tx = transactions.find((x) => x.id === id);
   if (!tx) return null;
@@ -76,13 +72,7 @@ export function TransactionConfirm({
     body = t('history.confirm.bodyIncome', { amount: money(tx.amountMinor) });
   } else {
     title = t('history.confirm.deleteExpense');
-    const budget = tx.categoryId && budgets.find((b) => b.categoryId === tx.categoryId);
-    // Only says it "goes back" when it's in this period's budget.
-    const counted =
-      BUDGETING && budget && summary && categorySpent([tx], budget.categoryId, summary.period) > 0;
-    body = counted
-      ? t('history.confirm.bodyBudget', { amount: money(tx.amountMinor), category: v.label })
-      : t('history.confirm.bodyExpense');
+    body = t('history.confirm.bodyExpense');
   }
 
   return (

@@ -65,7 +65,7 @@ export const text = {
     letterSpacing: -0.6,
     fontVariant: tabular,
   },
-  /** Screen titles: "Insights", "Budgets". */
+  /** Screen titles: "Insights", "Savings". */
   h1: { fontFamily: fontFamily.extrabold, fontSize: 28, lineHeight: 34, letterSpacing: -0.4 },
   /** "Good evening, Nika". */
   greeting: { fontFamily: fontFamily.bold, fontSize: 20, lineHeight: 26, letterSpacing: -0.2 },

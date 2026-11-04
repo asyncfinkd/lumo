@@ -71,7 +71,7 @@ export function setReminders(db: Db, on: boolean): void {
   db.update(profile).set({ reminders: on }).run();
 }
 
-export type ReminderKind = 'remindBills' | 'remindPayday' | 'remindLowBudget' | 'remindEvening';
+export type ReminderKind = 'remindBills' | 'remindPayday' | 'remindEvening';
 
 /** One of the four switches under Reminders (ProfileReminders). */
 export function setReminderKind(db: Db, kind: ReminderKind, on: boolean): void {

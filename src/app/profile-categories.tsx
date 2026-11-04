@@ -11,9 +11,8 @@ import type { CategoryKind } from '@/db/categories';
 import { categorySpent } from '@/domain/budgets';
 import { isInPeriod } from '@/domain/dates';
 import { formatMoney } from '@/domain/money';
-import { BUDGETING } from '@/features/flags';
 import { type CategoryView, useCategories } from '@/features/categories/categories';
-import { useAllTransactions, useBudgets, useMoneyMonth } from '@/features/live';
+import { useAllTransactions, useMoneyMonth } from '@/features/live';
 import { HeaderButton, SettingsHeader } from '@/features/profile/SettingsHeader';
 import { color, fontFamily, radius, shadow, space, text } from '@/theme';
 
@@ -27,7 +26,6 @@ export default function ProfileCategoriesScreen() {
   const categories = useCategories();
   const { profile, summary } = useMoneyMonth();
   const transactions = useAllTransactions();
-  const budgets = useBudgets();
 
   const detail = useMemo(() => {
     const currency = profile?.currency ?? 'GEL';
@@ -46,15 +44,11 @@ export default function ProfileCategoriesScreen() {
           .reduce((sum, tx) => sum + tx.amountMinor, 0);
         return t('categoryManage.earned', { amount: money(earned) });
       }
+      // What went out this month.
       const spent = money(categorySpent(transactions, c.id, summary.period));
-      // Without budgeting, just what went out this month.
-      if (!BUDGETING) return t('categoryManage.earned', { amount: spent });
-      const budget = budgets.find((b) => b.categoryId === c.id);
-      return budget
-        ? t('categoryManage.spentWithBudget', { amount: spent, budget: money(budget.limitMinor) })
-        : t('categoryManage.spentNoBudget', { amount: spent });
+      return t('categoryManage.earned', { amount: spent });
     };
-  }, [profile, summary, transactions, budgets, t]);
+  }, [profile, summary, transactions, t]);
 
   const open = (id?: string | null) =>
     router.push(id ? { pathname: '/profile-category', params: { id } } : '/profile-category');

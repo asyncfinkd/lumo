@@ -25,8 +25,6 @@ const renderBar = async (active: 'home' | 'insights' = 'home') => {
 describe('GlassTabBar', () => {
   it('names every tab for screen readers and marks the current one', async () => {
     await renderBar('insights');
-    // Budgets is off in phase 1 (features/flags.ts).
-    expect(screen.queryByRole('tab', { name: 'Budgets' })).toBeNull();
     for (const name of ['Home', 'Insights', 'Savings', 'Profile']) {
       expect(screen.getByRole('tab', { name })).toBeOnTheScreen();
     }

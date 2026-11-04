@@ -3,7 +3,6 @@ import { StyleSheet, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTranslation } from 'react-i18next';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { BUDGETING } from '@/features/flags';
 import { color, duration, radius, shadow, size } from '@/theme';
 import { PlusIcon, TabIcon, type TabIconName } from './Icons';
 import { easing } from './motion';
@@ -12,11 +11,8 @@ import { Press } from './Press';
 export type Tab = TabIconName;
 export type BlurTarget = RefObject<ComponentRef<typeof View> | null>;
 
-// Budgets is off in phase 1 (features/flags.ts): Home, Insights, +, Savings, Profile.
-// History opens from Home's "See all".
-const SLOTS: (Tab | 'add')[] = (
-  ['home', 'insights', 'add', 'savings', 'budgets', 'profile'] as const
-).filter((slot) => BUDGETING || slot !== 'budgets');
+// Home, Insights, +, Savings, Profile. History opens from Home's "See all".
+const SLOTS: (Tab | 'add')[] = ['home', 'insights', 'add', 'savings', 'profile'];
 const PAD = 6;
 
 type Props = {

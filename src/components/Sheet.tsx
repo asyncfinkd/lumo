@@ -22,7 +22,7 @@ type Props = {
   accessibilityLabel: string;
   /**
    * Distance from the top of the screen for a tall sheet (the add sheet uses
-   * 96). Leave out for a sheet that fits its content (edit budget).
+   * 96). Leave out for a sheet that fits its content.
    */
   top?: number;
   /** Gets `close()`, which slides the sheet away before `onDismissed`. */

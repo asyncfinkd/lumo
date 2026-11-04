@@ -4,11 +4,10 @@
 // The write helpers and queries, run on the real migrations.
 import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
-import { budgets, incomes, recurringBills, transactions } from '@/db/schema';
+import { incomes, recurringBills, transactions } from '@/db/schema';
 import { seedSampleData } from '@/db/seed';
 import { openTestDb } from '@/db/testing';
 import { totalBalance } from '@/domain/balance';
-import { saveBudget } from '../budgets/repo';
 import {
   adjustBalance,
   currentBalance,
@@ -139,18 +138,6 @@ describe('balance', () => {
     const before = db.select().from(transactions).all().length;
     adjustBalance(db, 1250000, '2026-10-31', undefined, id);
     expect(db.select().from(transactions).all()).toHaveLength(before);
-  });
-});
-
-describe('budgets', () => {
-  it('keeps one budget per category', () => {
-    const db = withProfile();
-    const input = { categoryId: 'groceries' as const, nudgeEnabled: true, nudgeAtMinor: 5000 };
-    saveBudget(db, { ...input, limitMinor: 90000 }, id);
-    saveBudget(db, { ...input, limitMinor: 100000 }, id);
-    const rows = db.select().from(budgets).all();
-    expect(rows).toHaveLength(1);
-    expect(rows[0]).toMatchObject({ limitMinor: 100000, currency: 'GEL' });
   });
 });
 

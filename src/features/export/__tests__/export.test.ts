@@ -11,7 +11,6 @@ import {
 const words: ExportWords = {
   category: (id) => (id ? `cat:${id}` : 'No category'),
   transactions: 'Transactions',
-  budgets: 'Budgets',
   billsAndIncome: 'Bills and income',
   columns: {
     date: 'Date',
@@ -23,7 +22,6 @@ const words: ExportWords = {
     amount: 'Amount',
     currency: 'Currency',
     added: 'Added',
-    limit: 'Monthly budget',
     name: 'Name',
     day: 'Day of month',
     auto: 'Added automatically',
@@ -93,7 +91,7 @@ describe('csv', () => {
     expect(plainAmount(380000, 'GEL')).toBe('3800.00');
   });
 
-  it('has transactions, budgets, and bills and income, with a BOM for Excel', () => {
+  it('has transactions, and bills and income, with a BOM for Excel', () => {
     const csv = buildCsv(
       {
         transactions: [
@@ -107,7 +105,6 @@ describe('csv', () => {
             categoryId: 'salary',
           }),
         ],
-        budgets: [{ categoryId: 'groceries', limitMinor: 90000, currency: 'GEL' }],
         bills: [
           {
             name: 'Rent',
@@ -129,7 +126,6 @@ describe('csv', () => {
       /^2026-10-27,\d\d:\d\d,Expense,cat:groceries,Fresh Market,"Weekly, big",-64\.20,GEL,By you$/,
     );
     expect(lines[3]).toMatch(/,Income,cat:salary,Salary,,3800\.00,GEL,From your income$/);
-    expect(lines).toContain('cat:groceries,900.00,GEL');
     expect(lines).toContain('Bill,Rent,cat:home,800.00,GEL,1,No');
     expect(lines).toContain('Income,Salary,,3800.00,GEL,26,Yes');
   });
@@ -144,7 +140,6 @@ describe('pdf', () => {
           tx({ date: '2026-10-26', kind: 'income', amountMinor: 380000 }),
           tx({ date: '2026-10-25', kind: 'income', amountMinor: 999, source: 'adjustment' }),
         ],
-        budgets: [],
         bills: [],
         incomes: [],
       },

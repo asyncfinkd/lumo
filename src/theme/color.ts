@@ -52,7 +52,6 @@ export const color = {
   goodSoft: '#EEF6F0',
   calmSoft: '#F5EEE6',
   warning: '#A4513A',
-  warningFill: '#E2775A',
 
   // Inputs and onboarding
   field: 'rgba(255,255,255,0.85)',
@@ -132,7 +131,6 @@ export const color = {
 /** CSS gradients for RN `backgroundImage`. */
 export const gradient = {
   progress: 'linear-gradient(90deg, #F7A27F, #F2845C)',
-  budgetCalm: 'linear-gradient(90deg, #F9B596, #F59C78)',
   /** The warm glow behind the icon while Kept opens (Splash). */
   launchHalo: 'radial-gradient(circle, rgba(255,226,170,0.75) 0%, rgba(255,226,170,0) 65%)',
   heroGlow: 'linear-gradient(150deg, rgba(255,241,204,0.45) 0%, rgba(255,255,255,0) 70%)',
